@@ -37,6 +37,8 @@ Use `scripts/verify_all.py` inside the selected Linux environment. It has a fixe
 
 For service diagnostics, inspect `systemctl status goose-model goose-roms omarchy-broker` and relevant journal entries. Restart through systemd, not by deleting socket paths. Source edits become visible immediately; recompile native code and rerun focused tests before restarting the broker. The installed native environment has its own broker binary and must be updated explicitly after a rebuild.
 
+The default account is `rryan`; no new password was invented or configured. For administrative maintenance, open a root shell from Windows with `wsl -d Omarchy -u root`. The local-reference prompt permits general reasoning for ordinary questions; retrieved snippets constrain relevant local claims rather than forcing every question into the knowledge base.
+
 ## Recovery
 
 The Ubuntu export is stored in the workspace at `deployment/backups/Ubuntu-before-Omarchy-20261005.tar`; its measured checksum is in the adjacent `.sha256.json` file. Recovery can import it under a new distribution name and a new directory with `wsl --import`. Do not import over the live Omarchy directory. The cutover verification record in the workspace states whether recovery import/boot and removal actually completed.

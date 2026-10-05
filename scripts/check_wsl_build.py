@@ -54,7 +54,7 @@ def main() -> None:
     assert response['result'].strip().strip('"\'. ').upper() == 'URGENT', response
     print(json.dumps({'status': status, 'grounded_answer': response['result'],
                       'default_user_uid': os.getuid(), 'gateway_auth': 'passed',
-                      'socket_permissions': 'passed', 'cold_restart': 'passed'}, indent=2))
+                      'socket_permissions': 'passed', 'service_readiness': 'passed'}, indent=2))
 
 
 if __name__ == '__main__':
