@@ -10,6 +10,7 @@ import uuid
 from app import container_runner
 from app.config import BASE_REPOS_DIR, TOOL_EXECUTION_TIMEOUT, WORKSPACES_DIR
 from app.throttle import tool_limiter
+from app.git_workspace import safe_git
 
 DISABLED = 'Container execution is disabled. See SECURITY.md for experimental limitations.'
 
@@ -63,16 +64,9 @@ async def execute_tool_task_async(repo_name: str, tool_image: str, command: str,
     if not (source / '.git').exists():
         return 'Repository not found in the base library.'
     argv = shlex.split(command)
+    git = await safe_git(source)
     control, workspace = _task_paths()
-    git = ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'core.fsmonitor=false',
-           '-c', 'submodule.recurse=false', '-C', str(source)]
     try:
-        filters = await container_runner.run_process([*git, 'config', '--name-only', '--get-regexp',
-                                                      r'^filter\..*\.(smudge|clean|process|required)$'], 10)
-        if filters.returncode not in (0, 1):
-            raise RuntimeError('Cannot inspect repository checkout filters')
-        for key in filters.output.splitlines():
-            git[1:1] = ['-c', key + ('=false' if key.endswith('.required') else '=')]
         created = await container_runner.run_process([*git, 'worktree', 'add', '--detach', str(workspace), 'HEAD'], 30)
         if created.returncode:
             raise RuntimeError('Worktree creation failed: ' + created.output[-1000:])

@@ -22,25 +22,36 @@ def main() -> None:
     intake.add_argument('--remove-source')
     intake.add_argument('--refresh-source')
     intake.add_argument('--cleanup-worker', help='Retry container cleanup for a retained task ID')
+    intake.add_argument('--register-project')
+    intake.add_argument('--stage-patch', help='Prepare a proposal JSON file in an isolated worktree')
+    intake.add_argument('--validate-patch')
+    intake.add_argument('--show-patch')
+    intake.add_argument('--patch-tasks', action='store_true')
     parser.add_argument('--preview', action='store_true', help='List eligible files without importing')
     parser.add_argument('prompt', nargs='*')
     args = parser.parse_args()
     operation = next(((name, value) for name, value in [
         ('file', args.add_file), ('repo', args.add_repo), ('folder', args.add_folder),
         ('list', args.sources), ('menu', args.library), ('remove', args.remove_source),
-        ('refresh', args.refresh_source), ('cleanup', args.cleanup_worker)] if value), None)
+        ('refresh', args.refresh_source), ('cleanup', args.cleanup_worker),
+        ('register', args.register_project), ('propose', args.stage_patch),
+        ('validate', args.validate_patch), ('show', args.show_patch), ('tasks', args.patch_tasks)] if value), None)
     if operation:
         if args.status or args.prompt:
-            parser.error('Source operations cannot be combined with chat or --status')
+            parser.error('Management actions cannot be combined with chat or --status')
         action, value = operation
         command = ['/usr/bin/python', str(Path(__file__).with_name('run_linux_env.py')), 'python', '-m']
         if action == 'cleanup':
             if args.preview:
                 parser.error('--preview does not apply to worker cleanup')
             command.append('scripts.cleanup_worker')
+        elif action in {'register', 'propose', 'validate', 'show', 'tasks'}:
+            if args.preview:
+                parser.error('Staging never changes the source checkout; --preview is for knowledge imports')
+            command.extend(['scripts.patch_tasks_cli', 'list' if action == 'tasks' else action])
         else:
             command.extend(['app.source_library', action])
-        if action not in {'list', 'menu'}:
+        if action not in {'list', 'menu', 'tasks'}:
             command.append(value)
         if args.preview:
             command.append('--preview')

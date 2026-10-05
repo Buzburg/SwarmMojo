@@ -143,6 +143,15 @@ async def execute(workspace: Path, control: Path, image: str, argv: list[str], *
     control = control.resolve(strict=True)
     if control.is_relative_to(workspace):
         raise ValueError('Container journal must be outside the worker mount')
+    metadata_mount: list[str] = []
+    git_metadata = workspace / '.git'
+    if git_metadata.exists() or git_metadata.is_symlink():
+        if git_metadata.is_symlink() or not git_metadata.is_file():
+            raise ValueError('Only detached worktrees with regular Git pointer files may be mounted')
+        mask = control / 'git-metadata-mask'
+        with mask.open('x'):
+            pass
+        metadata_mount = ['-v', f'{mask}:/workspace/.git:ro']
     command = [runtime, '--remote=false', '--log-level=error']
     info = await run_process([*command, 'info', '--format', '{{.Host.Security.Rootless}}'], CONTROL_TIMEOUT)
     if info.returncode or info.output.strip() != 'true':
@@ -159,7 +168,7 @@ async def execute(workspace: Path, control: Path, image: str, argv: list[str], *
             '--security-opt=no-new-privileges', '--read-only', '--pids-limit=128',
             f'--cpus={cpus}', f'--memory={memory}', '--log-driver=none',
             '--tmpfs=/tmp:rw,nosuid,nodev,noexec,size=128m', '--userns=keep-id',
-            '-v', f'{workspace}:/workspace:rw', '-w', '/workspace', image, *argv], CONTROL_TIMEOUT)
+            '-v', f'{workspace}:/workspace:rw', *metadata_mount, '-w', '/workspace', image, *argv], CONTROL_TIMEOUT)
         if created.returncode:
             raise RuntimeError('Container creation failed: ' + created.output[-2000:])
         identity = created.output.strip()
