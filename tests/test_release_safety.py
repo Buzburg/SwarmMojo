@@ -106,15 +106,17 @@ def test_gateway_does_not_reuse_completions(monkeypatch: pytest.MonkeyPatch) -> 
 
 
 def test_gateway_start_initializes_local_state(monkeypatch: pytest.MonkeyPatch) -> None:
-    from app import gateway, db, tool_rag, okf_loader
+    from app import gateway, db, tool_rag, okf_loader, config
     import uvicorn
     events = []
     monkeypatch.setattr(db, 'init_database', lambda: events.append('database'))
     monkeypatch.setattr(tool_rag, 'init_default_tool_registry', lambda: events.append('tools'))
     monkeypatch.setattr(okf_loader, 'ingest_okf_directory', lambda path: events.append('knowledge'))
+    monkeypatch.setattr(config, 'EMBEDDING_PROVIDER', 'local')
+    monkeypatch.setattr(config, 'get_embedding_model', lambda: events.append('embedding'))
     monkeypatch.setattr(uvicorn, 'run', lambda app, **kw: events.append(kw['host']))
     gateway.start_gateway()
-    assert events == ['database', 'tools', 'knowledge', '127.0.0.1']
+    assert events == ['database', 'tools', 'knowledge', 'embedding', '127.0.0.1']
 
 
 def test_mcp_startup_keeps_stdout_clean(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture) -> None:

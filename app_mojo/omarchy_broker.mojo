@@ -1,4 +1,5 @@
-"""Linux x86-64 native broker prototype. No Python, model, or tool execution."""
+"""Native authenticated socket transport with Python JSON and ROMS integration."""
+from std.python import Python
 from std.ffi import c_int, c_uint, c_long, external_call
 from std.os import stat
 from std.os.env import getenv
@@ -51,41 +52,6 @@ def pin_runtime_directory(path: String) raises:
     _ = external_call["close", c_int](fd)
 
 
-def matches(data: List[UInt8], count: Int, command: String) -> Bool:
-    var bytes = command.as_bytes()
-    if count != len(bytes):
-        return False
-    for i in range(count):
-        if data[i] != bytes[i]:
-            return False
-    return True
-
-
-def matches_json_action(data: List[UInt8], count: Int, action: String) -> Bool:
-    var prefix = String('{"v":1,"action":"').as_bytes()
-    var act = action.as_bytes()
-    var suffix = String('"}').as_bytes()
-    var expected_len = len(prefix) + len(act) + len(suffix)
-    if count != expected_len:
-        return False
-    for j in range(len(prefix)):
-        if data[j] != prefix[j]:
-            return False
-    for j in range(len(act)):
-        if data[len(prefix) + j] != act[j]:
-            return False
-    for j in range(len(suffix)):
-        if data[len(prefix) + len(act) + j] != suffix[j]:
-            return False
-    return True
-
-
-def is_json_object(data: List[UInt8], count: Int) -> Bool:
-    if count < 2:
-        return False
-    return data[0] == 123 and data[count - 1] == 125  # '{' and '}'
-
-
 def send_response(fd: c_int, response: String):
     # Tiny bounded responses; handle partial writes without SIGPIPE.
     var bytes = response.as_bytes()
@@ -106,7 +72,7 @@ def send_response(fd: c_int, response: String):
             _ = external_call["usleep", c_int](c_uint(20000))
 
 
-def receive_request(fd: c_int) -> String:
+def receive_request(fd: c_int) raises -> String:
     var buffer = List[UInt8]()
     for _ in range(MAX_FRAME + 1):
         buffer.append(0)
@@ -127,35 +93,12 @@ def receive_request(fd: c_int) -> String:
             if buffer[i] == 10:
                 if i != used - 1:
                     return '{"ok":false,"error":"multiple_frames"}\n'
-                if matches(buffer, i, "PING"):
-                    return '{"ok":true,"result":"pong"}\n'
-                if matches(buffer, i, "STATUS"):
-                    return '{"ok":true,"transport":"native-mojo-unix","rwkv7":"not_connected","tool_execution":false}\n'
-                if matches(buffer, i, "MOCK"):
-                    return '{"ok":true,"mock":true,"result":"Mock response; no model invoked"}\n'
-                if matches(buffer, i, "ANCHOR"):
-                    return '{"ok":true,"anchor":"[SYSTEM_ANCHOR]\\nStrict: Year is 2026.\\nTemporal Rule: Unverified claims post-cutoff must be verified via search."}\n'
-                if matches_json_action(buffer, i, "ping"):
-                    return '{"ok":true,"v":1,"result":"pong"}\n'
-                if matches_json_action(buffer, i, "status"):
-                    return '{"ok":true,"v":1,"transport":"native-mojo-unix","rwkv7":"not_connected","sandbox":"dryrun_staging","tool_execution":false}\n'
-                if matches_json_action(buffer, i, "mock"):
-                    return '{"ok":true,"v":1,"mock":true,"result":"Mock response; no model invoked"}\n'
-                if matches_json_action(buffer, i, "anchor"):
-                    return '{"ok":true,"v":1,"anchor":"[SYSTEM_ANCHOR]\\nStrict: Year is 2026.\\nTemporal Rule: Unverified claims post-cutoff must be verified via search."}\n'
-                if matches_json_action(buffer, i, "sandbox_status"):
-                    return '{"ok":true,"v":1,"sandbox":"landlock_staging","staging_root":"/tmp/omarchy-staging","landlock_abi":1,"dry_run_only":true}\n'
-                if matches_json_action(buffer, i, "landlock_probe"):
-                    return '{"ok":true,"v":1,"landlock_supported":true,"abi_version":1}\n'
-                if matches_json_action(buffer, i, "rwkv_status"):
-                    return '{"ok":true,"v":1,"rwkv7":"ready","state_buffer_mb":16,"librwkv":"ready_for_weights"}\n'
-                if matches_json_action(buffer, i, "telemetry"):
-                    return '{"ok":true,"v":1,"type":"telemetry","status":"active"}\n'
-                if matches_json_action(buffer, i, "os_controller"):
-                    return '{"ok":true,"v":1,"controller":"active","hyprland_ipc":true,"quickshell_ipc":true,"fastpath_enabled":true}\n'
-                if is_json_object(buffer, i):
-                    return '{"ok":false,"error":"unsupported_v1_action"}\n'
-                return '{"ok":false,"error":"unsupported_command"}\n'
+                var builtins = Python.import_module("builtins")
+                var actions = Python.import_module("app.broker_actions")
+                var frame = builtins.bytearray()
+                for j in range(i):
+                    _ = frame.append(Int(buffer[j]))
+                return String(actions.handle(frame))
         if used > MAX_FRAME:
             return '{"ok":false,"error":"request_too_large"}\n'
     return '{"ok":false,"error":"request_timeout"}\n'

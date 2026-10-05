@@ -15,7 +15,6 @@ from app.rag_engine import (
     search_grounded_context as _search_grounded_context,
 )
 from app.watcher import start_watcher, get_watcher_status as _get_watcher_status
-from app.throttle import tool_limiter
 from app.tools import (
     create_support_ticket as _create_ticket,
     get_support_ticket as _get_ticket,
@@ -149,7 +148,6 @@ def get_system_metrics() -> str:
 
 
 @mcp.tool()
-@tool_limiter.guard(timeout=60.0)
 async def run_sandboxed_command(image: str, command: str) -> str:
     """Executes a tool inside an isolated, hardware-capped container using Podman or Docker.
 

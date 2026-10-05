@@ -56,14 +56,17 @@ class HardwareThrottle:
         def decorator(func: Callable[..., Any]):
             @wraps(func)
             async def wrapper(*args, **kwargs):
-                # 1. Queue behind the concurrency semaphore
-                async with self.semaphore:
+                # Bound queue waiting separately from the resource backoff.
+                await asyncio.wait_for(self.semaphore.acquire(), timeout=timeout)
+                try:
                     # 2. Back off if host is currently spiking above threshold
                     await self.wait_for_headroom(timeout=timeout)
                     # 3. Execute the tool
                     if asyncio.iscoroutinefunction(func):
                         return await func(*args, **kwargs)
                     return func(*args, **kwargs)
+                finally:
+                    self.semaphore.release()
 
             return wrapper
 

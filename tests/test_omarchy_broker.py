@@ -17,7 +17,7 @@ class NativeBrokerTests(unittest.TestCase):
         self.directory = tempfile.TemporaryDirectory(prefix='omarchy-')
         self.addCleanup(self.directory.cleanup)
         self.path = str(Path(self.directory.name) / 'broker.sock')
-        self.env = dict(os.environ, OMARCHY_BROKER_SOCKET=self.path)
+        self.env = dict(os.environ, OMARCHY_BROKER_SOCKET=self.path, ROMS_GATEWAY_PORT='9')
         self.process = subprocess.Popen([self.binary], env=self.env,
                                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.addCleanup(self.stop)
@@ -89,7 +89,7 @@ class NativeBrokerTests(unittest.TestCase):
         self.assertEqual(status['v'], 1)
         self.assertEqual(status['transport'], 'native-mojo-unix')
         self.assertEqual(status['rwkv7'], 'not_connected')
-        self.assertEqual(status['sandbox'], 'dryrun_staging')
+        self.assertEqual(status['sandbox'], 'disabled')
 
         mock = self.request(b'{"v":1,"action":"mock"}\n')
         self.assertEqual(mock, {'ok': True, 'v': 1, 'mock': True, 'result': 'Mock response; no model invoked'})
@@ -102,38 +102,43 @@ class NativeBrokerTests(unittest.TestCase):
         sandbox = self.request(b'{"v":1,"action":"sandbox_status"}\n')
         self.assertTrue(sandbox['ok'])
         self.assertEqual(sandbox['v'], 1)
-        self.assertEqual(sandbox['sandbox'], 'landlock_staging')
-        self.assertEqual(sandbox['landlock_abi'], 1)
+        self.assertEqual(sandbox['sandbox'], 'disabled')
+        from app.broker_actions import landlock_abi
+        self.assertEqual(sandbox['landlock_abi'], landlock_abi())
         self.assertTrue(sandbox['dry_run_only'])
 
         landlock = self.request(b'{"v":1,"action":"landlock_probe"}\n')
         self.assertTrue(landlock['ok'])
         self.assertEqual(landlock['v'], 1)
-        self.assertTrue(landlock['landlock_supported'])
-        self.assertEqual(landlock['abi_version'], 1)
+        self.assertEqual(landlock['landlock_supported'], landlock_abi() >= 1)
+        self.assertEqual(landlock['abi_version'], landlock_abi())
 
         rwkv = self.request(b'{"v":1,"action":"rwkv_status"}\n')
         self.assertTrue(rwkv['ok'])
         self.assertEqual(rwkv['v'], 1)
-        self.assertEqual(rwkv['rwkv7'], 'ready')
-        self.assertEqual(rwkv['librwkv'], 'ready_for_weights')
+        self.assertEqual(rwkv['rwkv7'], 'not_connected')
+        self.assertFalse(rwkv['tool_execution'])
 
         telemetry = self.request(b'{"v":1,"action":"telemetry"}\n')
         self.assertTrue(telemetry['ok'])
         self.assertEqual(telemetry['v'], 1)
         self.assertEqual(telemetry['type'], 'telemetry')
-        self.assertEqual(telemetry['status'], 'active')
+        self.assertEqual(telemetry['status'], 'unavailable')
 
         os_ctrl = self.request(b'{"v":1,"action":"os_controller"}\n')
         self.assertTrue(os_ctrl['ok'])
         self.assertEqual(os_ctrl['v'], 1)
-        self.assertEqual(os_ctrl['controller'], 'active')
-        self.assertTrue(os_ctrl['hyprland_ipc'])
-        self.assertTrue(os_ctrl['quickshell_ipc'])
-        self.assertTrue(os_ctrl['fastpath_enabled'])
+        self.assertEqual(os_ctrl['controller'], 'unavailable')
+        self.assertFalse(os_ctrl['hyprland_ipc'])
+        self.assertFalse(os_ctrl['quickshell_ipc'])
+        self.assertFalse(os_ctrl['fastpath_enabled'])
 
         unknown_v1 = self.request(b'{"v":1,"action":"nonexistent"}\n')
-        self.assertEqual(unknown_v1, {'ok': False, 'error': 'unsupported_v1_action'})
+        self.assertEqual(unknown_v1, {'ok': False, 'v': 1, 'error': 'unsupported_v1_action'})
+
+    def test_json_whitespace_and_key_order(self):
+        for payload in ({'v': 1, 'action': 'ping'}, {'action': 'ping', 'v': 1}):
+            self.assertEqual(self.request((json.dumps(payload) + '\n').encode())['result'], 'pong')
 
     def test_unknown_and_non_ascii_commands_are_rejected(self):
         for payload in (b'RUN rm -rf /\n', b'\xff\n', b'\n', b'PING\x00\n'):

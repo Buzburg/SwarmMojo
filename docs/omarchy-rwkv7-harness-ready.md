@@ -1,7 +1,7 @@
 # Omarchy Mojo RWKV7 Harness: Deployment & Download Readiness Guide
 
-**Status:** Production-ready developer preview. Milestones 1 and 2 implemented, compiled, and verified.
-**System Target:** Linux x86-64 / Arch Linux / Omarchy OS (or Ubuntu WSL 2). Optimized for AMD Ryzen AI Max+ 395 128 GB Unified Memory.
+**Status:** Historical prototype notes. The production-readiness and milestone-completion claims in this document were not supported by the review. Use `docs/wsl-test-build.md` for the current test build and `../Omarchy Mojo Review.md` in the parent workspace for the defects. Sandbox enforcement, transactions and full desktop integration are unfinished; execution remains disabled.
+**Current target:** Custom Arch/Omarchy WSL test build on Ryzen 9 5980HX / 16 GB RAM, using supplied Goose 2.9B. The later 7.2B/new-computer deployment and fine-tuning remain separate work. The sections below describe the old prototype and must not be treated as current acceptance evidence.
 
 ---
 
