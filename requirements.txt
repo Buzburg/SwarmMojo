@@ -1,0 +1,14 @@
+mcp[cli]>=1.3.0
+fastmcp>=0.4.0
+sentence-transformers>=3.0.0
+sqlite-vec>=0.1.3
+python-frontmatter>=1.1.0
+pydantic>=2.0.0
+psutil>=5.9.0
+numpy
+pytest>=8.0.0
+
+# Direct gateway dependencies (do not rely on transitive installs)
+httpx>=0.27
+starlette>=0.37
+uvicorn>=0.30

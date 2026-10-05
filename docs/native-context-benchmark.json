@@ -1,0 +1,55 @@
+{
+  "python": "3.12.14",
+  "machine": "x86_64",
+  "parity_cases": 400,
+  "invalid_inputs_rejected": 5,
+  "samples": 9,
+  "scope": "Selection only; native timings include Python conversion. No database or model time.",
+  "cases": [
+    {
+      "case": "all-fit-5",
+      "records": 5,
+      "budget_chars": 6000,
+      "python_ms": 0.001401,
+      "mojo_ms": 0.003327,
+      "ratio_python_over_mojo": 0.42,
+      "selected": 5
+    },
+    {
+      "case": "tight-20",
+      "records": 20,
+      "budget_chars": 2000,
+      "python_ms": 0.126287,
+      "mojo_ms": 0.013083,
+      "ratio_python_over_mojo": 9.65,
+      "selected": 2
+    },
+    {
+      "case": "standard-20",
+      "records": 20,
+      "budget_chars": 6000,
+      "python_ms": 3.65708,
+      "mojo_ms": 0.142021,
+      "ratio_python_over_mojo": 25.75,
+      "selected": 7
+    },
+    {
+      "case": "large-20",
+      "records": 20,
+      "budget_chars": 18000,
+      "python_ms": 16.929692,
+      "mojo_ms": 0.636624,
+      "ratio_python_over_mojo": 26.59,
+      "selected": 9
+    }
+  ],
+  "context_with_sqlite_and_json": {
+    "fixture_records": 20,
+    "budget_chars": 6000,
+    "python_ms": 8.386957,
+    "mojo_ms": 1.951127,
+    "ratio_python_over_mojo": 4.3,
+    "scope": "Warm local fixture; includes SQLite recall, packing and JSON. Excludes MCP/model."
+  },
+  "mojo": "1.1.0"
+}

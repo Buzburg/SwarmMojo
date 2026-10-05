@@ -1,0 +1,56 @@
+# Python & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environments & Package Managers
+.venv/
+venv/
+ENV/
+env/
+.pixi/
+
+# Testing & Caches
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# ROMS Runtime & Database Artifacts
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/*.db-journal
+*.db
+workspaces/
+repos/
+
+# Local Scratch & Reference PDFs
+*.pdf
+scratch/
+
+# Private configuration and generated records
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+data/
+*.sqlite
+*.sqlite3
+*.db-*
+*.jsonl
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+*.egg-info/
+
+# Unreviewed generated skills and local reference archives
+/skills/_candidates/
+*.zip

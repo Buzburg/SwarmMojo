@@ -1,0 +1,10 @@
+# Dependencies for offline release-boundary tests; no embedding model needed.
+fastmcp>=0.4.0
+sqlite-vec>=0.1.3
+python-frontmatter>=1.1.0
+psutil>=5.9.0
+numpy
+pytest>=8.0.0
+httpx>=0.27
+starlette>=0.37
+uvicorn>=0.30

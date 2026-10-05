@@ -1,0 +1,5 @@
+ROMS: RAG + OKF + MCP + Skills All-In-One Server
+Copyright 2026 Buzburg LLC
+
+This software and related documentation are licensed under the Apache License, Version 2.0.
+Third-party libraries (e.g. SQLite, SentenceTransformers, FastMCP, Mojo) retain their respective licenses.
