@@ -127,11 +127,21 @@ async def register_project(value: str) -> dict:
         raise ValueError('Select the repository root')
     registry = STORE / 'projects'
     registry.mkdir(parents=True, exist_ok=True, mode=0o700)
+    info = source.stat()
+    # Probe this filesystem once at explicit registration, before staging any patch.
+    with tempfile.NamedTemporaryFile(prefix='.omarchy-mode-', dir=source) as probe:
+        os.fchmod(probe.fileno(), 0o644)
+        new_file_mode = stat.S_IMODE(os.fstat(probe.fileno()).st_mode)
     for path in registry.glob('*.json'):
         existing = json.loads(path.read_text())
         if existing['source'] == str(source):
+            if 'device' in existing and [existing['device'], existing['inode']] != [info.st_dev, info.st_ino]:
+                raise ValueError('Registered repository directory has been replaced')
+            existing.update(device=info.st_dev, inode=info.st_ino, new_file_mode=new_file_mode)
+            durable_json(path, existing)
             return existing
-    project = {'id': uuid.uuid4().hex, 'source': str(source)}
+    project = {'id': uuid.uuid4().hex, 'source': str(source), 'device': info.st_dev,
+               'inode': info.st_ino, 'new_file_mode': new_file_mode}
     durable_json(registry / (project['id'] + '.json'), project)
     return project
 
@@ -241,7 +251,7 @@ async def propose(project_id: str, base_commit: str, changes: list[dict], checks
                 if read_file(source, name) != before:
                     raise ValueError('User working copy has a conflicting edit: ' + name)
                 preimages[name] = {'text': before.decode('utf-8') if before is not None else None,
-                                  'mode': stat.S_IMODE((source / name).stat().st_mode) if before is not None else 0o644}
+                                  'mode': stat.S_IMODE((source / name).stat().st_mode) if before is not None else project['new_file_mode']}
                 target = stage / name
                 if change['after'] is None:
                     target.unlink()

@@ -1,6 +1,6 @@
 # Staged patch validation — October 5, 2026
 
-T13's proposed/staged/validating/validated lifecycle is implemented with real isolated Git worktrees and the combined native-container validator. Source checkouts are not modified. Apply, rollback, broker integration and a user-facing approval flow are still separate unfinished work.
+T13's proposed/staged/validating/validated lifecycle is implemented with real isolated Git worktrees and the combined native-container validator. Staging and validation do not modify source checkouts. Operator apply/rollback is covered separately in [promotion verification](patch-promotion-verification.md); broker/model task routing remains unfinished.
 
 ## Contract and records
 
@@ -34,4 +34,4 @@ Staging tests use real repositories with spaces in their paths. They verify a ha
 
 DEBT(pointdexter): retained task/worktree cleanup and restart reconciliation are not automatic; revisit before exposing persistent model-driven task execution; upgrade to the transaction recovery and operator cleanup flow. Never delete the original repository as task cleanup.
 
-This checkpoint is not an apply/rollback certification. The next gate must bind concrete authorization to the validated digest, recheck the source revision/preimages immediately before promotion, and journal partial multi-file operations while protecting later user edits.
+This staging checkpoint alone does not certify apply/rollback. The subsequent [promotion increment](patch-promotion-verification.md) supplies its own concrete authorization, conflict/recovery contract and evidence.
