@@ -1,11 +1,7 @@
 """ROMS Business Actions and Sandboxed Task Execution Tools."""
 
-import asyncio
 import frontmatter
 import os
-import shutil
-import subprocess
-import uuid
 from pathlib import Path
 from app.safe_paths import markdown_path
 from typing import Any, Dict, List, Optional
@@ -18,7 +14,7 @@ from app.config import (
     TOOL_EXECUTION_TIMEOUT,
 )
 from app.db import get_connection
-from app.throttle import tool_limiter, get_process_preexec_fn
+from app.throttle import tool_limiter
 from app.okf_loader import ingest_okf_file, ingest_okf_directory
 
 
@@ -234,175 +230,7 @@ def sanitize_output(output: str, max_length: int = 2500) -> str:
 # ==========================================
 
 
-@tool_limiter.guard(timeout=60.0)
-async def run_sandboxed_command(
-    image: str,
-    command: str,
-    cpus: str = "2.0",
-    memory: str = "4g",
-    network: str = "none",
-) -> str:
-    """Executes a tool inside an isolated, hardware-capped container using Podman or Docker.
-
-    Guarded against multi-agent swarms through hardware backoff and concurrency ceiling.
-    """
-    if os.getenv("ROMS_ENABLE_EXPERIMENTAL_EXECUTION") != "1":
-        return "Container execution is disabled. See SECURITY.md for experimental limitations."
-    WORKSPACES_DIR.mkdir(parents=True, exist_ok=True)
-    task_id = str(uuid.uuid4())[:8]
-    task_dir = WORKSPACES_DIR / f"task_{task_id}"
-    task_dir.mkdir(parents=True, exist_ok=True)
-
-    runtime = shutil.which("podman") or shutil.which("docker")
-    if not runtime:
-        return (
-            f"Execution failed: Neither Podman nor Docker is installed or on PATH. "
-            f"Task {task_id} aborted."
-        )
-
-    # Convert task_dir path for container mount
-    mount_path = str(task_dir.resolve()).replace("\\", "/")
-    container_cmd = [
-        runtime,
-        "run",
-        "--rm",
-        f"--network={network}",
-        f"--cpus={cpus}",
-        f"--memory={memory}",
-        "-v",
-        f"{mount_path}:/workspace:rw",
-        "-w",
-        "/workspace",
-        image,
-        *command.split(),
-    ]
-
-    preexec = get_process_preexec_fn()
-    kwargs: Dict[str, Any] = {
-        "stdout": asyncio.subprocess.PIPE,
-        "stderr": asyncio.subprocess.PIPE,
-    }
-    if preexec is not None:
-        kwargs["preexec_fn"] = preexec
-
-    try:
-        process = await asyncio.create_subprocess_exec(*container_cmd, **kwargs)
-        stdout, stderr = await asyncio.wait_for(
-            process.communicate(), timeout=TOOL_EXECUTION_TIMEOUT
-        )
-        raw_output = (
-            stdout.decode(errors="replace")
-            if process.returncode == 0
-            else f"Error (Exit {process.returncode}):\n{stderr.decode(errors='replace')}"
-        )
-        output = sanitize_output(raw_output)
-        return f"Task [{task_id}] (Exit Code {process.returncode}):\n{output}"
-    except asyncio.TimeoutError:
-        return f"Task [{task_id}] killed: Exceeded {TOOL_EXECUTION_TIMEOUT}s hard execution deadline."
-    except Exception as e:
-        return f"Execution failed: {str(e)}"
-    finally:
-        if task_dir.exists():
-            shutil.rmtree(task_dir, ignore_errors=True)
-
-
-def execute_tool_task(
-    repo_name: str,
-    tool_image: str,
-    command: str,
-    cpus: str = "2.0",
-    memory: str = "4g",
-    timeout: int = 120,
-) -> str:
-    """Spawns an isolated Git worktree and executes a containerized tool against it.
-
-    Ensures zero cross-agent file pollution and commits/restores cleanly.
-    """
-    if os.getenv("ROMS_ENABLE_EXPERIMENTAL_EXECUTION") != "1":
-        return "Container execution is disabled. See SECURITY.md for experimental limitations."
-    task_id = str(uuid.uuid4())[:8]
-    WORKSPACES_DIR.mkdir(parents=True, exist_ok=True)
-    worktree_dir = WORKSPACES_DIR / f"task_{task_id}"
-    source_repo = (BASE_REPOS_DIR / repo_name).resolve()
-    if not repo_name or source_repo == BASE_REPOS_DIR.resolve() or not source_repo.is_relative_to(BASE_REPOS_DIR.resolve()):
-        raise ValueError("Repository must be inside the configured repository folder.")
-
-    if not source_repo.exists():
-        return f"Error: Repository '{repo_name}' not found in base library ({BASE_REPOS_DIR})."
-
-    runtime = shutil.which("podman") or shutil.which("docker")
-    if not runtime:
-        return "Error: Neither Podman nor Docker is available on host."
-
-    try:
-        # 1. Create instantaneous isolated worktree
-        subprocess.run(
-            [
-                "git",
-                "-C",
-                str(source_repo),
-                "worktree",
-                "add",
-                "-b",
-                f"task-{task_id}",
-                str(worktree_dir),
-            ],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-
-        mount_path = str(worktree_dir.resolve()).replace("\\", "/")
-        # 2. Execute within an isolated, resource-capped container
-        container_cmd = [
-            runtime,
-            "run",
-            "--rm",
-            "--network=none",
-            f"--cpus={cpus}",
-            f"--memory={memory}",
-            "-v",
-            f"{mount_path}:/workspace:rw",
-            "-w",
-            "/workspace",
-            tool_image,
-            *command.split(),
-        ]
-
-        result = subprocess.run(
-            container_cmd, capture_output=True, text=True, timeout=timeout
-        )
-        raw_output = (
-            result.stdout
-            if result.returncode == 0
-            else f"Execution failed:\n{result.stderr}"
-        )
-        output = sanitize_output(raw_output)
-        return f"Task [{task_id}] Complete.\nOutput:\n{output}"
-
-    except subprocess.TimeoutExpired:
-        return f"Task [{task_id}] timed out after {timeout} seconds."
-    except Exception as e:
-        return f"Task [{task_id}] encountered an error: {str(e)}"
-    finally:
-        # 3. Clean up the ephemeral worktree and branch
-        if worktree_dir.exists():
-            subprocess.run(
-                [
-                    "git",
-                    "-C",
-                    str(source_repo),
-                    "worktree",
-                    "remove",
-                    "--force",
-                    str(worktree_dir),
-                ],
-                capture_output=True,
-            )
-            subprocess.run(
-                ["git", "-C", str(source_repo), "branch", "-D", f"task-{task_id}"],
-                capture_output=True,
-            )
+from app.worker_tools import run_sandboxed_command, execute_tool_task
 
 
 def get_system_metrics(db_path: Path | str | None = None) -> Dict[str, Any]:

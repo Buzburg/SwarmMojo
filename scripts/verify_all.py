@@ -29,6 +29,7 @@ def wait_for_services(command: list[str], root: Path, env: dict[str, str], timeo
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--offline', action='store_true', help='Check code only, without running services')
+    parser.add_argument('--containers', action='store_true', help='Require live rootless worker lifecycle checks')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     prefix = Path(os.getenv('ROMS_PYTHON_PREFIX', str(root / '.pixi/envs/default')))
@@ -43,6 +44,9 @@ def main() -> None:
     ]
     if not args.offline:
         checks.append(('Live model and ROMS', ['/usr/local/bin/goose', '--status']))
+    if args.containers:
+        checks.append(('Rootless worker lifecycle', [sys.executable, '-m', 'pytest',
+                       'tests/test_container_lifecycle.py', '-q', '--tb=short']))
     failed = 0
     env = dict(os.environ, OMARCHY_BROKER_BINARY=str(binary))
     print('WSL test build. Tool execution, training and full desktop are not certified.')
@@ -50,6 +54,8 @@ def main() -> None:
         try:
             if name == 'Compiled native broker' and not binary.is_file():
                 raise FileNotFoundError(f'Required current-build artifact missing: {binary}')
+            if name == 'Rootless worker lifecycle' and not env.get('ROMS_LIVE_CONTAINER_IMAGE'):
+                raise ValueError('ROMS_LIVE_CONTAINER_IMAGE must identify a reviewed local image; skipped tests cannot certify execution')
             result = (wait_for_services(command, root, env) if name == 'Live model and ROMS' else
                       subprocess.run(command, cwd=root, env=env, text=True, capture_output=True, timeout=180))
             passed = result.returncode == 0

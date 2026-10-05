@@ -49,6 +49,8 @@ Application source remains in the Windows project folder, referenced by `/opt/om
 
 Working goals for this increment are local chat, real memory retrieval, truthful readiness, current date/time, authenticated local APIs, native socket transport and restart recovery. Model output cannot execute commands. Experimental ROMS execution is explicitly disabled, and native sandbox/patch apply/rollback work remains unfinished. No guest-provider credentials, web search, state checkpoint/fork API, autonomous repair or training are enabled.
 
+The rootless worker lifecycle is now verified separately: timeout and cancellation stop/reap owned containers before temporary folders are removed; cleanup failures retain recoverable journals. `goose --cleanup-worker task_ID` retries removal of a retained worker's containers and preserves its files. The installed service keeps execution disabled pending the remaining sandbox/authorization gates. See [worker lifecycle evidence](worker-lifecycle-verification.md).
+
 The 7.2B Q8 model loaded on this PC, but its CPU smoke test took about 108 seconds to become ready and generated about 2.9 tokens/second. The 2.9B smoke test took about 15 seconds to become ready and answered the arithmetic question correctly. Its approximately 14.5 tokens/second figure came from only three generated tokens, so it is not a representative benchmark. Actual gateway latency also includes retrieval and prompt processing.
 
 This host is Ryzen 9 5980HX / 16 GB RAM, with WSL limited to 10 GB. It is not the future 128 GB target discussed in the PDF. Mesa exposes the Radeon RX 6800M through Direct3D12/Vulkan in the new system, but the installed inference build uses CPU and GPU inference is unverified.

@@ -17,6 +17,8 @@ def main() -> None:
     config.mkdir(parents=True, exist_ok=True, mode=0o700)
     data = home / '.local/share/omarchy-harness/roms'
     data.mkdir(parents=True, exist_ok=True)
+    workers = data.parent / 'workspaces'
+    workers.mkdir(parents=True, exist_ok=True, mode=0o700)
     source_db = root / 'data/roms.db'
     if source_db.is_file() and not (data / 'roms.db').exists():
         with sqlite3.connect(f'file:{source_db}?mode=ro', uri=True) as source:
@@ -42,6 +44,7 @@ def main() -> None:
     settings = dict(line.split('=', 1) for line in envfile.read_text().splitlines() if '=' in line)
     settings['ROMS_EMBEDDING_MODEL'] = '/opt/omarchy-embedding'
     settings['ROMS_PYTHON_PREFIX'] = '/opt/roms-env'
+    settings['ROMS_WORKSPACES_DIR'] = str(workers)
     envfile.write_text(''.join(f'{key}={value}\n' for key, value in settings.items()))
     launcher = Path('/usr/local/bin/goose')
     launcher.write_text('#!/bin/bash\nset -euo pipefail\nset -a\n'
