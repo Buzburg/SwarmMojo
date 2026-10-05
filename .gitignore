@@ -53,4 +53,5 @@ build/
 
 # Unreviewed generated skills and local reference archives
 /skills/_candidates/
+/config/worker-image.local.json
 *.zip

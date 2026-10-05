@@ -30,12 +30,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--offline', action='store_true', help='Check code only, without running services')
     parser.add_argument('--containers', action='store_true', help='Require live rootless worker lifecycle checks')
+    parser.add_argument('--sandbox', action='store_true', help='Require native and combined confinement checks')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     prefix = Path(os.getenv('ROMS_PYTHON_PREFIX', str(root / '.pixi/envs/default')))
     binary = Path(os.getenv('OMARCHY_BROKER_BINARY', str(prefix / 'bin/omarchy-broker')))
     suites = ['release_safety', 'memory', 'context', 'retrieval_quality', 'ingestion_quality',
-              'tools_quality', 'throttle', 'broker_actions', 'document_identity', 'source_library', 'build_readiness']
+              'tools_quality', 'throttle', 'broker_actions', 'document_identity', 'source_library', 'build_readiness', 'validation_policy']
     checks = [
         ('ROMS offline regressions', [sys.executable, '-m', 'pytest',
             *[f'tests/test_{name}.py' for name in suites], '-q', '--tb=short']),
@@ -47,6 +48,9 @@ def main() -> None:
     if args.containers:
         checks.append(('Rootless worker lifecycle', [sys.executable, '-m', 'pytest',
                        'tests/test_container_lifecycle.py', '-q', '--tb=short']))
+    if args.sandbox:
+        checks.append(('Native and combined sandbox', [sys.executable, '-m', 'pytest',
+                       'tests/test_native_sandbox.py', 'tests/test_combined_sandbox.py', '-q', '--tb=short']))
     failed = 0
     env = dict(os.environ, OMARCHY_BROKER_BINARY=str(binary))
     print('WSL test build. Tool execution, training and full desktop are not certified.')
@@ -56,6 +60,13 @@ def main() -> None:
                 raise FileNotFoundError(f'Required current-build artifact missing: {binary}')
             if name == 'Rootless worker lifecycle' and not env.get('ROMS_LIVE_CONTAINER_IMAGE'):
                 raise ValueError('ROMS_LIVE_CONTAINER_IMAGE must identify a reviewed local image; skipped tests cannot certify execution')
+            if name == 'Native and combined sandbox':
+                if not env.get('OMARCHY_NATIVE_WORKER_IMAGE'):
+                    raise ValueError('OMARCHY_NATIVE_WORKER_IMAGE must identify the built native sandbox image')
+                sandbox = Path(env.get('OMARCHY_SANDBOX_BINARY', str(prefix / 'bin/staging-sandbox')))
+                if not sandbox.is_file():
+                    raise FileNotFoundError(f'Required native enforcement artifact missing: {sandbox}')
+                env['OMARCHY_SANDBOX_BINARY'] = str(sandbox)
             result = (wait_for_services(command, root, env) if name == 'Live model and ROMS' else
                       subprocess.run(command, cwd=root, env=env, text=True, capture_output=True, timeout=180))
             passed = result.returncode == 0

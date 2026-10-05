@@ -144,6 +144,36 @@ def test_worker_network_override_rejected(monkeypatch):
 
 
 @live
+def test_container_isolation_is_independent_of_landlock(tmp_path, monkeypatch):
+    workspace, control = paths(tmp_path)
+    secret = tmp_path / 'host-secret'
+    secret.write_text('must stay on host')
+    (workspace / 'escape').symlink_to(secret)
+    monkeypatch.setenv('ROMS_TEST_HOST_SECRET', 'must-not-reach-container')
+    command = r'''
+set -eu
+test -z "${ROMS_TEST_HOST_SECRET:-}"
+test ! -e /run/podman/podman.sock
+test ! -e /var/run/docker.sock
+test ! -e /workspace/escape
+if touch /etc/roms-write-probe 2>/dev/null; then exit 91; fi
+test "$(cat /sys/fs/cgroup/memory.max)" = 67108864
+test "$(cat /sys/fs/cgroup/pids.max)" = 128
+test "$(cat /sys/fs/cgroup/cpu.max)" = '200000 100000'
+grep -q '^CapEff:[[:space:]]*0000000000000000$' /proc/self/status
+grep -q '^NoNewPrivs:[[:space:]]*1$' /proc/self/status
+test "$(ls /sys/class/net)" = lo
+echo bounded > /workspace/allowed
+echo isolation-passed
+'''
+    result = asyncio.run(runner.execute(workspace, control, IMAGE, ['sh', '-c', command], memory='64m'))
+    assert result.returncode == 0 and 'isolation-passed' in result.output, result
+    assert secret.read_text() == 'must stay on host'
+    assert (workspace / 'allowed').read_text().strip() == 'bounded'
+    assert_absent(control)
+
+
+@live
 def test_real_tools_single_and_two_slot_lifecycles(tmp_path, monkeypatch):
     monkeypatch.setenv('ROMS_ENABLE_EXPERIMENTAL_EXECUTION', '1')
     monkeypatch.setattr(worker_tools, 'WORKSPACES_DIR', tmp_path)

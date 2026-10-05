@@ -47,7 +47,9 @@ Application source remains in the Windows project folder, referenced by `/opt/om
 
 ## Scope and known limits
 
-Working goals for this increment are local chat, real memory retrieval, truthful readiness, current date/time, authenticated local APIs, native socket transport and restart recovery. Model output cannot execute commands. Experimental ROMS execution is explicitly disabled, and native sandbox/patch apply/rollback work remains unfinished. No guest-provider credentials, web search, state checkpoint/fork API, autonomous repair or training are enabled.
+Working goals for this increment are local chat, real memory retrieval, truthful readiness, current date/time, authenticated local APIs, native socket transport and restart recovery. Model output cannot execute commands. Experimental ROMS execution is explicitly disabled; broker sandbox integration and patch apply/rollback remain unfinished. No guest-provider credentials, web search, state checkpoint/fork API, autonomous repair or training are enabled.
+
+The actual Mojo Landlock policy and its combination with rootless containers now pass enforcement tests. A locally built Python worker image supports registered syntax and unittest validation without a model-selected shell or image. See [native sandbox evidence](native-sandbox-verification.md). These components are not yet an assistant-accessible execution path.
 
 The rootless worker lifecycle is now verified separately: timeout and cancellation stop/reap owned containers before temporary folders are removed; cleanup failures retain recoverable journals. `goose --cleanup-worker task_ID` retries removal of a retained worker's containers and preserves its files. The installed service keeps execution disabled pending the remaining sandbox/authorization gates. See [worker lifecycle evidence](worker-lifecycle-verification.md).
 

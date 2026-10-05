@@ -1,143 +1,127 @@
-"""Staging workspace and Landlock filesystem sandbox for Omarchy Mojo RWKV7."""
+"""Linux x86-64 Landlock boundary; compose with the rootless worker policy."""
 from std.ffi import c_int, c_uint, c_long, external_call
 from std.os import stat
-from std.os.path import dirname, basename
-from std.memory import Pointer
+from std.sys import argv
 
-comptime SYS_PRCTL = 157
-comptime SYS_LANDLOCK_CREATE_RULESET = 444
-comptime SYS_LANDLOCK_ADD_RULE = 445
-comptime SYS_LANDLOCK_RESTRICT_SELF = 446
-comptime PR_SET_NO_NEW_PRIVS = 38
-comptime LANDLOCK_CREATE_RULESET_VERSION = 1
-comptime LANDLOCK_RULE_PATH_BENEATH = 1
-
-# Landlock ABI v1 Access Rights
-comptime LANDLOCK_ACCESS_FS_EXECUTE = 1
-comptime LANDLOCK_ACCESS_FS_WRITE_FILE = 2
-comptime LANDLOCK_ACCESS_FS_READ_FILE = 4
-comptime LANDLOCK_ACCESS_FS_READ_DIR = 8
-comptime LANDLOCK_ACCESS_FS_REMOVE_DIR = 16
-comptime LANDLOCK_ACCESS_FS_REMOVE_FILE = 32
-comptime LANDLOCK_ACCESS_FS_MAKE_DIR = 128
-comptime LANDLOCK_ACCESS_FS_MAKE_REG = 256
-
-comptime READ_ONLY_FS = LANDLOCK_ACCESS_FS_EXECUTE | LANDLOCK_ACCESS_FS_READ_FILE | LANDLOCK_ACCESS_FS_READ_DIR
-comptime WRITE_FS = (
-    LANDLOCK_ACCESS_FS_WRITE_FILE |
-    LANDLOCK_ACCESS_FS_REMOVE_DIR |
-    LANDLOCK_ACCESS_FS_REMOVE_FILE |
-    LANDLOCK_ACCESS_FS_MAKE_DIR |
-    LANDLOCK_ACCESS_FS_MAKE_REG
-)
-comptime ALL_HANDLED_FS = READ_ONLY_FS | WRITE_FS
+comptime MIN_ABI = 3  # REFER (v2) and TRUNCATE (v3) are required.
+comptime READ_EXEC = (1 << 0) | (1 << 2) | (1 << 3)
+comptime HANDLED_V3 = (1 << 15) - 1
+comptime WRITE_STAGE = (1 << 1) | (1 << 4) | (1 << 5) | (1 << 7) | (1 << 8) | (1 << 9) | (1 << 10) | (1 << 12) | (1 << 13) | (1 << 14)
+comptime DIR_FLAGS = 0x10000 | 0x20000 | 0x80000  # DIRECTORY | NOFOLLOW | CLOEXEC
 
 
 def probe_landlock_abi() -> Int:
-    """Returns the Landlock ABI version (e.g. 1, 2, 3) or a negative value if unsupported."""
-    var ver = external_call["syscall", c_long](
-        c_long(SYS_LANDLOCK_CREATE_RULESET),
-        UInt(0),
-        UInt(0),
-        c_uint(LANDLOCK_CREATE_RULESET_VERSION)
-    )
-    return Int(ver)
+    return Int(external_call["syscall", c_long, num_fixed_args=1](
+        c_long(444), c_long(0), c_long(0), c_long(1)))
 
 
 def is_landlock_available() -> Bool:
-    return probe_landlock_abi() >= 1
+    return probe_landlock_abi() >= MIN_ABI
 
 
-def ensure_directory(path: String) raises -> Bool:
-    """Ensures an isolated staging directory exists with private permissions (0700)."""
-    comptime O_DIRECTORY = 0x10000
-    comptime O_CLOEXEC = 0x80000
-    var p = path
-    var res = external_call["mkdir", c_int](p.as_c_string_span(), c_uint(0o0700))
-    if res == 0:
-        return True
-    # If already exists, verify ownership and permissions
-    var st = stat(path)
-    if (st.st_mode & 0o170000) != 0o040000:
-        raise Error("Path exists but is not a directory: " + path)
-    return True
+def pin_stage(path: String) raises -> c_int:
+    if not path.startswith("/") or path == "/":
+        raise Error("Stage must be an absolute non-root directory")
+    var root = String("/")
+    var fd = external_call["open", c_int, num_fixed_args=2](root.as_c_string_span(), c_int(DIR_FLAGS))
+    if fd < 0:
+        raise Error("Cannot pin filesystem root")
+    for part in path.split("/"):
+        var component = String(part)
+        if component == "":
+            continue
+        if component == "." or component == "..":
+            _ = external_call["close", c_int](fd)
+            raise Error("Dot components are forbidden in staging paths")
+        var child = external_call["openat", c_int, num_fixed_args=3](
+            fd, component.as_c_string_span(), c_int(DIR_FLAGS))
+        _ = external_call["close", c_int](fd)
+        if child < 0:
+            raise Error("Stage path is missing, inaccessible or contains a symlink")
+        fd = child
+    try:
+        var info = stat("/proc/self/fd/" + String(Int(fd)))
+        if info.st_uid != Int(external_call["getuid", c_uint]()):
+            raise Error("Stage must belong to the worker user")
+        if (info.st_mode & 0o170000) != 0o040000 or (info.st_mode & 0o077) != 0:
+            raise Error("Stage directory must be private (0700)")
+    except error:
+        _ = external_call["close", c_int](fd)
+        raise error
+    return fd
 
 
-def apply_landlock_sandbox(allowed_writable_dir: String) raises:
-    """
-    Confines the calling process using Linux Landlock.
-    Allows read-only access to / and full read/write access to allowed_writable_dir.
-    """
-    if not is_landlock_available():
-        raise Error("Landlock is not supported by the host Linux kernel")
+def add_path_rule(ruleset: c_int, fd: c_int, access: UInt64) raises:
+    # Packed u64 rights + s32 fd; the kernel ignores the trailing four bytes.
+    var rule = List[UInt64]()
+    rule.append(access)
+    rule.append(UInt64(fd))
+    if external_call["syscall", c_long, num_fixed_args=1](
+        c_long(445), c_long(ruleset), c_long(1), rule.unsafe_ptr(), c_long(0)) != 0:
+        raise Error("Landlock path rule installation failed")
 
-    _ = ensure_directory(allowed_writable_dir)
 
-    # 1. landlock_ruleset_attr: 64-bit handled_access_fs
+def apply_landlock_sandbox(stage_fd: c_int) raises:
+    var abi = probe_landlock_abi()
+    if abi < MIN_ABI:
+        raise Error("Landlock ABI 3 or newer is required for truncate and rename protection")
+    var handled = UInt64(HANDLED_V3)
+    if abi >= 5:
+        handled |= UInt64(1 << 15)  # Deny device ioctl where supported.
     var attr = List[UInt64]()
-    attr.append(UInt64(ALL_HANDLED_FS))
-
-    var ruleset_fd = external_call["syscall", c_int](
-        c_long(SYS_LANDLOCK_CREATE_RULESET),
-        attr.unsafe_ptr(),
-        UInt(8),
-        c_uint(0)
-    )
-    if ruleset_fd < 0:
-        raise Error("Failed to create Landlock ruleset")
-
-    # 2. Add rule for root / (read + execute)
-    comptime O_PATH = 0o10000000
-    var root_path = String("/")
-    var root_fd = external_call["open", c_int, num_fixed_args=2](
-        root_path.as_c_string_span(),
-        c_int(O_PATH | 0x10000)
-    )
-    if root_fd >= 0:
-        var rule_root = List[UInt64]()
-        rule_root.append(UInt64(READ_ONLY_FS))
-        rule_root.append(UInt64(root_fd)) # parent_fd in low 32 bits
-        _ = external_call["syscall", c_int](
-            c_long(SYS_LANDLOCK_ADD_RULE),
-            ruleset_fd,
-            c_uint(LANDLOCK_RULE_PATH_BENEATH),
-            rule_root.unsafe_ptr(),
-            c_uint(0)
-        )
-        _ = external_call["close", c_int](root_fd)
-
-    # 3. Add rule for allowed writable directory (read + write)
-    var write_path = allowed_writable_dir
-    var write_fd = external_call["open", c_int, num_fixed_args=2](
-        write_path.as_c_string_span(),
-        c_int(O_PATH | 0x10000)
-    )
-    if write_fd >= 0:
-        var rule_write = List[UInt64]()
-        rule_write.append(UInt64(READ_ONLY_FS | WRITE_FS))
-        rule_write.append(UInt64(write_fd))
-        _ = external_call["syscall", c_int](
-            c_long(SYS_LANDLOCK_ADD_RULE),
-            ruleset_fd,
-            c_uint(LANDLOCK_RULE_PATH_BENEATH),
-            rule_write.unsafe_ptr(),
-            c_uint(0)
-        )
-        _ = external_call["close", c_int](write_fd)
-
-    # 4. Set PR_SET_NO_NEW_PRIVS
-    if external_call["prctl", c_int](c_int(PR_SET_NO_NEW_PRIVS), c_long(1), c_long(0), c_long(0), c_long(0)) != 0:
-        _ = external_call["close", c_int](ruleset_fd)
-        raise Error("Failed to set PR_SET_NO_NEW_PRIVS")
-
-    # 5. Restrict self
-    if external_call["syscall", c_int](c_long(SYS_LANDLOCK_RESTRICT_SELF), ruleset_fd, c_uint(0)) != 0:
-        _ = external_call["close", c_int](ruleset_fd)
-        raise Error("Failed to enforce Landlock self-restriction")
-
-    _ = external_call["close", c_int](ruleset_fd)
+    attr.append(handled)
+    var ruleset = c_int(external_call["syscall", c_long, num_fixed_args=1](
+        c_long(444), attr.unsafe_ptr(), c_long(8), c_long(0)))
+    if ruleset < 0:
+        raise Error("Landlock ruleset creation failed")
+    try:
+        # Only the system toolchain is readable/executable outside the stage.
+        var usr = String("/usr")
+        var usr_fd = external_call["open", c_int, num_fixed_args=2](usr.as_c_string_span(), c_int(DIR_FLAGS))
+        if usr_fd < 0:
+            raise Error("Read-only system toolchain is unavailable")
+        try:
+            add_path_rule(ruleset, usr_fd, UInt64(READ_EXEC))
+        finally:
+            _ = external_call["close", c_int](usr_fd)
+        add_path_rule(ruleset, stage_fd, UInt64(READ_EXEC | WRITE_STAGE))
+        if external_call["prctl", c_int, num_fixed_args=1](
+            c_int(38), c_long(1), c_long(0), c_long(0), c_long(0)) != 0:
+            raise Error("Cannot set no-new-privileges")
+        if external_call["syscall", c_long, num_fixed_args=1](
+            c_long(446), c_long(ruleset), c_long(0)) != 0:
+            raise Error("Landlock enforcement failed")
+    finally:
+        _ = external_call["close", c_int](ruleset)
 
 
 def main() raises:
-    print("Landlock Probe ABI:", probe_landlock_abi())
-    print("Landlock Available:", is_landlock_available())
+    var args = argv()
+    if len(args) == 2 and args[1] == "--probe":
+        print(probe_landlock_abi())
+        return
+    if len(args) < 4 or args[2] != "--":
+        raise Error("Usage: staging-sandbox STAGE -- /absolute/program [arguments]")
+    var command = List[String]()
+    for i in range(3, len(args)):
+        command.append(String(args[i]))
+    if not command[0].startswith("/"):
+        raise Error("An absolute executable path is required")
+    var pointers = List[UInt]()
+    for i in range(len(command)):
+        pointers.append(UInt(Int(command[i].as_c_string_span().ptr())))
+    pointers.append(0)
+    var stage_fd = pin_stage(String(args[1]))
+    try:
+        apply_landlock_sandbox(stage_fd)
+        if external_call["fchdir", c_int](stage_fd) != 0:
+            raise Error("Cannot enter pinned stage")
+    finally:
+        _ = external_call["close", c_int](stage_fd)
+    if external_call["clearenv", c_int]() != 0:
+        raise Error("Cannot clear worker environment")
+    if external_call["syscall", c_long, num_fixed_args=1](
+        c_long(436), c_long(3), c_long(0xffffffff), c_long(0)) != 0:
+        raise Error("Cannot close inherited descriptors")
+    _ = external_call["execv", c_int](command[0].as_c_string_span(), pointers.unsafe_ptr())
+    raise Error("Cannot execute the confined command")

@@ -35,7 +35,7 @@ async def run_sandboxed_command(image: str, command: str, cpus: str = '2.0',
         raise ValueError('Worker networking must remain disabled')
     argv = shlex.split(command)
     control, workspace = _task_paths()
-    workspace.mkdir()
+    workspace.mkdir(mode=0o700)
     try:
         result = await container_runner.execute(workspace, control, image, argv, cpus=cpus,
                                                 memory=memory, timeout=TOOL_EXECUTION_TIMEOUT)
@@ -76,6 +76,7 @@ async def execute_tool_task_async(repo_name: str, tool_image: str, command: str,
         created = await container_runner.run_process([*git, 'worktree', 'add', '--detach', str(workspace), 'HEAD'], 30)
         if created.returncode:
             raise RuntimeError('Worktree creation failed: ' + created.output[-1000:])
+        workspace.chmod(0o700)
         result = await container_runner.execute(workspace, control, tool_image, argv, cpus=cpus,
                                                 memory=memory, timeout=timeout)
         return f'Task [{control.name}] (Exit Code {result.returncode}):\n{result.output[:2500]}'

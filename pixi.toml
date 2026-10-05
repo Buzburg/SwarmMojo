@@ -24,7 +24,7 @@ build-broker = "mojo build app_mojo/omarchy_broker.mojo -o .pixi/envs/default/bi
 test-broker = "env OMARCHY_BROKER_BINARY=.pixi/envs/default/bin/omarchy-broker python -m unittest discover -s tests -p test_omarchy_broker.py -v"
 broker = ".pixi/envs/default/bin/omarchy-broker"
 build-sandbox = "mojo build app_mojo/staging_sandbox.mojo -o .pixi/envs/default/bin/staging-sandbox"
-test-sandbox = "python -m unittest tests/test_staging_sandbox.py -v"
+test-sandbox = "env OMARCHY_SANDBOX_BINARY=.pixi/envs/default/bin/staging-sandbox python -m pytest tests/test_native_sandbox.py -q"
 build-rwkv = "mojo build app_mojo/rwkv_engine.mojo -o .pixi/envs/default/bin/rwkv-engine"
 verify-all = "python scripts/verify_all.py"
 bench-context = "env PYTHONPATH=. mojo -I . benchmarks/bench_context.mojo"
