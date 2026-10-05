@@ -8,6 +8,30 @@ From the project folder, open `Open Goose.cmd` for chat or `Open Omarchy.cmd` fo
 
 WSL distribution name: `Omarchy`. Its filesystem is accessible through `\\wsl.localhost\Omarchy`. The original `\\wsl.localhost\Ubuntu` path is retired only after verified cutover; do not relabel Arch as Ubuntu simply to preserve that path.
 
+## Add repositories and files
+
+Open `Open Knowledge Library.cmd` in the project folder. Choose a file, local Git repository or folder, paste its Windows or Linux path, review the selection, and type `yes` to import. The same menu lists, refreshes and removes imported sources. Imports populate ROMS retrieval memory; they do not train or modify model weights, or execute imported code.
+
+The Linux shell also provides `goose --library`. For scripting:
+
+```sh
+goose --add-file 'D:\path\document.md' --preview
+goose --add-repo 'D:\path\repository' --preview
+goose --add-folder 'D:\path\documents' --preview
+goose --add-file 'D:\path\document.md'
+goose --sources
+goose --refresh-source SOURCE_ID
+goose --remove-source SOURCE_ID
+```
+
+Remove `--preview` to perform an import. Git imports read tracked files from an existing local checkout, including working-copy edits. Untracked files are excluded; select them separately if needed. A folder import scans supported text files without applying Git ignore rules. No remote clone or credentials are required. Snapshots and manifests live in `~/.local/share/omarchy-harness/roms/library`. Document IDs include a unique source ID and relative path, so identical filenames in different sources remain independent. Removing an imported source deletes its indexed copy and snapshot, preserving original files. Refresh builds a new snapshot first and removes the previous source only after successful indexing; its source ID changes.
+
+Supported inputs include Markdown, plain text, CSV, JSON, Python, Mojo, JavaScript/TypeScript, C/C++, Rust, Go and common text configuration formats. This increment does not import PDF, Office documents, images, archives or model weights. Limits are 1 MiB per file, 32 MiB and 1,000 eligible files per import, and 20,000 scanned entries for folders. Repository symlinks, generated directories, common credential filenames, `.env` names, binary/non-UTF-8 text and PEM private keys are excluded. These exclusions are not a comprehensive secret scanner; review the selected material before importing it.
+
+Ordinary indexing errors remove that import's indexed documents and retain a failed manifest for inspection/removal. A forced interruption may leave an `indexing` source and partially indexed documents; remove or refresh that source from the menu. If cleanup fails, its manifest reports `cleanup_required`. Re-adding an existing origin creates another independent source; use refresh to replace it. Imports commit one document at a time, so concurrent queries may see an import in progress.
+
+Verification: `scripts/check_source_intake.py` exercises the installed CLI with temporary repositories, real embeddings, same-name documents, cross-process cache refresh and removal. It removes its test sources afterward. The fixed verifier includes source-library and startup-readiness regressions; live readiness waits up to 90 seconds for a cold WSL start.
+
 ## Installed components
 
 - Official Arch WSL base: `archlinux-2026.10.01.179549.wsl`, verified against the publisher's SHA-256.

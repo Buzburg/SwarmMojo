@@ -2,7 +2,9 @@
 import argparse
 import json
 import os
+from pathlib import Path
 import socket
+import subprocess
 import sys
 import time
 import urllib.request
@@ -11,8 +13,34 @@ import urllib.request
 def main() -> None:
     parser = argparse.ArgumentParser(description='Local Omarchy Goose assistant')
     parser.add_argument('--status', action='store_true')
+    intake = parser.add_mutually_exclusive_group()
+    intake.add_argument('--add-file')
+    intake.add_argument('--add-repo')
+    intake.add_argument('--add-folder')
+    intake.add_argument('--sources', action='store_true')
+    intake.add_argument('--library', action='store_true', help='Open the knowledge library menu')
+    intake.add_argument('--remove-source')
+    intake.add_argument('--refresh-source')
+    parser.add_argument('--preview', action='store_true', help='List eligible files without importing')
     parser.add_argument('prompt', nargs='*')
     args = parser.parse_args()
+    operation = next(((name, value) for name, value in [
+        ('file', args.add_file), ('repo', args.add_repo), ('folder', args.add_folder),
+        ('list', args.sources), ('menu', args.library), ('remove', args.remove_source), ('refresh', args.refresh_source)] if value), None)
+    if operation:
+        if args.status or args.prompt:
+            parser.error('Source operations cannot be combined with chat or --status')
+        action, value = operation
+        command = ['/usr/bin/python', str(Path(__file__).with_name('run_linux_env.py')),
+                   'python', '-m', 'app.source_library', action]
+        if action not in {'list', 'menu'}:
+            command.append(value)
+        if args.preview:
+            command.append('--preview')
+        environment = {key: value for key, value in os.environ.items() if key not in {'PYTHONHOME', 'PYTHONPATH'}}
+        raise SystemExit(subprocess.run(command, env=environment).returncode)
+    if args.preview:
+        parser.error('--preview requires a source operation')
     if args.status:
         with socket.socket(socket.AF_UNIX) as client:
             client.settimeout(10)

@@ -5,6 +5,25 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import time
+
+
+def wait_for_services(command: list[str], root: Path, env: dict[str, str], timeout: float = 90) -> subprocess.CompletedProcess:
+    deadline = time.monotonic() + timeout
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError('Local model and ROMS did not become ready within the startup deadline')
+        try:
+            result = subprocess.run(command, cwd=root, env=env, text=True, capture_output=True,
+                                    timeout=min(10, remaining))
+            if result.returncode == 0:
+                status = json.loads(result.stdout)
+                if status.get('rwkv7') == 'ready' and status.get('roms') == 'ready':
+                    return result
+        except subprocess.TimeoutExpired:
+            pass
+        time.sleep(min(1, max(0, deadline - time.monotonic())))
 
 
 def main() -> None:
@@ -15,7 +34,7 @@ def main() -> None:
     prefix = Path(os.getenv('ROMS_PYTHON_PREFIX', str(root / '.pixi/envs/default')))
     binary = Path(os.getenv('OMARCHY_BROKER_BINARY', str(prefix / 'bin/omarchy-broker')))
     suites = ['release_safety', 'memory', 'context', 'retrieval_quality', 'ingestion_quality',
-              'tools_quality', 'throttle', 'broker_actions']
+              'tools_quality', 'throttle', 'broker_actions', 'document_identity', 'source_library', 'build_readiness']
     checks = [
         ('ROMS offline regressions', [sys.executable, '-m', 'pytest',
             *[f'tests/test_{name}.py' for name in suites], '-q', '--tb=short']),
@@ -31,7 +50,8 @@ def main() -> None:
         try:
             if name == 'Compiled native broker' and not binary.is_file():
                 raise FileNotFoundError(f'Required current-build artifact missing: {binary}')
-            result = subprocess.run(command, cwd=root, env=env, text=True, capture_output=True, timeout=180)
+            result = (wait_for_services(command, root, env) if name == 'Live model and ROMS' else
+                      subprocess.run(command, cwd=root, env=env, text=True, capture_output=True, timeout=180))
             passed = result.returncode == 0
             if name == 'Live model and ROMS' and passed:
                 status = json.loads(result.stdout)

@@ -36,6 +36,8 @@ SUPPORTED_EXTENSIONS = {
     ".ps1",
     ".ts",
     ".js",
+    ".tsx", ".jsx", ".rs", ".go", ".c", ".h", ".cpp", ".hpp",
+    ".toml", ".yaml", ".yml", ".ini", ".css", ".html", ".xml",
 }
 
 
@@ -146,7 +148,7 @@ def _parse_text_or_code(path: Path) -> Tuple[str, str, str, List[str]]:
     return title, doc_type, raw_content, chunks
 
 
-def ingest_document_file(filepath: Path | str, db_path: Path | str | None = None) -> bool:
+def ingest_document_file(filepath: Path | str, db_path: Path | str | None = None, *, doc_id: str | None = None) -> bool:
     """Ingests any supported file (.md, .csv, .json, .txt, code) into both vector and FTS5 indexes.
 
     Returns True if ingested/updated, False if unchanged.
@@ -171,7 +173,9 @@ def ingest_document_file(filepath: Path | str, db_path: Path | str | None = None
     if not raw_content or not chunks:
         return False
 
-    filename = path.name
+    filename = doc_id if doc_id is not None else path.name
+    if not isinstance(filename, str) or not filename or len(filename) > 4096 or '\x00' in filename:
+        raise ValueError('Invalid document identity')
     checksum = hashlib.sha256(raw_content.encode("utf-8")).hexdigest()
 
     from app.config import EMBEDDING_DIM, EMBEDDING_PROVIDER, compute_embedding_vector
