@@ -87,6 +87,8 @@ def handle(frame: bytearray) -> str:
             result = {"ok": True, "result": response["choices"][0]["message"]["content"]}
         elif action == 'worker_status':
             result = worker_request('capabilities', timeout=45)
+        elif action == 'worker_recovery':
+            result = worker_request('recovery', timeout=5)
         elif action in {'task.status', 'task.validate'}:
             if set(args) != {'task_id'} or not isinstance(args['task_id'], str) or not re.fullmatch(r'[a-f0-9]{32}', args['task_id']):
                 raise ValueError('A valid task ID is required')

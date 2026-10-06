@@ -32,6 +32,6 @@ The full `scripts/verify_all.py --containers --sandbox --staging` profile passed
 
 Staging tests use real repositories with spaces in their paths. They verify a harmless edit through syntax and unittest checks, unchanged source files and unrelated user edits, rejected traversal/control paths, conflicting source edits, patch/preimage digest tampering, syntax failure, forbidden outside writes, protected Git metadata, and a zero-exit test that maliciously modifies the staged source. The latter remains `failed`, with its actual zero exit code and the mutation reason recorded.
 
-DEBT(pointdexter): retained task/worktree cleanup and restart reconciliation are not automatic; revisit before exposing persistent model-driven task execution; upgrade to the transaction recovery and operator cleanup flow. Never delete the original repository as task cleanup.
+Recorded validation containers now have [startup reconciliation](worker-recovery-verification.md), with staged work preserved. DEBT(pointdexter): interrupted proposal creation and retained task/worktree cleanup are not automatic; revisit before exposing persistent model-driven task execution; upgrade to an operator cleanup flow. Never delete the original repository as task cleanup.
 
 This staging checkpoint alone does not certify apply/rollback. The subsequent [promotion increment](patch-promotion-verification.md) supplies its own concrete authorization, conflict/recovery contract and evidence.

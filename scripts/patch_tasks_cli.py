@@ -10,10 +10,10 @@ from app.source_library import local_path
 
 async def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['register', 'propose', 'validate', 'show', 'list', 'review', 'apply', 'rollback', 'worker-status'])
+    parser.add_argument('action', choices=['register', 'propose', 'validate', 'show', 'list', 'review', 'apply', 'rollback', 'worker-status', 'recover-workers'])
     parser.add_argument('value', nargs='?')
     args = parser.parse_args()
-    if args.action not in {'list', 'worker-status'} and not args.value:
+    if args.action not in {'list', 'worker-status', 'recover-workers'} and not args.value:
         parser.error('A path or task ID is required')
     if args.action == 'register':
         result = await patch_tasks.register_project(args.value)
@@ -35,6 +35,11 @@ async def main() -> None:
         result = await asyncio.to_thread(task_worker_client.request, 'capabilities', timeout=45)
         if not result['ok']:
             raise RuntimeError('Validation service: ' + result['error'] + ': ' + result.get('detail', ''))
+    elif args.action == 'recover-workers':
+        result = await asyncio.to_thread(task_worker_client.request, 'recover', timeout=60)
+        if not result['ok']:
+            print(json.dumps(result, indent=2))
+            raise RuntimeError('Some recorded workers still require recovery; retained files were preserved')
     elif args.action in {'review', 'apply', 'rollback'}:
         rollback = args.action == 'rollback'
         result = patch_promotion.review(args.value, rollback=rollback)

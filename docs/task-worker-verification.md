@@ -37,6 +37,6 @@ After the final diagnostic refinement, the complete focused service suite passed
 
 ## Remaining work
 
-DEBT(pointdexter): forced host/process death during active validation still requires startup reconciliation of retained task/probe journals; revisit before unattended conversational execution; upgrade to exact-label cleanup and interrupted-state recovery under task locks. Unknown cleanup state must continue to preserve the workspace. The legacy worker cleanup CLI does not yet discover retained capability-probe directories.
+Startup reconciliation of recorded validation tasks and owned capability probes is now implemented and tested through forced process death. See [recovery verification](worker-recovery-verification.md). Unknown cleanup state still preserves the workspace and blocks new validation. Power-loss durability and legacy unidentified probe journals remain outside that certification.
 
 The native broker still serializes requests, so a synchronous validation can delay other broker calls. Direct worker status requests remain responsive. Model-assisted proposal creation, cancellation controls exposed to the user, asynchronous broker jobs and the full Checkpoint F conversation remain unfinished; this checkpoint does not claim them complete.

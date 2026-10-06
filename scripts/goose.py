@@ -26,6 +26,7 @@ def main() -> None:
     intake.add_argument('--stage-patch', help='Prepare a proposal JSON file in an isolated worktree')
     intake.add_argument('--validate-patch')
     intake.add_argument('--worker-status', action='store_true', help='Probe the private native/container validation service')
+    intake.add_argument('--recover-workers', action='store_true', help='Retry cleanup of recorded interrupted validations')
     intake.add_argument('--show-patch')
     intake.add_argument('--review-patch')
     intake.add_argument('--apply-patch', help='Review and interactively approve an exactly validated patch')
@@ -39,7 +40,8 @@ def main() -> None:
         ('list', args.sources), ('menu', args.library), ('remove', args.remove_source),
         ('refresh', args.refresh_source), ('cleanup', args.cleanup_worker),
         ('register', args.register_project), ('propose', args.stage_patch),
-        ('validate', args.validate_patch), ('worker-status', args.worker_status), ('show', args.show_patch), ('review', args.review_patch),
+        ('validate', args.validate_patch), ('worker-status', args.worker_status), ('recover-workers', args.recover_workers),
+        ('show', args.show_patch), ('review', args.review_patch),
         ('apply', args.apply_patch), ('rollback', args.rollback_patch), ('tasks', args.patch_tasks)] if value), None)
     if operation:
         if args.status or args.prompt:
@@ -50,13 +52,13 @@ def main() -> None:
             if args.preview:
                 parser.error('--preview does not apply to worker cleanup')
             command.append('scripts.cleanup_worker')
-        elif action in {'register', 'propose', 'validate', 'show', 'tasks', 'review', 'apply', 'rollback', 'worker-status'}:
+        elif action in {'register', 'propose', 'validate', 'show', 'tasks', 'review', 'apply', 'rollback', 'worker-status', 'recover-workers'}:
             if args.preview:
                 parser.error('--preview is for knowledge imports; use --review-patch to inspect a patch')
             command.extend(['scripts.patch_tasks_cli', 'list' if action == 'tasks' else action])
         else:
             command.extend(['app.source_library', action])
-        if action not in {'list', 'menu', 'tasks', 'worker-status'}:
+        if action not in {'list', 'menu', 'tasks', 'worker-status', 'recover-workers'}:
             command.append(value)
         if args.preview:
             command.append('--preview')

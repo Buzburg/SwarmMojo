@@ -7,9 +7,9 @@ from pathlib import Path
 import signal
 import socket
 import struct
-import tempfile
+import uuid
 
-from app import patch_tasks, validation_policy
+from app import patch_tasks, validation_policy, worker_recovery
 from app.config import WORKSPACES_DIR
 from app.container_runner import CleanupRequired
 from app.json_protocol import unique_object
@@ -25,11 +25,17 @@ class Worker:
     def __init__(self) -> None:
         self.lock = asyncio.Lock()
         self.clients: set[asyncio.Task] = set()
+        self.recovery: dict | None = None
 
     async def probe(self) -> dict:
         WORKSPACES_DIR.mkdir(parents=True, exist_ok=True, mode=0o700)
-        # Retain the native directory on uncertain cleanup, just like real tasks.
-        base = Path(tempfile.mkdtemp(prefix='capability-', dir=WORKSPACES_DIR))
+        base = WORKSPACES_DIR / ('capability-' + uuid.uuid4().hex)
+        base.mkdir(mode=0o700)
+        with patch_tasks.task_lock(base):
+            patch_tasks.durable_json(base / 'owner.json', {'kind': 'capability', 'version': 1, 'id': base.name})
+            return await self.probe_in(base)
+
+    async def probe_in(self, base: Path) -> dict:
         stage, control = base / 'stage', base / 'control'
         stage.mkdir(mode=0o700)
         control.mkdir(mode=0o700)
@@ -57,6 +63,8 @@ class Worker:
         action, args = request['action'], request['args']
         if action == 'ping' and not args:
             return {'result': 'pong'}
+        if action == 'recovery' and not args:
+            return {'recovery': worker_recovery.summary(self.recovery)}
         if action in {'task.status', 'task.validate'}:
             if set(args) != {'task_id'} or not isinstance(args['task_id'], str):
                 raise ValueError('A task ID is required')
@@ -66,13 +74,20 @@ class Worker:
                 return {'task': task_summary(task)}
             if task['state'] != 'staged':
                 raise ValueError('Only staged tasks can be validated')
-        elif action != 'capabilities' or args:
+        elif action not in {'capabilities', 'recover'} or args:
             raise ValueError('Unsupported worker action or arguments')
         try:
             await asyncio.wait_for(self.lock.acquire(), 0.2)
         except TimeoutError:
             return {'ok': False, 'error': 'worker_busy'}
         try:
+            if self.recovery is None or action == 'recover':
+                self.recovery = await worker_recovery.reconcile(WORKSPACES_DIR)
+            if action == 'recover':
+                return {'ok': not self.recovery['blocked'], 'recovery': worker_recovery.summary(self.recovery),
+                        **({'error': 'recovery_required'} if self.recovery['blocked'] else {})}
+            if self.recovery['blocked']:
+                return {'ok': False, 'error': 'recovery_required', 'recovery': worker_recovery.summary(self.recovery)}
             capability = await self.probe()
             if action == 'capabilities':
                 return {'capabilities': capability}
@@ -152,6 +167,7 @@ async def serve(path: Path | None = None) -> None:
     if path.exists() or path.is_symlink():
         raise FileExistsError('Refusing to replace an existing worker endpoint')
     worker = Worker()
+    worker.recovery = await worker_recovery.reconcile(WORKSPACES_DIR)
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
     for event in (signal.SIGTERM, signal.SIGINT):
