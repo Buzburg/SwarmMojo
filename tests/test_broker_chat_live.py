@@ -16,6 +16,7 @@ from test_gateway_disconnect import serving
 @pytest.mark.skipif(not os.getenv('ROMS_LIVE_DRAFT'), reason='Explicit installed-model verification required')
 @pytest.mark.parametrize('trial', [1, 2])
 def test_actual_model_answers_from_mcp_project_memory(native_chat, database, monkeypatch, trial):
+    monkeypatch.delenv('OMARCHY_NATIVE_CHAT_BINARY', raising=False)
     settings = dict(line.split('=', 1) for line in
                     Path('/home/rryan/.config/goose/runtime.env').read_text().splitlines() if '=' in line)
     for name in ('ROMS_GATEWAY_API_KEY', 'ROMS_UPSTREAM_API_KEY'):

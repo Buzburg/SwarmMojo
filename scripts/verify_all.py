@@ -34,6 +34,7 @@ def main() -> None:
     parser.add_argument('--staging', action='store_true', help='Require real fixture patch staging and validation')
     parser.add_argument('--drafts', action='store_true', help='Require a real model draft through validation, apply and rollback')
     parser.add_argument('--native-adapter', action='store_true', help='Require actual C ABI and compiled Mojo model checks')
+    parser.add_argument('--native-chat', action='store_true', help='Require actual Mojo worker conversations and process cleanup')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     prefix = Path(os.getenv('ROMS_PYTHON_PREFIX', str(root / '.pixi/envs/default')))
@@ -52,6 +53,9 @@ def main() -> None:
     if args.native_adapter:
         checks.append(('Native model ABI', [sys.executable, '-m', 'pytest', 'tests/test_native_adapter.py',
                                           'tests/test_native_answer.py', 'tests/test_mojo_model_binding.py', '-q', '--tb=short']))
+    if args.native_chat:
+        checks.append(('Native broker conversations', [sys.executable, '-m', 'pytest',
+                       'tests/test_native_chat.py', '-q', '--tb=short']))
     if args.containers:
         checks.append(('Rootless worker lifecycle', [sys.executable, '-m', 'pytest',
                        'tests/test_container_lifecycle.py', '-q', '--tb=short']))
@@ -82,6 +86,10 @@ def main() -> None:
                 for variable in ('OMARCHY_NATIVE_ADAPTER', 'OMARCHY_STATE_MODEL'):
                     if not env.get(variable) or not Path(env[variable]).is_file():
                         raise ValueError(f'{variable} must identify the actual artifact; skipped tests cannot certify the ABI')
+            if name == 'Native broker conversations':
+                for variable in ('OMARCHY_NATIVE_CHAT_BINARY', 'OMARCHY_NATIVE_MODEL'):
+                    if not env.get(variable) or not Path(env[variable]).is_file():
+                        raise ValueError(f'{variable} must identify an actual artifact; skipped tests cannot certify native chat')
             if name == 'Rootless worker lifecycle' and not env.get('ROMS_LIVE_CONTAINER_IMAGE'):
                 raise ValueError('ROMS_LIVE_CONTAINER_IMAGE must identify a reviewed local image; skipped tests cannot certify execution')
             if name in {'Model-assisted project workflow', 'Memory-grounded live chat'} and not env.get('ROMS_LIVE_DRAFT'):

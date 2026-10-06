@@ -14,7 +14,7 @@ The compiled Mojo probe independently enables the format and generates the same 
 
 The separate four-test workshop suite passed with its actual model test enabled, including checkpoint continuation and independent forks. The first combined command omitted that suite's distinct `OMARCHY_STATE_LIBRARY` variable and skipped its real-model case; the subsequent explicit run passed all four. This skip is not counted as model verification.
 
-These are CPU and format/lifecycle checks. They do not establish broad factual accuracy, arbitrary grammar support, GPU cancellation, native broker conversation dispatch or restartable formatted sessions. The installed broker continues to use the previously verified HTTP generation path.
+These are CPU and format/lifecycle checks. They do not establish broad factual accuracy, arbitrary grammar support, GPU cancellation or restartable formatted sessions. The subsequent [native broker increment](native-chat-verification.md) connects this adapter to project-scoped chat; plain chat retains the previously verified HTTP path.
 
 The previous adapter and manifest are preserved under `deployment/backups/native-adapter-before-answer-format` in the parent workspace. Existing persisted checkpoints bind the adapter digest: they must not be silently migrated to a different adapter. The previous source is retained in Git commit `6b4738e`; restoring that adapter also requires its matching source/runtime identity.
 

@@ -50,7 +50,11 @@ async def dispatch(request: dict, frame: bytearray, legacy: bool) -> str:
         if context is not None and not context['records']:
             result = {'ok': True, 'result': broker_chat.no_evidence(context)}
         else:
-            response = await gateway('/v1/chat/completions', broker_chat.completion_body(messages, context))
+            if context is not None and os.getenv('OMARCHY_NATIVE_CHAT_BINARY'):
+                from app.native_chat import generate
+                response = await generate(messages)
+            else:
+                response = await gateway('/v1/chat/completions', broker_chat.completion_body(messages, context))
             result = {'ok': True, 'result': broker_chat.result(response, context)}
     elif action == 'task.validate':
         async def validate() -> str:

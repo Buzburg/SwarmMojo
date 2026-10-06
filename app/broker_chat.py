@@ -85,4 +85,5 @@ def result(response: dict, context: dict | None) -> str | dict:
             raise ValueError('Invalid answer object')
     except ValueError:
         raise ProtocolError('GENERATION_INVALID', 'The model did not follow the answer contract') from None
-    return {'answer': value['answer'], 'memory': context, 'generated': True}
+    return {'answer': value['answer'], 'memory': context, 'generated': True,
+            **({'runtime': response['native_runtime']} if 'native_runtime' in response else {})}

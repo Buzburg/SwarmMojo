@@ -118,25 +118,30 @@ class CheckpointStore:
         return metadata, data
 
 
+def verify_inputs(library: Path, model: Path, model_key: str) -> dict:
+    """Verify native/model identities without loading a second model into this process."""
+    manifest = json.loads(library.with_suffix('.json').read_text())
+    inputs = json.loads((ROOT / 'config/build-inputs.json').read_text())
+    expected = inputs['models'][model_key]
+    if (manifest['abi'] != 1 or manifest['revision'] != inputs['runtime']['revision']
+            or digest(library) != manifest['library_sha256']
+            or digest(ROOT / 'native/rwkv_state.cpp') != manifest['source_sha256']):
+        raise ValueError('State adapter does not match current pinned sources')
+    for name, sha in manifest['runtime_libraries'].items():
+        if digest(Path(name)) != sha:
+            raise ValueError('Linked runtime library changed')
+    if model.stat().st_size != expected['bytes'] or digest(model) != expected['sha256']:
+        raise ValueError('Model identity does not match the input manifest')
+    return {'model_sha256': expected['sha256'], 'runtime_revision': manifest['revision'],
+            'runtime_libraries': manifest['runtime_libraries'], 'adapter_sha256': manifest['library_sha256']}
+
+
 class Runtime:
     def __init__(self, library: Path, model: Path, *, model_key: str, gpu_layers: int = 0) -> None:
         self.handle = None
         self.library_path = Path(library).resolve()
-        manifest = json.loads(library.with_suffix('.json').read_text())
-        inputs = json.loads((ROOT / 'config/build-inputs.json').read_text())
-        expected = inputs['models'][model_key]
-        if (manifest['abi'] != 1 or manifest['revision'] != inputs['runtime']['revision']
-                or digest(library) != manifest['library_sha256']
-                or digest(ROOT / 'native/rwkv_state.cpp') != manifest['source_sha256']):
-            raise ValueError('State adapter does not match current pinned sources')
-        for name, sha in manifest['runtime_libraries'].items():
-            if digest(Path(name)) != sha:
-                raise ValueError('Linked runtime library changed')
-        if model.stat().st_size != expected['bytes'] or digest(model) != expected['sha256']:
-            raise ValueError('Model identity does not match the input manifest')
-        self.identity = {'model_sha256': expected['sha256'], 'runtime_revision': manifest['revision'],
-            'runtime_libraries': manifest['runtime_libraries'], 'adapter_sha256': manifest['library_sha256'],
-            'gpu_layers_requested': gpu_layers, 'format': 1, 'sampler': {'kind': 'greedy', 'rng_state': None}}
+        self.identity = {**verify_inputs(library, model, model_key), 'gpu_layers_requested': gpu_layers,
+                         'format': 1, 'sampler': {'kind': 'greedy', 'rng_state': None}}
         self.lib = c.CDLL(str(self.library_path))
         signatures = {
             'wb_error': ([], c.c_char_p), 'wb_model_open': ([c.c_char_p, c.c_int], c.c_void_p),

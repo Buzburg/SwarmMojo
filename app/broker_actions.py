@@ -44,6 +44,7 @@ def build_status() -> dict:
 
 
 def status_result(health: dict, worker_reachable: bool) -> dict:
+    from app.native_chat import status as native_status
     model_ready = health.get('upstream_ready') is True
     gateway_ready = health.get('status') == 'ready'
     return {
@@ -54,6 +55,7 @@ def status_result(health: dict, worker_reachable: bool) -> dict:
         # Retained compatibility fields refer only to arbitrary chat-triggered execution.
         'sandbox': 'disabled', 'sandbox_scope': 'arbitrary_chat_execution', 'tool_execution': False,
         'features': {
+            'native_project_chat': native_status(),
             'chat': {'state': 'ready' if model_ready and gateway_ready else 'unavailable',
                      'reason': 'Live gateway and model health' if model_ready and gateway_ready else 'Gateway or model is not ready'},
             'knowledge_library': {'state': 'not_probed',
@@ -137,7 +139,11 @@ def handle(frame: bytearray) -> str:
             if context is not None and not context['records']:
                 result = {'ok': True, 'result': broker_chat.no_evidence(context)}
             else:
-                response = gateway("/v1/chat/completions", broker_chat.completion_body(messages, context))
+                if context is not None and os.getenv('OMARCHY_NATIVE_CHAT_BINARY'):
+                    from app.native_chat import generate
+                    response = asyncio.run(generate(messages))
+                else:
+                    response = gateway("/v1/chat/completions", broker_chat.completion_body(messages, context))
                 result = {"ok": True, "result": broker_chat.result(response, context)}
         elif action == 'worker_status':
             result = worker_request('capabilities', timeout=45)

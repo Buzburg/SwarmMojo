@@ -139,7 +139,8 @@ def native_chat(tmp_path, database):
         process.communicate(timeout=8)
 
 
-def test_compiled_broker_supplies_real_memory_to_controlled_model(native_chat, database):
+def test_compiled_broker_supplies_real_memory_to_controlled_model(native_chat, database, monkeypatch):
+    monkeypatch.delenv('OMARCHY_NATIVE_CHAT_BINARY', raising=False)
     calls = []
     class HTTP(BaseHTTPRequestHandler):
         def log_message(self, *args):

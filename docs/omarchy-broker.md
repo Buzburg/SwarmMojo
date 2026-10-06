@@ -32,6 +32,8 @@ Plain chat retains its text result. Project chat returns `{"answer":"text","memo
 
 Project replies also contain `generated`: true for a validated model answer, false for a system notice when no usable records fit the query and context budget. Empty evidence never invokes the model. The notice does not claim no records exist elsewhere; inspect the receipt's omission/truncation fields.
 
+The installed broker selects the direct Mojo worker for project chat through `OMARCHY_NATIVE_CHAT_BINARY` and `OMARCHY_NATIVE_MODEL`. It does not fall back to HTTP after a native failure. Plain chat keeps the HTTP path. Successful native replies include `runtime`; `features.native_project_chat` reports process/session counts and facts received after real native session creation. Idle means no retained native session. See [native chat verification](native-chat-verification.md) for limits, installation and actual evidence.
+
 State save/restore/fork, task stage/apply/rollback/cancel and unknown actions return `NOT_IMPLEMENTED`. Operator CLI staging and promotion are separate working interfaces; their existence does not make those broker actions implemented. Arbitrary shell/image/approval actions are not exposed.
 
 Status aliases share a scoped feature inventory with reasons. Legacy `sandbox: disabled` describes arbitrary chat execution, not the separate registered validation worker. Kernel ABI probing sets `enforcement_verified: false`; only an actual worker probe can provide enforcement evidence. See [readiness evidence](readiness-verification.md).
