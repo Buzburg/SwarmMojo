@@ -21,4 +21,6 @@ The existing three C-adapter tests and three build-readiness tests also passed. 
 
 The probe links the verified library by absolute path. Model/service/broker binaries and adapter source were not changed. Existing adapter identity and CPU cancellation evidence remain in [native adapter verification](native-adapter-verification.md). No 7.2B model was loaded and no training was performed.
 
+Subsequent increment: [native answer-format verification](native-answer-verification.md) adds `answer_format()` and one additional real Mojo JSON-answer check. The original eleven binding checks remain in the required native profile.
+
 Design reference: Modular documents move-only ownership and foreign calls in [Mojo structs](https://docs.modular.com/mojo/manual/structs/) and [C interoperability](https://mojolang.static.modular.com/docs/manual/c-ffi/). Actual signatures were checked against the pinned installed compiler, which requires `__deinit__` rather than the older documentation's `__del__` spelling.

@@ -1,5 +1,6 @@
 """Compile and run the real Mojo -> C -> RWKV binding, without HTTP or mock output."""
 import os
+import json
 from pathlib import Path
 import shutil
 import subprocess
@@ -82,6 +83,12 @@ def test_missing_model_fails_without_mock_generation(binding, tmp_path):
     assert result.returncode == 1, result.stderr[-4000:]
     assert 'Model load failed (native code -1)' in result.stderr
     assert not result.stdout.strip()
+
+
+def test_mojo_fixed_answer_format_generates_real_json(binding):
+    result = run(binding, 'answer')
+    assert result.returncode == 0, result.stderr[-4000:]
+    assert json.loads(bytes.fromhex(result.stdout.strip())) == {'answer': '56'}
 
 
 def test_session_cannot_be_copied_into_two_owners(binding, tmp_path):

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
@@ -30,6 +31,11 @@ struct Model {
     ~Model() { if (value) llama_model_free(value); }
 };
 using Owner = std::shared_ptr<Model>;
+constexpr char ANSWER_GRAMMAR[] = R"grammar(root ::= "{" space "\"answer\"" space ":" space string "}" space
+space ::= [ \t\n\r]{0,8}
+string ::= "\"" char{1,1600} "\"" space
+char ::= [^"\\\x00-\x1F] | "\\" (["\\/bfnrt] | "u" [0-9a-fA-F]{4})
+)grammar";
 struct Session {
     Owner model;
     llama_context * ctx = nullptr;
@@ -39,6 +45,7 @@ struct Session {
     std::atomic<bool> cancelled{false};
     std::mutex mutex;
     llama_token next = -1;
+    std::unique_ptr<llama_sampler, decltype(&llama_sampler_free)> grammar{nullptr, llama_sampler_free};
     ~Session() { if (ctx) llama_free(ctx); }
 };
 struct Batch {
@@ -71,10 +78,14 @@ void active(Session & s) {
     require(s.valid, WB_INVALID_STATE, "Session invalid; restore a verified checkpoint");
     require(!s.cancelled.load(), WB_CANCELLED, "Session cancelled");
 }
-void decode(Session & s, const std::vector<llama_token> & tokens) {
+void decode(Session & s, const std::vector<llama_token> & tokens, bool generated = false) {
     active(s);
     if (tokens.empty() || s.position + tokens.size() > llama_n_ctx(s.ctx))
         throw std::runtime_error("Empty input or session context exhausted");
+    if (generated && s.grammar) {
+        s.valid = false; s.ready = false;
+        llama_sampler_accept(s.grammar.get(), tokens.front());
+    }
     for (size_t start = 0; start < tokens.size(); start += 128) {
         int count = static_cast<int>(std::min<size_t>(128, tokens.size() - start));
         Batch owned(count);
@@ -97,11 +108,28 @@ void decode(Session & s, const std::vector<llama_token> & tokens) {
         s.valid = true;
         s.position += count;
     }
-    s.ready = true;
+    s.valid = false; s.ready = false;
     auto * vocab = llama_model_get_vocab(s.model->value);
     auto * logits = llama_get_logits_ith(s.ctx, -1);
     if (!logits) { s.ready = false; s.valid = false; throw std::runtime_error("Missing next-token logits"); }
-    s.next = static_cast<llama_token>(std::max_element(logits, logits + llama_vocab_n_tokens(vocab)) - logits);
+    const int count = llama_vocab_n_tokens(vocab);
+    if (s.grammar) {
+        // Grammar filters logits; greedy selection remains deterministic on this backend.
+        std::vector<llama_token_data> candidates(count);
+        for (int i = 0; i < count; ++i) candidates[i] = {i, logits[i], 0.0f};
+        llama_token_data_array view{candidates.data(), candidates.size(), -1, false};
+        llama_sampler_apply(s.grammar.get(), &view);
+        auto chosen = std::max_element(view.data, view.data + view.size,
+            [](const auto & a, const auto & b) { return a.logit < b.logit; });
+        if (chosen == view.data + view.size || !std::isfinite(chosen->logit)) {
+            s.valid = false; s.ready = false;
+            throw std::runtime_error("Grammar permits no finite next token");
+        }
+        s.next = chosen->id;
+    } else {
+        s.next = static_cast<llama_token>(std::max_element(logits, logits + count) - logits);
+    }
+    s.valid = true; s.ready = true;
 }
 }
 extern "C" {
@@ -156,6 +184,18 @@ int wb_session_cancel(void * handle) noexcept {
 int wb_session_reset_cancel(void * handle) noexcept {
     return checked([&] { auto & s = session(handle); std::lock_guard<std::mutex> lock(s.mutex); s.cancelled.store(false); });
 }
+int wb_session_answer_format(void * handle) noexcept {
+    return checked([&] {
+        auto & s = session(handle); std::lock_guard<std::mutex> lock(s.mutex);
+        active(s);
+        require(s.position == 0 && !s.ready, WB_INVALID_STATE, "Set answer format before the first prefill");
+        std::unique_ptr<llama_sampler, decltype(&llama_sampler_free)> grammar(
+            llama_sampler_init_grammar(llama_model_get_vocab(s.model->value), ANSWER_GRAMMAR, "root"),
+            llama_sampler_free);
+        if (!grammar) throw std::runtime_error("Cannot initialize answer grammar");
+        s.grammar = std::move(grammar);
+    });
+}
 int wb_tokenize(void * handle, const char * text, int bytes, int add_special, int parse_special,
                 int32_t * tokens, int capacity, int * needed) noexcept {
     return checked([&] {
@@ -174,6 +214,7 @@ int wb_prefill(void * handle, const char * text, int size) noexcept {
         std::lock_guard<std::mutex> lock(s.mutex);
         active(s);
         require(text && size >= 1 && size <= 65536, WB_INVALID_ARGUMENT, "Invalid prompt span");
+        require(!s.grammar || s.position == 0, WB_INVALID_STATE, "Answer-format sessions accept one initial prompt");
         auto * vocab = llama_model_get_vocab(s.model->value);
         int count = llama_tokenize(vocab, text, size, nullptr, 0, s.position == 0, true);
         if (count >= 0) throw std::runtime_error("Cannot size prompt tokens");
@@ -198,7 +239,7 @@ int wb_next(void * handle, char * output, int capacity, int * size) noexcept {
         if (llama_vocab_is_eog(vocab, token)) { ended = 1; return; }
         *size = llama_token_to_piece(vocab, token, output, capacity, 0, true);
         if (*size < 0) { *size = -*size; throw Failure(WB_BUFFER_TOO_SMALL, "Token piece exceeds output buffer"); }
-        decode(s, {token});
+        decode(s, {token}, true);
     });
     return result < 0 ? result : ended;
 }
@@ -206,7 +247,9 @@ int64_t wb_state_size(void * handle) noexcept {
     int64_t size = -1;
     checked([&] {
         auto & s = session(handle); std::lock_guard<std::mutex> lock(s.mutex);
-        active(s); size = 12 + llama_state_get_size(s.ctx);
+        active(s);
+        require(!s.grammar, WB_INVALID_STATE, "Grammar checkpoints require sampler-state support");
+        size = 12 + llama_state_get_size(s.ctx);
     });
     return size;
 }
@@ -214,6 +257,7 @@ int wb_state_get(void * handle, uint8_t * data, size_t size) noexcept {
     return checked([&] {
         auto & s = session(handle); std::lock_guard<std::mutex> lock(s.mutex);
         active(s);
+        require(!s.grammar, WB_INVALID_STATE, "Grammar checkpoints require sampler-state support");
         require(data && size == 12 + llama_state_get_size(s.ctx), WB_INVALID_ARGUMENT, "State export span must match exact size");
         std::memcpy(data, &s.position, 4);
         uint32_t ready = s.ready ? 1 : 0;
@@ -226,6 +270,7 @@ int wb_state_get(void * handle, uint8_t * data, size_t size) noexcept {
 int wb_state_set(void * handle, const uint8_t * data, size_t size) noexcept {
     return checked([&] {
         auto & s = session(handle); std::lock_guard<std::mutex> lock(s.mutex);
+        require(!s.grammar, WB_INVALID_STATE, "Grammar checkpoints require sampler-state support");
         require(data && size >= 12 && size <= 512 * 1024 * 1024, WB_INVALID_ARGUMENT, "Invalid state span");
         int32_t position, next; uint32_t ready;
         std::memcpy(&position, data, 4); std::memcpy(&ready, data + 4, 4);

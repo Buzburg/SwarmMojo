@@ -23,10 +23,10 @@ The existing four-test workshop checkpoint suite also passed against this adapte
 
 The final installed-artifact profile passed **3/3 groups**: 273 offline regressions, 46 compiled broker/MCP tests plus 13 subtests, and all three actual native-adapter tests. No required group in that run was skipped.
 
-## Installed workshop artifact
+## ABI-hardening artifact (superseded)
 
 The adapter was built against the pinned public runtime headers and verified installed library hashes. The builder also rejects modified public include trees and mismatched runtime patch identity, and records the new public header hash. Rebuilding with these checks reproduced the installed library bytes.
 
-Installed workshop library: `build/libomarchy_state.so`, SHA-256 `123f510d4bbcf85262a0ab378f1fe1393c10b194ff7cf9200c75d6eb440a08e2`. Its adjacent manifest records source/header/runtime hashes. The prior library and manifest are preserved in `deployment/backups/native-adapter-before-abi-hardening` in the parent workspace. Replacement used new files and atomic rename, preserving existing mappings rather than truncating a loaded library.
+Library at this increment: `build/libomarchy_state.so`, SHA-256 `123f510d4bbcf85262a0ab378f1fe1393c10b194ff7cf9200c75d6eb440a08e2`. Its adjacent manifest records source/header/runtime hashes. The prior library and manifest are preserved in `deployment/backups/native-adapter-before-abi-hardening` in the parent workspace. Replacement used new files and atomic rename, preserving existing mappings rather than truncating a loaded library. The later [native answer-format increment](native-answer-verification.md) records the current artifact and retains this one for rollback.
 
 The model service and native broker binary were not replaced. The subsequent [compiled Mojo binding](mojo-model-binding-verification.md) now reaches the C adapter. Memory-grounded native conversation, runtime-derived backend/session status, sequenced streaming and durable turn recovery remain open under T09/T10. No 7.2B loading or training occurred.

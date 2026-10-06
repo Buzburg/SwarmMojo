@@ -22,6 +22,7 @@ def load():
         'wb_model_open': ([c.c_char_p, c.c_int], c.c_void_p), 'wb_model_close': ([c.c_void_p], None),
         'wb_session_new': ([c.c_void_p, c.c_uint32, c.c_int], c.c_void_p), 'wb_session_close': ([c.c_void_p], None),
         'wb_session_cancel': ([c.c_void_p], c.c_int), 'wb_session_reset_cancel': ([c.c_void_p], c.c_int),
+        'wb_session_answer_format': ([c.c_void_p], c.c_int),
         'wb_tokenize': ([c.c_void_p, c.c_char_p, c.c_int, c.c_int, c.c_int, c.POINTER(c.c_int32), c.c_int, c.POINTER(c.c_int)], c.c_int),
         'wb_prefill': ([c.c_void_p, c.c_char_p, c.c_int], c.c_int),
         'wb_next': ([c.c_void_p, c.c_void_p, c.c_int, c.POINTER(c.c_int)], c.c_int),
@@ -62,6 +63,7 @@ def test_null_arguments_and_missing_model_do_not_crash(tmp_path):
     assert lib.wb_state_set(None, None, 0) == -2
     assert lib.wb_session_cancel(None) == -2
     assert lib.wb_session_reset_cancel(None) == -2
+    assert lib.wb_session_answer_format(None) == -2
     assert lib.wb_tokenize(None, b'x', 1, 0, 0, None, 0, c.byref(size)) == -2
     lib.wb_model_close(None)
     lib.wb_session_close(None)

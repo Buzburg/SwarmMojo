@@ -51,7 +51,7 @@ def main() -> None:
         checks.append(('Live model and ROMS', ['/usr/local/bin/goose', '--status']))
     if args.native_adapter:
         checks.append(('Native model ABI', [sys.executable, '-m', 'pytest', 'tests/test_native_adapter.py',
-                                          'tests/test_mojo_model_binding.py', '-q', '--tb=short']))
+                                          'tests/test_native_answer.py', 'tests/test_mojo_model_binding.py', '-q', '--tb=short']))
     if args.containers:
         checks.append(('Rootless worker lifecycle', [sys.executable, '-m', 'pytest',
                        'tests/test_container_lifecycle.py', '-q', '--tb=short']))

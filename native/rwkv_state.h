@@ -30,6 +30,11 @@ void * wb_session_new(void * model, uint32_t context, int threads) WB_NOEXCEPT;
 void wb_session_close(void * session) WB_NOEXCEPT;
 int wb_session_cancel(void * session) WB_NOEXCEPT;
 int wb_session_reset_cancel(void * session) WB_NOEXCEPT;
+/* Enable the fixed {"answer": string} JSON grammar before the first prefill.
+ * These sessions accept one initial prompt. Sampling remains greedy.
+ * Grammar-bearing checkpoints are not yet supported:
+ * state_size/get/set reject these sessions rather than omitting sampler state. */
+int wb_session_answer_format(void * session) WB_NOEXCEPT;
 int wb_tokenize(void * model, const char * text, int bytes, int add_special,
                 int parse_special, int32_t * tokens, int capacity, int * needed) WB_NOEXCEPT;
 int wb_prefill(void * session, const char * text, int bytes) WB_NOEXCEPT;

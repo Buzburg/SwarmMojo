@@ -65,6 +65,11 @@ struct RWKV7Session(Movable):
         check_native(external_call["wb_prefill", c_int](
             self._handle, text.as_c_string_span(), c_int(size)), "Prefill")
 
+    def answer_format(mut self) raises:
+        """Enable the fixed JSON answer grammar before prefill; state export is unsupported."""
+        self.require_open()
+        check_native(external_call["wb_session_answer_format", c_int](self._handle), "Answer format")
+
     def next_piece(mut self) raises -> Tuple[Bool, List[UInt8]]:
         """Return (end-of-generation, bytes); no string decoding or hidden token loop."""
         self.require_open()

@@ -26,6 +26,12 @@ int main(int argc, char ** argv) {
     if (session || wb_error_code() != WB_OUT_OF_MEMORY) return 5;
     session = wb_session_new(model, 128, 1);
     if (!session) return 6;
+    fail_allocation = true;
+    int grammar = wb_session_answer_format(session);
+    fail_allocation = false;
+    if (grammar != WB_OUT_OF_MEMORY) return 7;
+    if (wb_state_size(session) < 12) return 8; // Failed setup left the plain session intact.
+    if (wb_session_answer_format(session) != WB_OK) return 9;
     wb_session_close(session);
     wb_model_close(model);
     return 0;

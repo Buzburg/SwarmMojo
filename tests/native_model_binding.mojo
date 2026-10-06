@@ -34,6 +34,9 @@ def main() raises:
     var prompt = String("User: What is 7 times 8?\n\nAssistant:")
     if mode == "unicode":
         prompt = "User: café 中文 🙂\n\nAssistant:"
+    if mode == "answer":
+        session.answer_format()
+        prompt = "User: Reply as JSON with one string field named answer. What is 7 times 8? Give only the number in answer.\n\nAssistant:"
     session.prefill(prompt)
     if mode == "cancel":
         session.cancel()
@@ -42,14 +45,19 @@ def main() raises:
     if mode == "reset":
         session.cancel()
         session.reset_cancel()
-    elif mode != "generate" and mode != "unicode":
+    elif mode != "generate" and mode != "unicode" and mode != "answer":
         raise Error("Unknown probe mode")
     var digits = String("0123456789abcdef").as_bytes()
-    for _ in range(12):
+    var limit = 512 if mode == "answer" else 12
+    var ended = False
+    for _ in range(limit):
         var result = session.next_piece()
         if result[0]:
+            ended = True
             break
         for byte in result[1]:
             print(chr(Int(digits[Int(byte) >> 4])), end="")
             print(chr(Int(digits[Int(byte) & 15])), end="")
     print("")
+    if mode == "answer" and not ended:
+        raise Error("Native answer did not finish within its token budget")
