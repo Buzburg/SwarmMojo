@@ -33,6 +33,7 @@ def main() -> None:
     parser.add_argument('--sandbox', action='store_true', help='Require native and combined confinement checks')
     parser.add_argument('--staging', action='store_true', help='Require real fixture patch staging and validation')
     parser.add_argument('--drafts', action='store_true', help='Require a real model draft through validation, apply and rollback')
+    parser.add_argument('--native-adapter', action='store_true', help='Require actual C ABI model, state and cancellation checks')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     prefix = Path(os.getenv('ROMS_PYTHON_PREFIX', str(root / '.pixi/envs/default')))
@@ -47,6 +48,8 @@ def main() -> None:
     ]
     if not args.offline:
         checks.append(('Live model and ROMS', ['/usr/local/bin/goose', '--status']))
+    if args.native_adapter:
+        checks.append(('Native model ABI', [sys.executable, '-m', 'pytest', 'tests/test_native_adapter.py', '-q', '--tb=short']))
     if args.containers:
         checks.append(('Rootless worker lifecycle', [sys.executable, '-m', 'pytest',
                        'tests/test_container_lifecycle.py', '-q', '--tb=short']))
@@ -71,6 +74,10 @@ def main() -> None:
         try:
             if name == 'Compiled native broker' and not binary.is_file():
                 raise FileNotFoundError(f'Required current-build artifact missing: {binary}')
+            if name == 'Native model ABI':
+                for variable in ('OMARCHY_NATIVE_ADAPTER', 'OMARCHY_STATE_MODEL'):
+                    if not env.get(variable) or not Path(env[variable]).is_file():
+                        raise ValueError(f'{variable} must identify the actual artifact; skipped tests cannot certify the ABI')
             if name == 'Rootless worker lifecycle' and not env.get('ROMS_LIVE_CONTAINER_IMAGE'):
                 raise ValueError('ROMS_LIVE_CONTAINER_IMAGE must identify a reviewed local image; skipped tests cannot certify execution')
             if name == 'Model-assisted project workflow' and not env.get('ROMS_LIVE_DRAFT'):
