@@ -4,7 +4,11 @@
 {%- elif message['role'] == 'user' -%}
 {{- 'User: ' + message['content'] + '\n\n' -}}
 {%- elif message['role'] == 'assistant' -%}
+{%- if message['reasoning_content'] is defined and message['reasoning_content'] -%}
+{{- 'Assistant: <think>' + message['reasoning_content'] + '</think>' + message['content'] + '\n\n' -}}
+{%- else -%}
 {{- 'Assistant: ' + message['content'] + '\n\n' -}}
+{%- endif -%}
 {%- endif -%}
 {%- endfor -%}
 {%- if add_generation_prompt -%}

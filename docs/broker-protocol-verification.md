@@ -16,6 +16,8 @@ The complete installed profile passed **9/9 required groups**: 212 Python regres
 
 An additional installed `scripts/check_wsl_build.py` run reached the real model through the new broker envelope and preserved its request ID, but failed its exact-answer assertion: the model returned an empty `<think>` block before the correct `URGENT` word. The nine-group result above remains a passed profile; this extra generation-format check is a separate failure, not counted as passing or hidden by stripping tags in the test. Prompt/template handling and broader model quality still require follow-up under T08/T11. The protocol increment does not alter model text.
 
+Follow-up: [completed-response decoding](goose-response-verification.md) subsequently resolved this formatting check while preserving original model output. The unchanged installed cutover assertion now passes. This later fix does not change the recorded outcome of the earlier failed run.
+
 ## Remaining protocol work
 
 This increment completes strict parsing/framing and the structured envelope. Request IDs correlate replies but do not yet bind mutating broker calls to durable request/result records. Broker-forwarded generation/validation does not yet propagate socket loss as cancellation, and serial action handling can delay queued callers. Those R02 requirements remain open; the entire protocol milestone is not claimed complete. Direct-worker cancellation and task-level promotion recovery retain their separately verified behavior.

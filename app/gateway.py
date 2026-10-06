@@ -38,6 +38,7 @@ from app.prompt_builder import format_context_for_local_llm
 from app.tool_rag import format_tool_search_results
 from app.trajectory_recorder import start_session, record_step, finish_session
 from app.project_model import draft_completion
+from app.goose_response import decode_completed_response
 
 app = Starlette(debug=False)
 
@@ -218,7 +219,7 @@ async def chat_completions(request: Request) -> Response:
                     target_url, json=body, headers=upstream_headers()
                 )
                 if upstream_resp.status_code == 200:
-                    resp_data = upstream_resp.json()
+                    resp_data = decode_completed_response(upstream_resp.json())
                     finish_session(session_id=session_id, success=True, final_result="Completed successfully")
                     return JSONResponse(resp_data, headers={"X-ROMS-Cache": "DISABLED", "X-ROMS-Session": session_id})
 
