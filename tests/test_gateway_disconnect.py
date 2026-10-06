@@ -31,11 +31,14 @@ async def serving(app):
         listener.close()
 
 
-@pytest.mark.parametrize('mode', ['nonstream', 'stream', 'draft'])
+@pytest.mark.parametrize('mode', ['nonstream', 'stream', 'draft', 'scoped'])
 def test_client_disconnect_closes_actual_upstream_socket_and_allows_next_request(monkeypatch, mode):
     monkeypatch.setenv('ROMS_GATEWAY_API_KEY', 'fixture-key')
     monkeypatch.setenv('ROMS_UPSTREAM_API_KEY', 'fixture-upstream-key')
-    monkeypatch.setattr(gateway, 'hybrid_search', lambda **_: [])
+    def retrieve(**kwargs):
+        assert mode != 'scoped', 'Scoped context must not trigger unscoped retrieval'
+        return []
+    monkeypatch.setattr(gateway, 'hybrid_search', retrieve)
     monkeypatch.setattr(gateway, 'start_session', lambda **_: None)
     finished = []
     monkeypatch.setattr(gateway, 'finish_session', lambda **record: finished.append(record))
@@ -51,6 +54,7 @@ def test_client_disconnect_closes_actual_upstream_socket_and_allows_next_request
                 path = headers.split(b' ')[1].decode()
                 length = next(int(line.split(b':', 1)[1]) for line in headers.split(b'\r\n') if line.lower().startswith(b'content-length:'))
                 body = json.loads(await reader.readexactly(length))
+                assert 'roms_retrieval' not in body, 'Gateway-only options leaked upstream'
                 if path == '/apply-template':
                     response = {'prompt': 'fixture'}
                 elif path == '/tokenize':
@@ -86,6 +90,8 @@ def test_client_disconnect_closes_actual_upstream_socket_and_allows_next_request
                 payload = ({'instruction': 'Set VALUE to 2', 'files': {'module.py': 'VALUE = 1\n'}} if mode == 'draft' else
                            {'messages': [{'role': 'user', 'content': 'wait until cancelled'}], 'stream': mode == 'stream'})
                 path = '/v1/project/draft' if mode == 'draft' else '/v1/chat/completions'
+                if mode == 'scoped':
+                    payload['roms_retrieval'] = 'disabled'
                 encoded = json.dumps(payload).encode()
                 writer.write(f'POST {path} HTTP/1.1\r\nHost: localhost\r\nAuthorization: Bearer fixture-key\r\nContent-Type: application/json\r\nContent-Length: {len(encoded)}\r\n\r\n'.encode() + encoded)
                 await writer.drain()
@@ -100,7 +106,8 @@ def test_client_disconnect_closes_actual_upstream_socket_and_allows_next_request
                 async with httpx.AsyncClient(trust_env=False, timeout=3) as client:
                     response = await client.post(f'http://127.0.0.1:{port}/v1/chat/completions',
                         headers={'Authorization': 'Bearer fixture-key'},
-                        json={'messages': [{'role': 'user', 'content': 'quick'}]})
+                        json={'messages': [{'role': 'user', 'content': 'quick'}],
+                              **({'roms_retrieval': 'disabled'} if mode == 'scoped' else {})})
                     assert response.status_code == 200, response.text
                     assert response.json()['choices'][0]['message']['content'] == 'ready'
                 if mode != 'draft':

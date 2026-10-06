@@ -45,9 +45,13 @@ async def dispatch(request: dict, frame: bytearray, legacy: bool) -> str:
         from app.broker_memory import search
         result = {'ok': True, 'result': await search(args)}
     elif action == 'chat':
-        response = await gateway('/v1/chat/completions', {'messages': [{'role': 'user', 'content': args['prompt']}],
-                                                        'max_tokens': 256, 'stream': False, 'temperature': 0.3})
-        result = {'ok': True, 'result': response['choices'][0]['message']['content']}
+        from app import broker_chat
+        messages, context = await broker_chat.prepare(args)
+        if context is not None and not context['records']:
+            result = {'ok': True, 'result': broker_chat.no_evidence(context)}
+        else:
+            response = await gateway('/v1/chat/completions', broker_chat.completion_body(messages, context))
+            result = {'ok': True, 'result': broker_chat.result(response, context)}
     elif action == 'task.validate':
         async def validate() -> str:
             return actions.encode_result(await worker_request(action, args), request_id)

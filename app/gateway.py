@@ -123,6 +123,9 @@ async def chat_completions(request: Request) -> Response:
     if type(max_tokens) is not int or not 1 <= max_tokens <= 1024:
         return JSONResponse({"error": "max_tokens must be between 1 and 1024"}, status_code=400)
     body["max_tokens"] = max_tokens
+    retrieval = body.pop('roms_retrieval', 'default')
+    if retrieval not in ('default', 'disabled'):
+        return JSONResponse({'error': 'roms_retrieval must be default or disabled'}, status_code=400)
     body.setdefault("model", os.getenv("ROMS_MODEL_ALIAS", "goose-2.9b"))
     session_id = str(uuid.uuid4())[:8]
 
@@ -134,7 +137,7 @@ async def chat_completions(request: Request) -> Response:
             break
 
     # Augment with knowledge, skills and tool descriptions
-    if last_user_query:
+    if last_user_query and retrieval == 'default':
         # A. Hybrid RAG
         rag_chunks = await run_in_threadpool(hybrid_search,
             query=last_user_query,

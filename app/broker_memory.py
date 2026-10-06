@@ -47,14 +47,21 @@ def parameters() -> StdioServerParameters:
                                  env=env, cwd=str(ROOT))
 
 
-def decode_result(response, args: dict) -> dict:
+def response_value(response, max_chars: int) -> dict:
     response = response.model_dump(by_alias=True)
     if response.get('isError') or len(response['content']) != 1 or response['content'][0]['type'] != 'text':
         raise ValueError('Memory service did not return one successful text result')
     raw = response['content'][0]['text']
-    if len(raw) > args.get('max_chars', 6000) or len(raw.encode()) > 48000:
+    if len(raw) > max_chars or len(raw.encode()) > 48000:
         raise protocol.ProtocolError('RESPONSE_TOO_LARGE', 'Memory response exceeds the requested bound')
     value = json.loads(raw, object_pairs_hook=unique_object)
+    if type(value) is not dict:
+        raise ValueError('Invalid memory response')
+    return value
+
+
+def decode_result(response, args: dict) -> dict:
+    value = response_value(response, args.get('max_chars', 6000))
     if type(value) is not dict or set(value) != {'memories', 'truncated'} or type(value['truncated']) is not bool:
         raise ValueError('Invalid memory result')
     records = value['memories']
@@ -71,26 +78,62 @@ def decode_result(response, args: dict) -> dict:
     return value
 
 
-async def lookup(args: dict) -> dict:
+def decode_context(response, args: dict) -> dict:
+    value = response_value(response, args['max_chars'])
+    fields = {'project_id', 'backend', 'selection', 'evidence_authority', 'pool_truncated',
+              'candidates', 'duplicates_removed', 'omitted', 'warning_available', 'warning_included', 'records'}
+    if (set(value) != fields or value['project_id'] != args['project_id'] or value['backend'] != 'python' or
+            value['selection'] != 'rank-utility-knapsack-v1' or value['evidence_authority'] != 'caller-supplied' or
+            any(type(value[key]) is not bool for key in ('pool_truncated', 'warning_available', 'warning_included')) or
+            any(type(value[key]) is not int or not 0 <= value[key] <= 20
+                for key in ('candidates', 'duplicates_removed', 'omitted')) or
+            type(value['records']) is not list or len(value['records']) > 20):
+        raise ValueError('Invalid project context envelope')
+    for row in value['records']:
+        if (type(row) is not dict or set(row) != {'id', 'summary', 'source_ref', 'revision', 'expires_at',
+                                                'outcome', 'role', 'retrieval_rank', 'verification'} or
+                any(not isinstance(row.get(key), str) for key in ('id', 'summary', 'source_ref', 'revision')) or
+                (row['expires_at'] is not None and not isinstance(row['expires_at'], str)) or
+                row.get('outcome') not in {'success', 'failure'} or
+                row.get('role') != ('warning' if row['outcome'] == 'failure' else 'lesson') or
+                type(row.get('retrieval_rank')) is not int or not 1 <= row['retrieval_rank'] <= 20 or
+                type(row.get('verification')) is not dict or
+                not isinstance(row['verification'].get('evidence_ref'), str) or
+                row['verification'].get('authority') != 'caller-supplied' or
+                type(row['verification'].get('exit_code')) is not int or
+                (row['verification']['exit_code'] == 0) != (row['outcome'] == 'success')):
+            raise ValueError('Invalid project context record')
+    if (value['warning_included'] != any(row['role'] == 'warning' for row in value['records']) or
+            (value['warning_included'] and not value['warning_available']) or
+            len(value['records']) + value['omitted'] + value['duplicates_removed'] != value['candidates']):
+        raise ValueError('Inconsistent project context selection')
+    return value
+
+
+async def lookup(args: dict, *, context: bool = False) -> dict:
+    tool_name = 'memory_prepare_context' if context else 'memory_recall'
     async with stdio_client(parameters()) as (read, write):
         async with ClientSession(read, write) as session:
             initialized = await session.initialize()
             if initialized.model_dump(by_alias=True)['serverInfo']['name'] != 'ROMS-Memory':
                 raise ValueError('Unexpected memory server')
             listing = (await session.list_tools()).model_dump(by_alias=True)
-            tools = [tool for tool in listing['tools'] if tool['name'] == 'memory_recall']
+            tools = [tool for tool in listing['tools'] if tool['name'] == tool_name]
             if len(tools) != 1 or listing.get('nextCursor'):
                 raise ValueError('Memory discovery is incomplete')
             schema = tools[0]['inputSchema']
             if schema.get('type') != 'object' or not {'project_id', 'query'} <= set(schema.get('required', [])):
                 raise ValueError('Incompatible memory schema')
-            response = await session.call_tool('memory_recall', args)
-    return decode_result(response, args)
+            response = await session.call_tool(tool_name, args)
+    return decode_context(response, args) if context else decode_result(response, args)
 
 
-async def search(args: dict) -> dict:
+async def search(args: dict, *, context: bool = False) -> dict:
     validate_args(args)
-    work = asyncio.create_task(lookup(args))
+    if context and (set(args) != {'project_id', 'query', 'max_chars', 'revision'} or
+                    not 1024 <= args['max_chars'] <= 12000):
+        raise ValueError('Invalid context lookup arguments')
+    work = asyncio.create_task(lookup(args, context=True) if context else lookup(args))
     try:
         try:
             async with asyncio.timeout(TIMEOUT):

@@ -44,7 +44,8 @@ def main() -> None:
         ('ROMS offline regressions', [sys.executable, '-m', 'pytest',
             *[f'tests/test_{name}.py' for name in suites], '-q', '--tb=short']),
         ('Compiled native broker', [sys.executable, '-m', 'pytest', 'tests/test_omarchy_broker.py',
-                                    'tests/test_broker_concurrency.py', 'tests/test_broker_memory.py', '-q', '--tb=short']),
+                                    'tests/test_broker_concurrency.py', 'tests/test_broker_memory.py',
+                                    'tests/test_broker_chat.py', '-q', '--tb=short']),
     ]
     if not args.offline:
         checks.append(('Live model and ROMS', ['/usr/local/bin/goose', '--status']))
@@ -68,6 +69,8 @@ def main() -> None:
         checks.append(('Model-assisted project workflow', [sys.executable, '-m', 'pytest',
                        'tests/test_project_assistant.py', 'tests/test_project_model.py', 'tests/test_rwkv_prompt.py',
                        'tests/test_gateway_cancellation_live.py', '-q', '--tb=short']))
+        checks.append(('Memory-grounded live chat', [sys.executable, '-m', 'pytest',
+                       'tests/test_broker_chat_live.py', '-q', '--tb=short']))
     failed = 0
     env = dict(os.environ, OMARCHY_BROKER_BINARY=str(binary))
     print('WSL test build. Tool execution, training and full desktop are not certified.')
@@ -81,7 +84,7 @@ def main() -> None:
                         raise ValueError(f'{variable} must identify the actual artifact; skipped tests cannot certify the ABI')
             if name == 'Rootless worker lifecycle' and not env.get('ROMS_LIVE_CONTAINER_IMAGE'):
                 raise ValueError('ROMS_LIVE_CONTAINER_IMAGE must identify a reviewed local image; skipped tests cannot certify execution')
-            if name == 'Model-assisted project workflow' and not env.get('ROMS_LIVE_DRAFT'):
+            if name in {'Model-assisted project workflow', 'Memory-grounded live chat'} and not env.get('ROMS_LIVE_DRAFT'):
                 raise ValueError('ROMS_LIVE_DRAFT must explicitly enable the live model check; a skipped test cannot certify drafting')
             if name in {'Native and combined sandbox', 'Staged patch validation', 'Project validation service', 'Model-assisted project workflow'}:
                 if not env.get('OMARCHY_NATIVE_WORKER_IMAGE'):

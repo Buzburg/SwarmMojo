@@ -59,9 +59,7 @@ def status_result(health: dict, worker_reachable: bool) -> dict:
             'knowledge_library': {'state': 'not_probed',
                                   'reason': 'Status does not test indexing; use --library for text files, repositories and folders'},
             'project_memory': {'state': 'not_probed',
-                               'reason': 'memory.search performs an actual scoped MCP lookup; status does not inspect lessons'},
-            'project_memory': {'state': 'not_probed',
-                               'reason': 'memory.search performs an actual scoped MCP lookup; status does not inspect lessons'},
+                               'reason': 'memory.search and project-scoped chat perform actual MCP lookups; status does not inspect lessons'},
             'project_workshop': {'state': 'available' if model_ready and gateway_ready and worker_reachable and os.getenv('ROMS_GATEWAY_API_KEY') else 'unavailable',
                                  'reason': 'Requires authenticated gateway, model and worker; enforcement probe, checks and operator approval still required'},
             'validation_worker': {'state': 'reachable' if worker_reachable else 'unavailable',
@@ -85,8 +83,8 @@ def validate_action(action: str, args: dict) -> None:
         from app.broker_memory import validate_args
         validate_args(args)
     elif action == 'chat':
-        if set(args) != {'prompt'} or not isinstance(args['prompt'], str) or not args['prompt'].strip():
-            raise ValueError('chat requires a text prompt')
+        from app.broker_chat import validate_args
+        validate_args(args)
     elif action in {'task.status', 'task.validate'}:
         if set(args) != {'task_id'} or not isinstance(args['task_id'], str) or not re.fullmatch(r'[a-f0-9]{32}', args['task_id']):
             raise ValueError('A valid task ID is required')
@@ -133,10 +131,14 @@ def handle(frame: bytearray) -> str:
             from app.broker_memory import search
             result = {'ok': True, 'result': asyncio.run(search(args))}
         elif action == "chat":
-            prompt = args.get("prompt")
-            response = gateway("/v1/chat/completions", {"messages": [{"role": "user", "content": prompt}],
-                               "max_tokens": 256, "stream": False, "temperature": 0.3})
-            result = {"ok": True, "result": response["choices"][0]["message"]["content"]}
+            import asyncio
+            from app import broker_chat
+            messages, context = asyncio.run(broker_chat.prepare(args))
+            if context is not None and not context['records']:
+                result = {'ok': True, 'result': broker_chat.no_evidence(context)}
+            else:
+                response = gateway("/v1/chat/completions", broker_chat.completion_body(messages, context))
+                result = {"ok": True, "result": broker_chat.result(response, context)}
         elif action == 'worker_status':
             result = worker_request('capabilities', timeout=45)
         elif action == 'worker_recovery':

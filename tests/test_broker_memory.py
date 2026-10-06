@@ -137,8 +137,8 @@ def test_timeout_and_cancellation_reap_real_child_without_changing_memory(databa
     assert contents(path) == before
 
 
-@pytest.mark.parametrize('cancel', [False, True])
-def test_native_broker_search_uses_real_mcp_service(database, tmp_path, cancel):
+@pytest.mark.parametrize('action,cancel', [('memory.search', False), ('memory.search', True), ('chat', True)])
+def test_native_broker_search_uses_real_mcp_service(database, tmp_path, action, cancel):
     path, ids, _ = database
     before = contents(path)
     runtime = tmp_path / 'runtime'
@@ -156,7 +156,8 @@ def test_native_broker_search_uses_real_mcp_service(database, tmp_path, cancel):
         with socket.socket(socket.AF_UNIX) as client:
             client.settimeout(25)
             client.connect(str(address))
-            client.sendall(json.dumps({'v': 1, 'id': 'memory-check', 'action': 'memory.search', 'args': ARGS}).encode() + b'\n')
+            args = ARGS if action == 'memory.search' else {'project_id': ARGS['project_id'], 'prompt': ARGS['query']}
+            client.sendall(json.dumps({'v': 1, 'id': 'memory-check', 'action': action, 'args': args}).encode() + b'\n')
             if cancel:
                 deadline = time.monotonic() + 5
                 while not (children := psutil.Process(process.pid).children()):
