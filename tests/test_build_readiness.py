@@ -1,10 +1,29 @@
 import json
 from pathlib import Path
 import subprocess
+import sys
 
 import pytest
 
 from scripts import verify_all
+
+
+def test_empty_artifact_directory_cannot_pass_offline_profile(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv('ROMS_PYTHON_PREFIX', str(tmp_path))
+    monkeypatch.delenv('OMARCHY_BROKER_BINARY', raising=False)
+    monkeypatch.setattr(sys, 'argv', ['verify_all.py', '--offline'])
+    commands = []
+    def passed_regressions(command, **kwargs):
+        commands.append(command)
+        return subprocess.CompletedProcess(command, 0, 'Fixture regression pass', '')
+    monkeypatch.setattr(verify_all.subprocess, 'run', passed_regressions)
+    with pytest.raises(SystemExit) as error:
+        verify_all.main()
+    assert error.value.code == 1
+    assert len(commands) == 1 and 'pytest' in commands[0]
+    output = capsys.readouterr().out
+    assert 'INCOMPLETE: Compiled native broker' in output
+    assert '1/2 required checks passed' in output
 
 
 def test_readiness_waits_for_both_services(monkeypatch):

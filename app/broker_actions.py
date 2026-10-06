@@ -28,6 +28,46 @@ def gateway(path: str, body: dict | None = None) -> dict:
         return json.load(response)
 
 
+def build_status() -> dict:
+    try:
+        health = gateway('/health')
+        if type(health) is not dict:
+            raise ValueError('Invalid gateway health response')
+    except (OSError, ValueError):
+        health = {}
+    model_ready = health.get('upstream_ready') is True
+    gateway_ready = health.get('status') == 'ready'
+    try:
+        worker = worker_request('ping', timeout=1)
+        worker_reachable = worker.get('ok') is True and worker.get('result') == 'pong'
+    except (OSError, ValueError):
+        worker_reachable = False
+    return {
+        'ok': True, 'transport': 'native-mojo-unix', 'profile': 'omarchy-wsl-test',
+        'rwkv7': 'ready' if model_ready else 'not_connected',
+        'roms': health.get('status') if health.get('status') in {'ready', 'degraded'} else 'unavailable',
+        'model': health.get('model') if isinstance(health.get('model'), str) else None,
+        # Retained compatibility fields refer only to arbitrary chat-triggered execution.
+        'sandbox': 'disabled', 'sandbox_scope': 'arbitrary_chat_execution', 'tool_execution': False,
+        'features': {
+            'chat': {'state': 'ready' if model_ready and gateway_ready else 'unavailable',
+                     'reason': 'Live gateway and model health' if model_ready and gateway_ready else 'Gateway or model is not ready'},
+            'knowledge_library': {'state': 'not_probed',
+                                  'reason': 'Status does not test indexing; use --library for text files, repositories and folders'},
+            'project_workshop': {'state': 'available' if model_ready and gateway_ready and worker_reachable and os.getenv('ROMS_GATEWAY_API_KEY') else 'unavailable',
+                                 'reason': 'Requires authenticated gateway, model and worker; enforcement probe, checks and operator approval still required'},
+            'validation_worker': {'state': 'reachable' if worker_reachable else 'unavailable',
+                                  'reason': 'Reachability only; worker_status runs an enforcement probe before validation'},
+            'arbitrary_execution': {'state': 'disabled', 'reason': 'Only registered project validation commands are exposed'},
+            'desktop_control': {'state': 'unavailable', 'reason': 'Hyprland and Quickshell adapters are not integrated'},
+            'recurrent_state': {'state': 'unavailable', 'reason': 'Real runtime checkpoint and independent fork are not integrated'},
+            'web_evidence': {'state': 'unavailable', 'reason': 'No search service is configured'},
+            'guest_delegation': {'state': 'unavailable', 'reason': 'Provider routing is not integrated'},
+            'training': {'state': 'unavailable', 'reason': 'A verified model training workflow is not integrated'},
+        },
+    }
+
+
 def handle(frame: bytearray) -> str:
     result: dict
     request_id = None
@@ -56,14 +96,7 @@ def handle(frame: bytearray) -> str:
         if action == "ping":
             result = {"ok": True, "result": "pong"}
         elif action in ("status", "rwkv_status"):
-            try:
-                health = gateway("/health")
-            except (OSError, ValueError):
-                health = {"upstream_ready": False, "status": "unavailable"}
-            result = {"ok": True, "transport": "native-mojo-unix",
-                      "rwkv7": "ready" if health.get("upstream_ready") else "not_connected",
-                      "roms": health.get("status"), "model": health.get("model"),
-                      "sandbox": "disabled", "tool_execution": False}
+            result = build_status()
         elif action == "mock":
             result = {"ok": True, "mock": True, "result": "Mock response; no model invoked"}
         elif action == "anchor":
@@ -72,12 +105,16 @@ def handle(frame: bytearray) -> str:
         elif action in ("sandbox_status", "landlock_probe"):
             abi = landlock_abi()
             result = {"ok": True, "sandbox": "disabled", "landlock_supported": abi >= 1,
-                      "abi_version": abi, "landlock_abi": abi, "dry_run_only": True}
+                      "abi_version": abi, "landlock_abi": abi, "dry_run_only": True,
+                      "scope": "kernel_abi_probe", "required_abi": 3, "required_abi_available": abi >= 3,
+                      "enforcement_verified": False, "enforcement_probe_action": "worker_status"}
         elif action == "telemetry":
-            result = {"ok": True, "type": "telemetry", "status": "unavailable"}
+            result = {"ok": True, "type": "telemetry", "status": "unavailable",
+                      "reason": "Runtime telemetry is not integrated"}
         elif action == "os_controller":
             result = {"ok": True, "controller": "unavailable", "hyprland_ipc": False,
-                      "quickshell_ipc": False, "fastpath_enabled": False}
+                      "quickshell_ipc": False, "fastpath_enabled": False,
+                      "reason": "Desktop adapters are not integrated; use the reviewed project workshop for file edits"}
         elif action == "chat":
             prompt = args.get("prompt")
             if set(args) != {"prompt"} or not isinstance(prompt, str) or not prompt.strip():

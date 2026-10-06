@@ -12,12 +12,14 @@ import unittest
 
 class NativeBrokerTests(unittest.TestCase):
     def setUp(self):
-        self.binary = os.environ.get('OMARCHY_BROKER_BINARY', '/tmp/omarchy-broker')
+        prefix = Path(os.getenv('ROMS_PYTHON_PREFIX', str(Path(__file__).resolve().parents[1] / '.pixi/envs/default')))
+        self.binary = os.environ.get('OMARCHY_BROKER_BINARY', str(prefix / 'bin/omarchy-broker'))
         self.assertTrue(Path(self.binary).is_file(), 'Build the native broker first')
         self.directory = tempfile.TemporaryDirectory(prefix='omarchy-')
         self.addCleanup(self.directory.cleanup)
         self.path = str(Path(self.directory.name) / 'broker.sock')
-        self.env = dict(os.environ, OMARCHY_BROKER_SOCKET=self.path, ROMS_GATEWAY_PORT='9')
+        self.env = dict(os.environ, OMARCHY_BROKER_SOCKET=self.path, ROMS_GATEWAY_PORT='9',
+                        OMARCHY_TASK_WORKER_SOCKET=str(Path(self.directory.name) / 'missing-worker.sock'))
         self.process = subprocess.Popen([self.binary], env=self.env,
                                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.addCleanup(self.stop)

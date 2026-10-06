@@ -1,97 +1,33 @@
-# Omarchy Mojo RWKV7 Harness: Deployment & Download Readiness Guide
+# Omarchy RWKV-7 build readiness
 
-**Status:** Historical prototype notes. The production-readiness and milestone-completion claims in this document were not supported by the review. Use `docs/wsl-test-build.md` for the current build and `native-sandbox-verification.md` for newly verified native enforcement. Transactions, broker execution integration and full desktop integration are unfinished; execution remains disabled.
-**Current target:** Custom Arch/Omarchy WSL test build on Ryzen 9 5980HX / 16 GB RAM, using supplied Goose 2.9B. The later 7.2B/new-computer deployment and fine-tuning remain separate work. The sections below describe the old prototype and must not be treated as current acceptance evidence.
+This is a custom Arch/Omarchy **WSL test build**, using the supplied Goose 2.9B model and ROMS. Ubuntu has been removed after a verified recovery export. This is not a completed native Omarchy desktop or a production-certified release. The 7.2B upgrade and fine-tuning are deferred to the new computer.
 
----
+## Working entry points
 
-## 1. What Has Been Built & Verified
+The workspace contains `Open Omarchy.cmd`, `Open Goose.cmd`, `Open Knowledge Library.cmd` and `Open Project Workshop.cmd`. The [operating guide](wsl-test-build.md) records installation paths and limits. `goose --status` checks the live gateway/model and worker reachability; `goose --worker-status` performs the actual combined confinement probe. A reachable worker is not an enforcement pass.
 
-### 1. Native Mojo IPC Broker (`app_mojo/omarchy_broker.mojo`)
-- Compiled Linux ELF binary: `.pixi/envs/default/bin/omarchy-broker`.
-- Listens on `/run/omarchy/broker.sock` or `$OMARCHY_BROKER_SOCKET`.
-- Enforces Linux `SO_PEERCRED` caller UID matching, umask 077, and directory pinning via `openat`/`procfs` to block symlink redirection.
-- Supports both **Protocol v0** (`PING`, `STATUS`, `MOCK`, `ANCHOR`) and **Protocol v1** structured JSON framing (`{"v":1,"action":"ping"}`, `{"v":1,"action":"status"}`, `{"v":1,"action":"anchor"}`, `{"v":1,"action":"sandbox_status"}`, `{"v":1,"action":"landlock_probe"}`, `{"v":1,"action":"rwkv_status"}`).
-- **Passed 21 real-process socket tests** in `tests/test_omarchy_broker.py`.
+| Area | Current evidence | Limit |
+|---|---|---|
+| Local inference and ROMS | Real Goose 2.9B chat, local-policy retrieval and cold-start checks | Broader generation quality remains unmeasured |
+| Knowledge library | [Actual embeddings, indexing, refresh and removal](source-intake-verification.md) | Supported text files only; no PDF/Office intake |
+| Native broker | Compiled-process socket/protocol tests; live gateway and worker routes | Serial requests; direct native model C adapter and MCP integration unfinished |
+| Confinement | [Actual Mojo Landlock plus rootless-container tests](native-sandbox-verification.md) | Registered Python validation commands only |
+| Editing | [Real model draft, validation, apply and rollback](project-assistant-verification.md) | Four selected files / 4 KiB; explicit operator approval |
+| Validation recovery | [Forced service death and recorded-worker cleanup](worker-recovery-verification.md) | Process-death evidence, not power-loss certification |
+| Recurrent state and fork | Unavailable | Prototype buffers are not real model state |
+| Desktop control, web evidence, guest delegation | Unavailable | Adapters/providers are not integrated |
+| Training and native image release | Unfinished | No trained checkpoint or tested custom boot image |
 
-### 2. Native Landlock Filesystem Sandbox (`app_mojo/staging_sandbox.mojo`)
-- Compiled Linux ELF binary: `.pixi/envs/default/bin/staging-sandbox`.
-- Superseded: the previous ABI-1/Python-only checks did not prove native enforcement or truncate protection. Those tests have been removed. The current implementation requires ABI 3+, pins the private stage and is exercised by `tests/test_native_sandbox.py`; see the linked current verification record.
+## Verification contract
 
-### 3. RWKV-7 Recurrent State Lifecycle Engine (`app_mojo/rwkv_engine.mojo`)
-- Compiled Linux ELF binary: `.pixi/envs/default/bin/rwkv-engine`.
-- Manages continuous in-memory recurrent state buffers ($S_t$).
-- Implements atomic disk serialization (`.tmp` write + POSIX rename) and sub-2ms cold restore.
-- Implements in-memory state forking (`clone_state` via `memcpy`) allowing speculative dry-run patch testing without state pollution.
-- Injects dynamic temporal anchoring (`[SYSTEM_ANCHOR] Year is 2026`) and anti-hallucination search envelopes.
+`scripts/verify_all.py` verifies a named test-build profile, not every item in the original PDF. Its base checks are offline ROMS regressions, the current compiled native broker and live model/ROMS readiness. `--offline` explicitly omits live readiness. `--containers`, `--sandbox`, `--staging` and `--drafts` add required groups; missing selected artifacts/prerequisites produce an incomplete result and nonzero exit.
 
-### 4. ROMS RAG & Local Memory Integration
-- Python MCP server, SQLite FTS5 rank fusion, OKF knowledge loader, and 8 project lesson memory tools.
-- **114 passed tests** across release safety, memory lifecycle, context packing, and retrieval quality.
+The installed nine-group profile uses all four flags and the pinned worker images recorded in the linked evidence. It passed with 142 offline tests, 22 native-broker tests, nine container tests, 13 confinement tests, 40 staging/promotion tests, 22 service/recovery tests and 28 project-workflow tests, plus live readiness and installed boundary checks. That evidence predates the additional status-contract tests; the new focused results are recorded in [readiness verification](readiness-verification.md).
 
----
+The verifier and native tests resolve an explicitly supplied executable or the configured environment's current build. They do not accept an unrelated `/tmp` binary. An empty-artifact regression proves that passing Python checks cannot make a missing native executable count as success.
 
-## 2. When You Wake Up: Ready-to-Run Next Steps
+`STATUS`, v1 `status` and `rwkv_status` share one feature inventory with reasons. Legacy `sandbox: disabled` and `tool_execution: false` refer to arbitrary chat execution, identified by `sandbox_scope`. The separate validation worker may be reachable while its enforcement remains unprobed. `landlock_probe` / `sandbox_status` report the kernel ABI only and explicitly set `enforcement_verified: false`; they never substitute for `worker_status`.
 
-### Step 1: Download RWKV-7 Model Weights
-Run the turnkey downloader script:
-```bash
-# In WSL or Linux from the ROMS folder:
-pixi run python scripts/download_rwkv7.py --model 7.2b-q8
-```
-*Options:*
-- `7.2b-q8` *(Recommended for Minisforum 128GB unified RAM)*: ~8.2 GB VRAM footprint, full FP16/Int8 precision, 60–85 tok/s.
-- `7.2b-q4`: ~4.5 GB VRAM footprint, 90–130 tok/s.
-- `2.9b`: ~1.6 GB VRAM footprint.
-- `1.5b`: ~850 MB VRAM footprint.
+## Completion requirements
 
-To build `librwkv.so` with native AVX2 acceleration:
-```bash
-pixi run python scripts/download_rwkv7.py --build-librwkv
-```
-
-### Step 2: Deploy to Omarchy / Arch Linux
-Run the turnkey Omarchy deployment installer:
-```bash
-bash scripts/setup_omarchy.sh
-```
-This automatically:
-1. Verifies and compiles `.pixi/envs/default/bin/omarchy-broker`.
-2. Creates `$XDG_RUNTIME_DIR/omarchy` with secure permissions (`0700`).
-3. Installs `~/.local/bin/omarchy-harness` CLI wrapper.
-4. Generates and registers `~/.config/systemd/user/omarchy-broker.service`.
-
-To activate the broker daemon as a resident systemd service on your desktop:
-```bash
-systemctl --user daemon-reload
-systemctl --user enable --now omarchy-broker
-systemctl --user status omarchy-broker
-```
-
-### Step 3: Test the CLI Gateway
-```bash
-# Basic health ping
-omarchy-harness PING
-
-# Structured status check
-omarchy-harness '{"v":1,"action":"status"}'
-
-# Query temporal anchor
-omarchy-harness '{"v":1,"action":"anchor"}'
-
-# Check Landlock sandbox status
-omarchy-harness '{"v":1,"action":"sandbox_status"}'
-```
-
----
-
-## 3. Verification Commands Reference
-
-```bash
-# Run the complete master verification suite (6/6 suites):
-pixi run verify-all
-
-# Run individual test suites:
-pixi run test-broker      # 21 native socket tests
-pixi run test-sandbox     # 4 Landlock and dryrun staging tests
-```
+The [original task list](../../tasks/todo.md) remains authoritative for the broader build. Missing state, desktop, web, delegation, packaging and evaluation work is not waived by passing the test-build profile. Earlier prototype performance projections and claims of working recurrent-state serialization have been removed from this guide because they were not supported by real runtime evidence. Use the supplied models and pinned runtime already installed; the old downloader/native-library instructions are not certified.

@@ -4,6 +4,8 @@
 
 The earlier milestone notes below are historical. The installed broker now handles real local chat through ROMS and Goose 2.9B, with a strict JSON v1 parser. It also supports `worker_status`, `task.status` and `task.validate`; task actions take exactly `{"task_id":"32 lowercase hex characters"}` in `args`. Validation is delegated to the private same-user service and never falls back to a host command. Apply/rollback stay in the explicit operator workflow. See [current worker architecture, limits and evidence](task-worker-verification.md). General chat-driven tool execution remains disabled.
 
+Current `STATUS`, `status` and `rwkv_status` responses include the same feature inventory and reasons, with live gateway/model health and bounded worker reachability. Legacy execution fields are explicitly scoped to arbitrary chat execution. Kernel ABI probing cannot certify enforcement; use `worker_status` for the actual test. See [readiness contract and evidence](readiness-verification.md). The old unavailable-model and no-systemd statements below describe the initial milestone only.
+
 ## Objective and scope
 Build a Linux x86-64 userspace broker on top of Omarchy/Arch, using the existing
 ROMS Mojo 1.1.0 toolchain. This is not a new kernel, bootable image, inference
