@@ -11,12 +11,14 @@ import time
 
 import pytest
 
-from app import patch_tasks, task_worker, task_worker_client, validation_policy
+from app import broker_requests, patch_tasks, task_worker, task_worker_client, validation_policy
 from test_patch_staging import project, change, live
 
 
 @pytest.fixture
 def worker(project, tmp_path, monkeypatch, request):
+    monkeypatch.setenv('ROMS_DATA_DIR', str(tmp_path))
+    monkeypatch.setattr(broker_requests, 'STORE', tmp_path / 'broker-requests')
     directory = tmp_path / 'endpoint'
     directory.mkdir(mode=0o700)
     endpoint = directory / 'worker.sock'
@@ -121,6 +123,21 @@ def test_real_validation_through_native_broker_keeps_no_new_privileges(worker, p
         assert result['ok'], result
         assert result['id'] == 'fixture' and result['result']['task']['state'] == 'validated'
         assert result['result']['capabilities']['available'] and not result['result']['capabilities']['apply']
+        assert raw_request(broker_socket, json.dumps(request, indent=1).replace('\n', '').encode() + b'\n') == result
+        request['args']['task_id'] = 'b' * 32
+        assert raw_request(broker_socket, json.dumps(request).encode() + b'\n')['error']['code'] == 'CONFLICT'
+        assert [entry['state'] for entry in patch_tasks.load_task(task['id'])[1]['history']].count('validating') == 1
+        process.kill()
+        process.communicate(timeout=10)
+        broker_socket = tmp_path / 'restarted-broker.sock'
+        process = subprocess.Popen([str(binary)], env=dict(os.environ, OMARCHY_BROKER_SOCKET=str(broker_socket)),
+                                   preexec_fn=restrict_broker, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        deadline = time.monotonic() + 5
+        while not broker_socket.exists():
+            assert process.poll() is None and time.monotonic() < deadline
+            time.sleep(0.02)
+        request['args']['task_id'] = task['id']
+        assert raw_request(broker_socket, json.dumps(request).encode() + b'\n') == result
         assert (project[0] / 'module.py').read_text() == 'VALUE = 1\n'
     finally:
         process.terminate()

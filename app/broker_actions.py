@@ -121,6 +121,9 @@ def handle(frame: bytearray) -> str:
         elif action in {'task.status', 'task.validate'}:
             if set(args) != {'task_id'} or not isinstance(args['task_id'], str) or not re.fullmatch(r'[a-f0-9]{32}', args['task_id']):
                 raise ValueError('A valid task ID is required')
+            if action == 'task.validate':
+                from app import broker_requests
+                return broker_requests.execute(request, lambda: encode_result(worker_request(action, args), request_id))
             result = worker_request(action, args)
     except protocol.ProtocolError as error:
         return protocol.encode(protocol.error_response(error.code, str(error), request_id))
@@ -130,6 +133,10 @@ def handle(frame: bytearray) -> str:
         result = {"ok": False, "error": "invalid_request"}
     except (OSError, urllib.error.URLError, KeyError, IndexError):
         result = {"ok": False, "error": "service_unavailable"}
+    return encode_result(result, request_id, legacy=legacy)
+
+
+def encode_result(result: dict, request_id: str | None, *, legacy: bool = False) -> str:
     if legacy:
         return protocol.encode(result)
     if not result['ok']:

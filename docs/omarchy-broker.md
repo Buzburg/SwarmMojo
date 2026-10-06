@@ -36,7 +36,17 @@ The socket directory must be private and owned by the service user. Native code 
 
 The installed system unit provides `/run/omarchy-broker` with private permissions and owns its lifecycle. Standalone callers must supply an existing private directory through `OMARCHY_BROKER_SOCKET`; the binary never removes an existing socket or another file. Normal service restarts rely on systemd's managed runtime directory, not unchecked stale-path deletion.
 
-The implementation remains serial. Read deadlines apply after acceptance, not time waiting in the listen queue. A long chat or validation delays later requests. Socket loss does not yet cancel broker-forwarded model generation or validation; the direct private worker already handles its own disconnected clients. Request IDs currently correlate responses, but do not yet provide a durable idempotency journal for mutating broker calls. These remaining R02 requirements must pass before the full protocol milestone is marked complete.
+The implementation remains serial. Read deadlines apply after acceptance, not time waiting in the listen queue. A long chat or validation delays later requests. Socket loss does not yet cancel broker-forwarded model generation or validation; the direct private worker already handles its own disconnected clients. These remaining R02 requirements must pass before the full protocol milestone is marked complete.
+
+## Durable validation requests
+
+`task.validate` reserves its request ID and canonical request digest in `ROMS_DATA_DIR/broker-requests` before contacting the worker. Completed replies, including worker rejection/failure replies, are persisted before transmission. A matching retry returns the exact saved reply; different arguments with an already-bound ID return `CONFLICT`. JSON whitespace and key order do not affect this binding. Read-only calls and ephemeral chat use IDs for correlation only.
+
+`REQUEST_UNCERTAIN` means an intent exists without a confirmed completed reply. This includes an in-progress request, a disconnected worker, or a broker killed between dispatch and recording the result. The broker never repeats that dispatch. Query `task.status` with the original task ID to inspect retained work; task cleanup/recovery remains the worker's responsibility. A saved success is historical evidence, not a fresh task-status query. There is no automatic intent reset, expiry or eviction. Pending intents currently require operator inspection; their original replies cannot always be reconstructed after a crash.
+
+The journal uses a private owned directory, descriptor-pinned paths, no-follow regular-file reads, a bounded cross-process lock, and atomic file replacement with file/directory synchronization. Bad ownership, links, malformed records and digest mismatches fail closed with `JOURNAL_UNAVAILABLE`; a held lock returns `JOURNAL_BUSY` after at most one second of lock waiting. After possible dispatch, journal failures instead report `REQUEST_UNCERTAIN`. Directory scans stop at the fixed inventory bound. Up to 1,000 request records are retained, each bounded to twice the response limit plus 4 KiB; leftover temporary files count toward capacity. `JOURNAL_FULL` blocks new IDs while existing records remain replayable. Deleting request records is not a supported cleanup operation because doing so could permit duplicate execution.
+
+See [replay verification](broker-replay-verification.md). Process-death tests exercise durable recovery; they do not certify physical power-loss behavior of the underlying storage.
 
 ## Build and evidence
 
