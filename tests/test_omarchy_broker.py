@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 import time
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 
 
 class NativeBrokerTests(unittest.TestCase):
@@ -42,7 +43,7 @@ class NativeBrokerTests(unittest.TestCase):
 
     def connect(self):
         client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        client.settimeout(5)
+        client.settimeout(8)
         client.connect(self.path)
         return client
 
@@ -50,6 +51,13 @@ class NativeBrokerTests(unittest.TestCase):
         with self.connect() as client:
             client.sendall(payload)
             return self.response(client)
+
+    def v1(self, action, args=None):
+        response = self.request((json.dumps({'v': 1, 'id': 'fixture', 'action': action, 'args': args or {}}) + '\n').encode())
+        self.assertEqual(response['v'], 1)
+        self.assertEqual(response['id'], 'fixture')
+        self.assertEqual(set(response), {'v', 'id', 'ok', 'result' if response['ok'] else 'error'})
+        return response
 
     def response(self, client):
         data = bytearray()
@@ -73,80 +81,92 @@ class NativeBrokerTests(unittest.TestCase):
         self.assertFalse(result['tool_execution'])
 
     def test_mock_is_explicit(self):
-        self.assertEqual(self.request(b'MOCK\n'),
-                         {'ok': True, 'mock': True, 'result': 'Mock response; no model invoked'})
+        self.assertEqual(self.v1('mock')['result'],
+                         {'mock': True, 'result': 'Mock response; no model invoked'})
 
     def test_anchor_response(self):
-        result = self.request(b'ANCHOR\n')
-        self.assertTrue(result['ok'])
+        result = self.v1('anchor')['result']
         self.assertIn('[SYSTEM_ANCHOR]', result['anchor'])
         self.assertIn('2026', result['anchor'])
 
     def test_protocol_v1_structured_requests(self):
-        self.assertEqual(self.request(b'{"v":1,"action":"ping"}\n'),
-                         {'ok': True, 'v': 1, 'result': 'pong'})
+        self.assertEqual(self.v1('ping'),
+                         {'ok': True, 'v': 1, 'id': 'fixture', 'result': 'pong'})
 
-        status = self.request(b'{"v":1,"action":"status"}\n')
-        self.assertTrue(status['ok'])
-        self.assertEqual(status['v'], 1)
+        status = self.v1('status')['result']
         self.assertEqual(status['transport'], 'native-mojo-unix')
         self.assertEqual(status['rwkv7'], 'not_connected')
         self.assertEqual(status['sandbox'], 'disabled')
 
-        mock = self.request(b'{"v":1,"action":"mock"}\n')
-        self.assertEqual(mock, {'ok': True, 'v': 1, 'mock': True, 'result': 'Mock response; no model invoked'})
+        mock = self.v1('mock')['result']
+        self.assertEqual(mock, {'mock': True, 'result': 'Mock response; no model invoked'})
 
-        anchor = self.request(b'{"v":1,"action":"anchor"}\n')
-        self.assertTrue(anchor['ok'])
-        self.assertEqual(anchor['v'], 1)
+        anchor = self.v1('anchor')['result']
         self.assertIn('2026', anchor['anchor'])
 
-        sandbox = self.request(b'{"v":1,"action":"sandbox_status"}\n')
-        self.assertTrue(sandbox['ok'])
-        self.assertEqual(sandbox['v'], 1)
+        sandbox = self.v1('sandbox_status')['result']
         self.assertEqual(sandbox['sandbox'], 'disabled')
         from app.broker_actions import landlock_abi
         self.assertEqual(sandbox['landlock_abi'], landlock_abi())
         self.assertTrue(sandbox['dry_run_only'])
 
-        landlock = self.request(b'{"v":1,"action":"landlock_probe"}\n')
-        self.assertTrue(landlock['ok'])
-        self.assertEqual(landlock['v'], 1)
+        landlock = self.v1('landlock_probe')['result']
         self.assertEqual(landlock['landlock_supported'], landlock_abi() >= 1)
         self.assertEqual(landlock['abi_version'], landlock_abi())
 
-        rwkv = self.request(b'{"v":1,"action":"rwkv_status"}\n')
-        self.assertTrue(rwkv['ok'])
-        self.assertEqual(rwkv['v'], 1)
+        rwkv = self.v1('rwkv_status')['result']
         self.assertEqual(rwkv['rwkv7'], 'not_connected')
         self.assertFalse(rwkv['tool_execution'])
 
-        telemetry = self.request(b'{"v":1,"action":"telemetry"}\n')
-        self.assertTrue(telemetry['ok'])
-        self.assertEqual(telemetry['v'], 1)
+        telemetry = self.v1('telemetry')['result']
         self.assertEqual(telemetry['type'], 'telemetry')
         self.assertEqual(telemetry['status'], 'unavailable')
 
-        os_ctrl = self.request(b'{"v":1,"action":"os_controller"}\n')
-        self.assertTrue(os_ctrl['ok'])
-        self.assertEqual(os_ctrl['v'], 1)
+        os_ctrl = self.v1('os_controller')['result']
         self.assertEqual(os_ctrl['controller'], 'unavailable')
         self.assertFalse(os_ctrl['hyprland_ipc'])
         self.assertFalse(os_ctrl['quickshell_ipc'])
         self.assertFalse(os_ctrl['fastpath_enabled'])
 
-        unknown_v1 = self.request(b'{"v":1,"action":"nonexistent"}\n')
-        self.assertEqual(unknown_v1, {'ok': False, 'v': 1, 'error': 'unsupported_v1_action'})
+        unknown_v1 = self.v1('nonexistent')
+        self.assertFalse(unknown_v1['ok'])
+        self.assertEqual(unknown_v1['error']['code'], 'NOT_IMPLEMENTED')
 
     def test_json_whitespace_and_key_order(self):
-        for payload in ({'v': 1, 'action': 'ping'}, {'action': 'ping', 'v': 1}):
+        for payload in ({'v': 1, 'id': 'fixture', 'action': 'ping', 'args': {}},
+                        {'args': {}, 'action': 'ping', 'id': 'fixture', 'v': 1}):
             self.assertEqual(self.request((json.dumps(payload) + '\n').encode())['result'], 'pong')
+
+    def test_strict_contract_over_real_socket(self):
+        for payload in (b'{"v":1,"v":1,"id":"x","action":"ping","args":{}}',
+                        b'{"v":true,"id":"x","action":"ping","args":{}}',
+                        b'{"v":1,"id":"x","action":"ping","args":{},"extra":0}',
+                        b'{"v":1,"id":"x","action":"chat","args":{"prompt":"\xff"}}'):
+            with self.subTest(payload=payload):
+                response = self.request(payload + b'\n')
+                self.assertFalse(response['ok'])
+                self.assertEqual(set(response['error']), {'code', 'message'})
+        nested = '[' * 16 + '0' + ']' * 16
+        raw = ('{"v":1,"id":"x","action":"state.save","args":{"nested":' + nested + '}}\n').encode()
+        self.assertEqual(self.request(raw)['error']['code'], 'INVALID_REQUEST')
+        self.assertEqual(self.v1('state.save')['error']['code'], 'NOT_IMPLEMENTED')
+        self.assertEqual(self.v1('ping')['result'], 'pong')
+
+    def test_concurrent_callers_keep_their_response_ids(self):
+        def call(number):
+            payload = {'v': 1, 'id': str(number), 'action': 'ping', 'args': {}}
+            response = self.request((json.dumps(payload) + '\n').encode())
+            return response['id'], response['result']
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            self.assertEqual(list(pool.map(call, range(16))), [(str(i), 'pong') for i in range(16)])
 
     def test_unknown_and_non_ascii_commands_are_rejected(self):
         for payload in (b'RUN rm -rf /\n', b'\xff\n', b'\n', b'PING\x00\n'):
             with self.subTest(payload=payload):
-                self.assertEqual(self.request(payload),
-                                 {'ok': False, 'error': 'unsupported_command'})
+                response = self.request(payload)
+                self.assertFalse(response['ok'])
+                self.assertEqual(response['error']['code'], 'INVALID_REQUEST')
+                self.assertIsNone(response['id'])
 
     def test_fragmented_command(self):
         with self.connect() as client:
@@ -156,18 +176,18 @@ class NativeBrokerTests(unittest.TestCase):
             self.assertEqual(self.response(client)['result'], 'pong')
 
     def test_oversized_and_pipelined_frames(self):
-        self.assertEqual(self.request(b'A' * 1025),
-                         {'ok': False, 'error': 'request_too_large'})
-        self.assertEqual(self.request(b'PING\nSTATUS\n'),
-                         {'ok': False, 'error': 'multiple_frames'})
+        self.assertEqual(self.request(b'A' * 65537)['error']['code'], 'REQUEST_TOO_LARGE')
+        self.assertEqual(self.request(b'PING\nSTATUS\n')['error']['code'], 'MULTIPLE_FRAMES')
 
     def test_incomplete_and_idle_clients_do_not_block_forever(self):
         with self.connect() as client:
             client.sendall(b'PI')
             client.shutdown(socket.SHUT_WR)
-            self.assertEqual(self.response(client)['error'], 'incomplete_request')
+            self.assertEqual(self.response(client)['error']['code'], 'INCOMPLETE_REQUEST')
         with self.connect() as client:
-            self.assertEqual(self.response(client)['error'], 'request_timeout')
+            started = time.monotonic()
+            self.assertEqual(self.response(client)['error']['code'], 'REQUEST_TIMEOUT')
+            self.assertGreaterEqual(time.monotonic() - started, 4.8)
         self.assertEqual(self.request(b'PING\n')['result'], 'pong')
 
     def test_disconnect_does_not_kill_broker(self):
@@ -193,10 +213,10 @@ class NativeBrokerTests(unittest.TestCase):
         self.assertEqual(obstacle.read_text(), 'keep me')
 
     def test_maximum_frame_boundary(self):
-        self.assertEqual(self.request(b'A' * 1024 + b'\n'),
-                         {'ok': False, 'error': 'unsupported_command'})
-        self.assertEqual(self.request(b'A' * 1025 + b'\n'),
-                         {'ok': False, 'error': 'request_too_large'})
+        payload = json.dumps({'v': 1, 'id': 'boundary', 'action': 'ping', 'args': {}}).encode()
+        payload += b' ' * (65536 - len(payload))
+        self.assertEqual(self.request(payload + b'\n')['result'], 'pong')
+        self.assertEqual(self.request(payload + b' \n')['error']['code'], 'REQUEST_TOO_LARGE')
 
     def test_missing_or_relative_socket_path_is_rejected(self):
         for value in ('', 'relative.sock'):

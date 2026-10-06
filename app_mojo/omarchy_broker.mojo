@@ -9,7 +9,21 @@ from std.memory import Pointer
 comptime AF_UNIX = 1
 comptime SOCK_STREAM_FLAGS = 1 | 0x800 | 0x80000  # NONBLOCK | CLOEXEC
 comptime MSG_NOSIGNAL = 0x4000
-comptime MAX_FRAME = 1024
+comptime MAX_FRAME = 65536
+
+
+def monotonic_milliseconds() raises -> Int:
+    var stamp = List[c_long]()
+    stamp.append(0)
+    stamp.append(0)
+    if external_call["clock_gettime", c_int](c_int(1), stamp.unsafe_ptr()) != 0:
+        raise Error("Cannot read monotonic clock")
+    return Int(stamp[0]) * 1000 + Int(stamp[1]) // 1000000
+
+
+def transport_error(code: String, message: String) raises -> String:
+    var protocol = Python.import_module("app.broker_protocol")
+    return String(protocol.encode(protocol.error_response(code, message)))
 
 
 def retryable_error() -> Bool:
@@ -77,22 +91,23 @@ def receive_request(fd: c_int) raises -> String:
     for _ in range(MAX_FRAME + 1):
         buffer.append(0)
     var used = 0
-    for _ in range(100):
+    var deadline = monotonic_milliseconds() + 5000
+    while monotonic_milliseconds() < deadline:
         var n = external_call["recv", c_long](
             fd, buffer.unsafe_ptr().unsafe_offset(used),
             UInt(MAX_FRAME + 1 - used), c_int(0))
         if n == 0:
-            return '{"ok":false,"error":"incomplete_request"}\n'
+            return transport_error("INCOMPLETE_REQUEST", "Connection closed before a complete frame")
         if n < 0:
             if not retryable_error():
-                return '{"ok":false,"error":"connection_error"}\n'
+                return transport_error("CONNECTION_ERROR", "Could not read the request frame")
             _ = external_call["usleep", c_int](c_uint(20000))
             continue
         used += Int(n)
         for i in range(used):
             if buffer[i] == 10:
                 if i != used - 1:
-                    return '{"ok":false,"error":"multiple_frames"}\n'
+                    return transport_error("MULTIPLE_FRAMES", "Only one frame is accepted per connection")
                 var builtins = Python.import_module("builtins")
                 var actions = Python.import_module("app.broker_actions")
                 var frame = builtins.bytearray()
@@ -100,8 +115,8 @@ def receive_request(fd: c_int) raises -> String:
                     _ = frame.append(Int(buffer[j]))
                 return String(actions.handle(frame))
         if used > MAX_FRAME:
-            return '{"ok":false,"error":"request_too_large"}\n'
-    return '{"ok":false,"error":"request_timeout"}\n'
+            return transport_error("REQUEST_TOO_LARGE", "Request exceeds the 65536-byte frame limit")
+    return transport_error("REQUEST_TIMEOUT", "Request frame was not completed within five seconds")
 
 
 def same_user(fd: c_int) -> Bool:

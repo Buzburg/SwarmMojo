@@ -10,9 +10,15 @@ def request(text):
     return json.loads(handle(bytearray(text.encode())))
 
 
+def v1(action):
+    response = request(json.dumps({'v': 1, 'id': 'fixture', 'action': action, 'args': {}}))
+    assert response['ok'], response
+    return response['result']
+
+
 def test_json_equivalence_and_rejected_ambiguity():
-    for text in ('{"v":1,"action":"ping"}', '{"action": "ping", "v": 1}'):
-        assert request(text) == {"ok": True, "v": 1, "result": "pong"}
+    for text in ('{"v":1,"action":"ping","id":"fixture","args":{}}', '{"args":{}, "id":"fixture", "action": "ping", "v": 1}'):
+        assert request(text) == {"ok": True, "v": 1, "id": "fixture", "result": "pong"}
     for text in ('{"v":1,"v":1,"action":"ping"}', '{"v":true,"action":"ping"}',
                  '{"v":1,"action":"ping","execute":"anything"}'):
         assert request(text)["ok"] is False
@@ -21,7 +27,7 @@ def test_json_equivalence_and_rejected_ambiguity():
 def test_status_cannot_claim_disconnected_model_is_ready():
     with patch('app.broker_actions.gateway', side_effect=OSError):
         assert request('STATUS')['rwkv7'] == 'not_connected'
-        assert request('{"v":1,"action":"rwkv_status"}')['rwkv7'] == 'not_connected'
+        assert v1('rwkv_status')['rwkv7'] == 'not_connected'
 
 
 @pytest.mark.parametrize('health', [[], {}, {'upstream_ready': 'true', 'status': 'ready'},
@@ -38,7 +44,7 @@ def test_status_separates_worker_reachability_from_enforcement(monkeypatch):
     monkeypatch.setenv('ROMS_GATEWAY_API_KEY', 'fixture-key')
     with patch('app.broker_actions.gateway', return_value={'upstream_ready': True, 'status': 'ready', 'model': 'fixture'}), \
             patch('app.broker_actions.worker_request', return_value={'ok': True, 'result': 'pong'}) as worker:
-        statuses = [request('STATUS'), request('{"v":1,"action":"status"}'), request('{"v":1,"action":"rwkv_status"}')]
+        statuses = [request('STATUS'), v1('status'), v1('rwkv_status')]
     assert all(status['features'] == statuses[0]['features'] for status in statuses)
     for call in worker.call_args_list:
         assert call.args == ('ping',) and call.kwargs == {'timeout': 1}
@@ -55,7 +61,7 @@ def test_status_separates_worker_reachability_from_enforcement(monkeypatch):
 @pytest.mark.parametrize('abi', [-1, 1, 2, 3, 6])
 def test_kernel_probe_does_not_certify_enforcement(abi):
     with patch('app.broker_actions.landlock_abi', return_value=abi):
-        status = request('{"v":1,"action":"sandbox_status"}')
+        status = v1('sandbox_status')
     assert status['required_abi_available'] is (abi >= 3)
     assert status['enforcement_verified'] is False
     assert status['scope'] == 'kernel_abi_probe'
@@ -69,8 +75,8 @@ def test_failed_worker_probe_does_not_claim_workshop_available(monkeypatch):
 
 
 def test_current_anchor_and_no_execution():
-    assert str(datetime.now().year) in request('ANCHOR')['anchor']
-    assert request('{"v":1,"action":"os_controller"}')['controller'] == 'unavailable'
+    assert str(datetime.now().year) in v1('anchor')['anchor']
+    assert v1('os_controller')['controller'] == 'unavailable'
 
 
 def test_gateway_auth(monkeypatch):

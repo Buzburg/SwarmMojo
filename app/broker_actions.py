@@ -6,7 +6,7 @@ import re
 import urllib.error
 import urllib.request
 from app.runtime_clock import current_time
-from app.json_protocol import unique_object
+from app import broker_protocol as protocol
 from app.task_worker_client import request as worker_request
 
 
@@ -71,26 +71,18 @@ def build_status() -> dict:
 def handle(frame: bytearray) -> str:
     result: dict
     request_id = None
-    version = None
+    legacy = bytes(frame) in (b'PING', b'STATUS')
     try:
-        text = bytes(frame).decode("utf-8", errors="strict")
-        if text in ("PING", "STATUS", "MOCK", "ANCHOR"):
-            action, args = text.lower(), {}
-        elif not text.lstrip().startswith("{"):
-            action, args = text, {}
+        if legacy:
+            action, args = bytes(frame).decode('ascii').lower(), {}
         else:
-            request = json.loads(text, object_pairs_hook=unique_object)
-            if not isinstance(request, dict) or type(request.get("v")) is not int or request["v"] != 1:
-                raise ValueError("unsupported version")
-            if set(request) - {"v", "id", "action", "args"}:
-                raise ValueError("unknown fields")
-            version = 1
-            request_id = request.get("id")
-            if request_id is not None and (not isinstance(request_id, str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,64}', request_id)):
-                raise ValueError("invalid id")
-            action, args = request.get("action"), request.get("args", {})
-            if not isinstance(action, str) or not isinstance(args, dict):
-                raise ValueError("invalid action or args")
+            request = protocol.parse(bytes(frame))
+            request_id = request['id']
+            action, args = request['action'], request['args']
+        supported = {'ping', 'status', 'rwkv_status', 'mock', 'anchor', 'sandbox_status', 'landlock_probe',
+                     'telemetry', 'os_controller', 'chat', 'worker_status', 'worker_recovery', 'task.status', 'task.validate'}
+        if action not in supported:
+            raise protocol.ProtocolError('NOT_IMPLEMENTED', 'This broker action is not implemented')
         if action not in {'chat', 'task.status', 'task.validate'} and args:
             raise ValueError('action does not accept arguments')
         if action == "ping":
@@ -130,16 +122,30 @@ def handle(frame: bytearray) -> str:
             if set(args) != {'task_id'} or not isinstance(args['task_id'], str) or not re.fullmatch(r'[a-f0-9]{32}', args['task_id']):
                 raise ValueError('A valid task ID is required')
             result = worker_request(action, args)
-        else:
-            result = {"ok": False, "error": "unsupported_v1_action" if version else "unsupported_command"}
+    except protocol.ProtocolError as error:
+        return protocol.encode(protocol.error_response(error.code, str(error), request_id))
     except UnicodeError:
-        result = {"ok": False, "error": "unsupported_command"}
+        result = {"ok": False, "error": "invalid_request"}
     except (ValueError, RecursionError, TypeError):
         result = {"ok": False, "error": "invalid_request"}
     except (OSError, urllib.error.URLError, KeyError, IndexError):
         result = {"ok": False, "error": "service_unavailable"}
-    if version:
-        result["v"] = version
-    if request_id is not None:
-        result["id"] = request_id
-    return json.dumps(result, ensure_ascii=True, separators=(",", ":")) + "\n"
+    if legacy:
+        return protocol.encode(result)
+    if not result['ok']:
+        messages = {'invalid_request': 'Arguments do not match the action contract',
+                    'service_unavailable': 'A required local service is unavailable',
+                    'worker_unavailable': 'The private validation worker is unavailable',
+                    'worker_busy': 'The private validation worker is busy',
+                    'recovery_required': 'Recorded worker cleanup must complete before validation',
+                    'cleanup_required': 'Worker cleanup is incomplete; inspect the retained task',
+                    'validation_failed': 'The selected checks failed; inspect the retained task',
+                    'validation_rejected': 'The task cannot be validated in its current state',
+                    'request_timeout': 'The local service deadline expired'}
+        code = result.get('error')
+        return protocol.encode(protocol.error_response(code.upper() if code in messages else 'SERVICE_FAILURE',
+            messages.get(code, 'The local service could not complete this action'), request_id))
+    payload = {key: value for key, value in result.items() if key not in {'ok', 'v', 'id'}}
+    if set(payload) == {'result'}:
+        payload = payload['result']
+    return protocol.encode({'v': 1, 'id': request_id, 'ok': True, 'result': payload})

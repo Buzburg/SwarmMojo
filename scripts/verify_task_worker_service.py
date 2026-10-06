@@ -62,7 +62,7 @@ def main() -> None:
             assert part and len(raw) + len(part) <= 65536
             raw += part
     routed = json.loads(raw)
-    assert routed['ok'] and routed['capabilities']['available'], routed
+    assert routed['ok'] and routed['id'] == 'service-check' and routed['result']['capabilities']['available'], routed
     protected = {}
     for unit in ('omarchy-broker', 'goose-roms'):
         pid = subprocess.check_output(['systemctl', 'show', unit, '-p', 'MainPID', '--value'], text=True).strip()
@@ -76,7 +76,7 @@ def main() -> None:
     assert keys <= allowed, 'Worker inherited an unexpected environment field'
     print(json.dumps({'worker_available': True, 'broker_route_verified': True,
                       'service_restrictions_retained': protected, 'worker_environment_allowlist_verified': True,
-                      'policy': routed['capabilities']['policy_version'], 'lifecycle_checked': args.lifecycle}, indent=2))
+                      'policy': routed['result']['capabilities']['policy_version'], 'lifecycle_checked': args.lifecycle}, indent=2))
 
 
 if __name__ == '__main__':

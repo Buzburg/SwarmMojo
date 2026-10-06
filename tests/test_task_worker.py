@@ -119,8 +119,8 @@ def test_real_validation_through_native_broker_keeps_no_new_privileges(worker, p
         request = {'v': 1, 'id': 'fixture', 'action': 'task.validate', 'args': {'task_id': task['id']}}
         result = raw_request(broker_socket, json.dumps(request).encode() + b'\n')
         assert result['ok'], result
-        assert result['id'] == 'fixture' and result['task']['state'] == 'validated'
-        assert result['capabilities']['available'] and not result['capabilities']['apply']
+        assert result['id'] == 'fixture' and result['result']['task']['state'] == 'validated'
+        assert result['result']['capabilities']['available'] and not result['result']['capabilities']['apply']
         assert (project[0] / 'module.py').read_text() == 'VALUE = 1\n'
     finally:
         process.terminate()
@@ -141,9 +141,9 @@ def test_unavailable_isolation_prevents_task_transition(project, tmp_path, monke
 def test_broker_route_fails_closed_when_worker_cannot_enforce_policy(worker, project):
     from app.broker_actions import handle
     task = staged(project)
-    payload = {'v': 1, 'action': 'task.validate', 'args': {'task_id': task['id']}}
+    payload = {'v': 1, 'id': 'fixture', 'action': 'task.validate', 'args': {'task_id': task['id']}}
     response = json.loads(handle(bytearray(json.dumps(payload).encode())))
-    assert not response['ok'] and response['error'] == 'worker_unavailable'
+    assert not response['ok'] and response['error']['code'] == 'WORKER_UNAVAILABLE'
     assert patch_tasks.load_task(task['id'])[1]['state'] == 'staged'
     assert (project[0] / 'module.py').read_text() == 'VALUE = 1\n'
 
