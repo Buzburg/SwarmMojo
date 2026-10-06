@@ -48,7 +48,7 @@ $env:ROMS_UPSTREAM_LLM_URL = "http://127.0.0.1:11434/v1"
 .venv\Scripts\python -m app.gateway
 ```
 
-ROMS initializes its database and indexes knowledge on startup. The default gateway is `http://127.0.0.1:8844/v1`. It accepts text role/content messages; multimodal input is not supported. It is an experimental partial API proxy, not a claim of full OpenAI compatibility. It has no authentication and must remain local. Completion caching is disabled so model/settings/context changes cannot reuse an unrelated response. Streaming error handling still needs integration coverage.
+ROMS initializes its database and indexes knowledge on startup. The default gateway is `http://127.0.0.1:8844/v1`. It accepts text role/content messages; multimodal input is not supported. It is an experimental partial API proxy, not a claim of full OpenAI compatibility. `ROMS_GATEWAY_API_KEY` enables bearer authentication; the installed Omarchy service sets a private key. Keep the listener on loopback. Completion caching is disabled so model/settings/context changes cannot reuse an unrelated response. Automatic chat trajectory recording is off by default; see [recording choices and privacy limits](docs/chat-privacy.md).
 
 ## Retrieval quality and performance
 
@@ -96,7 +96,9 @@ The release-safety and memory tests use isolated files and mocked upstream respo
 
 ## Omarchy Mojo RWKV7 foundation
 
-The custom Arch/Omarchy WSL test build runs Goose 2.9B with ROMS, a native authenticated socket broker and an operator-guided project workshop. The actual Mojo sandbox requires Landlock ABI 3+ and combines with rootless containers for registered Python checks. Reviewed patches support controlled apply and rollback. Real model-state persistence/fork, desktop control, web evidence and guest delegation remain unfinished.
+The custom Arch/Omarchy WSL test build runs Goose 2.9B with ROMS, a native authenticated socket broker and an operator-guided project workshop. The actual Mojo sandbox requires Landlock ABI 3+ and combines with rootless containers for registered Python checks. Reviewed patches support controlled apply and rollback. Native checkpoint/fork primitives and formatted-state restore are verified; durable broker conversations, desktop control, web evidence and guest delegation remain unfinished. Run `goose --doctor` for [read-only readiness and next steps](docs/doctor.md); `goose --status` retains the machine-readable response.
+
+Use `goose --system` or `/system` for [service inspection and reviewed installed-app launching](docs/os-operator.md). Goose proposes a catalog-constrained action; application interaction beyond launch remains unfinished. In the project workshop, `/repair TASK_ID` requests [one repair from a recorded failed Python check](docs/project-repair.md), followed by the original checks and existing review/apply/undo flow.
 
 `config/build-inputs.json` pins supplied GGUF identities, the native runtime revision and the reviewed environment lockfile. `scripts/download_rwkv7.py` verifies local files by default; explicit HTTPS acquisition requires matching the recorded bytes. It performs no checkpoint conversion or unpinned native-library build. See [model input verification](docs/model-input-verification.md).
 

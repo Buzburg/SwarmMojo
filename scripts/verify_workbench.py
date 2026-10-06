@@ -20,7 +20,7 @@ def main() -> None:
     args = parser.parse_args()
     if args.check_report:
         report = json.loads(args.check_report.read_text())
-        if report.get('success') is not True or report.get('tests', 0) < 22:
+        if report.get('success') is not True or report.get('tests', 0) < 27:
             raise SystemExit('Workbench verification did not pass the declared checks')
         return
     args.report.parent.mkdir(parents=True, exist_ok=True)
@@ -33,7 +33,7 @@ def main() -> None:
             raise SystemExit('Native verification requires the built adapter and --model')
         env.update(OMARCHY_STATE_LIBRARY=str(ROOT / 'build/libomarchy_state.so'),
                    OMARCHY_STATE_MODEL=str(args.model.resolve()))
-    suites = ['context', 'receipts', 'integrations', 'baseline', 'state']
+    suites = ['context', 'receipts', 'integrations', 'baseline', 'state', 'package']
     started = time.monotonic()
     command = [sys.executable, '-m', 'pytest', *['tests/test_workbench_' + name + '.py' for name in suites],
                '-q', '--tb=short', '--show-capture=no', '--junitxml=' + str(junit.resolve())]
@@ -42,7 +42,7 @@ def main() -> None:
     log.write_text(result.stdout + result.stderr)
     cases = list(ET.parse(junit).iter('testcase')) if junit.exists() else []
     skipped = sum(case.find('skipped') is not None for case in cases)
-    report = {'success': result.returncode == 0 and len(cases) >= 22 and skipped == (0 if args.native else 1),
+    report = {'success': result.returncode == 0 and len(cases) >= 27 and skipped == (0 if args.native else 1),
         'tests': len(cases), 'skipped': skipped, 'seconds': time.monotonic() - started,
         'native_state_verified': args.native and result.returncode == 0 and skipped == 0,
         'target_hardware_qualified': False, 'log': str(log.resolve())}

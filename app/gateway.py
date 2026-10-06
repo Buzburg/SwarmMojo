@@ -37,8 +37,9 @@ from app.config import (
 from app.rag_engine import hybrid_search
 from app.prompt_builder import format_context_for_local_llm
 from app.tool_rag import format_tool_search_results
-from app.trajectory_recorder import start_session, record_step, finish_session
+from app.trajectory_recorder import start_session, finish_session
 from app.project_model import draft_completion
+from app.os_model import plan_completion
 from app.goose_response import decode_completed_response
 from app.request_lifecycle import ClientDisconnected, while_connected
 
@@ -127,7 +128,6 @@ async def chat_completions(request: Request) -> Response:
     if retrieval not in ('default', 'disabled'):
         return JSONResponse({'error': 'roms_retrieval must be default or disabled'}, status_code=400)
     body.setdefault("model", os.getenv("ROMS_MODEL_ALIAS", "goose-2.9b"))
-    session_id = str(uuid.uuid4())[:8]
 
     # 1. Extract the latest user query
     last_user_query = ""
@@ -191,9 +191,11 @@ async def chat_completions(request: Request) -> Response:
     body["messages"] = messages
     target_url = f"{ROMS_UPSTREAM_LLM_URL}/chat/completions"
 
-    # Start trajectory tracking
-    if last_user_query:
+    session_id = None
+    if last_user_query and os.getenv('ROMS_RECORD_CHAT_TRAJECTORIES') == '1':
+        session_id = str(uuid.uuid4())
         start_session(session_id=session_id, goal=last_user_query)
+    session_headers = {'X-ROMS-Session': session_id} if session_id else {}
 
     if stream:
         async def stream_generator() -> AsyncGenerator[bytes, None]:
@@ -205,20 +207,23 @@ async def chat_completions(request: Request) -> Response:
                         upstream_resp.raise_for_status()
                         async for chunk in upstream_resp.aiter_bytes():
                             yield chunk
-                finish_session(session_id=session_id, success=True, final_result="Streamed completion successfully")
+                if session_id:
+                    finish_session(session_id=session_id, success=True, final_result="Streamed completion successfully")
             except asyncio.CancelledError:
-                finish_session(session_id=session_id, success=False, final_result="Streaming request cancelled; upstream connection closed")
+                if session_id:
+                    finish_session(session_id=session_id, success=False, final_result="Streaming request cancelled; upstream connection closed")
                 raise
             except Exception as e:
                 err_payload = {"error": f"Upstream LLM connection error: {str(e)}"}
                 yield f"data: {json.dumps(err_payload)}\n\n".encode("utf-8")
                 yield b"data: [DONE]\n\n"
-                finish_session(session_id=session_id, success=False, final_result=f"Stream error: {str(e)}")
+                if session_id:
+                    finish_session(session_id=session_id, success=False, final_result=f"Stream error: {str(e)}")
 
         return StreamingResponse(
             stream_generator(),
             media_type="text/event-stream",
-            headers={"Cache-Control": "no-cache", "Connection": "keep-alive", "X-ROMS-Session": session_id},
+            headers={"Cache-Control": "no-cache", "Connection": "keep-alive", **session_headers},
         )
     else:
         async def generate() -> httpx.Response:
@@ -229,20 +234,25 @@ async def chat_completions(request: Request) -> Response:
             upstream_resp = await while_connected(request, generate)
             if upstream_resp.status_code == 200:
                 resp_data = decode_completed_response(upstream_resp.json())
-                finish_session(session_id=session_id, success=True, final_result="Completed successfully")
-                return JSONResponse(resp_data, headers={"X-ROMS-Cache": "DISABLED", "X-ROMS-Session": session_id})
+                if session_id:
+                    finish_session(session_id=session_id, success=True, final_result="Completed successfully")
+                return JSONResponse(resp_data, headers={"X-ROMS-Cache": "DISABLED", **session_headers})
 
-            finish_session(session_id=session_id, success=False, final_result="Upstream rejected the completion request")
+            if session_id:
+                finish_session(session_id=session_id, success=False, final_result="Upstream rejected the completion request")
             return Response(content=upstream_resp.content, status_code=upstream_resp.status_code,
                             media_type="application/json")
         except ClientDisconnected:
-            finish_session(session_id=session_id, success=False, final_result="Client disconnected; upstream connection closed")
+            if session_id:
+                finish_session(session_id=session_id, success=False, final_result="Client disconnected; upstream connection closed")
             return Response(status_code=499)
         except asyncio.CancelledError:
-            finish_session(session_id=session_id, success=False, final_result="Request cancelled; upstream connection closed")
+            if session_id:
+                finish_session(session_id=session_id, success=False, final_result="Request cancelled; upstream connection closed")
             raise
         except Exception as e:
-            finish_session(session_id=session_id, success=False, final_result=f"Backend error: {str(e)}")
+            if session_id:
+                finish_session(session_id=session_id, success=False, final_result=f"Backend error: {str(e)}")
             return JSONResponse(
                 {"error": f"Failed to connect to local LLM backend at {ROMS_UPSTREAM_LLM_URL}: {str(e)}"},
                 status_code=502,
@@ -280,6 +290,7 @@ app.routes.extend([
     Route("/v1/models", list_models, methods=["GET"]),
     Route("/v1/chat/completions", chat_completions, methods=["POST"]),
     Route("/v1/project/draft", draft_completion, methods=["POST"]),
+    Route("/v1/os/plan", plan_completion, methods=["POST"]),
     Route("/health", health_check, methods=["GET"]),
     Route("/", health_check, methods=["GET"]),
 ])

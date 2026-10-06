@@ -33,6 +33,7 @@ def main() -> None:
     parser.add_argument('--sandbox', action='store_true', help='Require native and combined confinement checks')
     parser.add_argument('--staging', action='store_true', help='Require real fixture patch staging and validation')
     parser.add_argument('--drafts', action='store_true', help='Require a real model draft through validation, apply and rollback')
+    parser.add_argument('--os-operator', action='store_true', help='Require actual Goose plans and a test-owned graphical app launch')
     parser.add_argument('--native-adapter', action='store_true', help='Require actual C ABI and compiled Mojo model checks')
     parser.add_argument('--native-chat', action='store_true', help='Require actual Mojo worker conversations and process cleanup')
     args = parser.parse_args()
@@ -40,7 +41,7 @@ def main() -> None:
     prefix = Path(os.getenv('ROMS_PYTHON_PREFIX', str(root / '.pixi/envs/default')))
     binary = Path(os.getenv('OMARCHY_BROKER_BINARY', str(prefix / 'bin/omarchy-broker')))
     suites = ['release_safety', 'memory', 'context', 'retrieval_quality', 'ingestion_quality',
-              'tools_quality', 'throttle', 'broker_actions', 'broker_protocol', 'broker_requests', 'broker_scheduler', 'goose_response', 'request_lifecycle', 'gateway_disconnect', 'document_identity', 'source_library', 'build_readiness', 'validation_policy', 'model_inputs', 'runtime_patch']
+              'tools_quality', 'throttle', 'broker_actions', 'broker_protocol', 'broker_requests', 'broker_scheduler', 'goose_response', 'request_lifecycle', 'gateway_disconnect', 'gateway_privacy', 'doctor', 'workbench_package', 'os_operator', 'os_model', 'os_workshop', 'project_repair', 'document_identity', 'source_library', 'build_readiness', 'validation_policy', 'model_inputs', 'runtime_patch']
     checks = [
         ('ROMS offline regressions', [sys.executable, '-m', 'pytest',
             *[f'tests/test_{name}.py' for name in suites], '-q', '--tb=short']),
@@ -71,10 +72,13 @@ def main() -> None:
             checks.append(('Installed project worker boundary', [sys.executable, 'scripts/verify_task_worker_service.py']))
     if args.drafts:
         checks.append(('Model-assisted project workflow', [sys.executable, '-m', 'pytest',
-                       'tests/test_project_assistant.py', 'tests/test_project_model.py', 'tests/test_rwkv_prompt.py',
+                       'tests/test_project_assistant.py', 'tests/test_project_repair.py', 'tests/test_project_model.py', 'tests/test_rwkv_prompt.py',
                        'tests/test_gateway_cancellation_live.py', '-q', '--tb=short']))
         checks.append(('Memory-grounded live chat', [sys.executable, '-m', 'pytest',
                        'tests/test_broker_chat_live.py', '-q', '--tb=short']))
+    if args.os_operator:
+        checks.append(('Installed OS operator', [sys.executable, '-m', 'pytest',
+                       'tests/test_os_operator_live.py', '-q', '--tb=short']))
     failed = 0
     env = dict(os.environ, OMARCHY_BROKER_BINARY=str(binary))
     print('WSL test build. Tool execution, training and full desktop are not certified.')
@@ -94,6 +98,8 @@ def main() -> None:
                 raise ValueError('ROMS_LIVE_CONTAINER_IMAGE must identify a reviewed local image; skipped tests cannot certify execution')
             if name in {'Model-assisted project workflow', 'Memory-grounded live chat'} and not env.get('ROMS_LIVE_DRAFT'):
                 raise ValueError('ROMS_LIVE_DRAFT must explicitly enable the live model check; a skipped test cannot certify drafting')
+            if name == 'Installed OS operator' and env.get('ROMS_LIVE_OS_OPERATOR') != '1':
+                raise ValueError('ROMS_LIVE_OS_OPERATOR=1 must explicitly enable the real application launch check')
             if name in {'Native and combined sandbox', 'Staged patch validation', 'Project validation service', 'Model-assisted project workflow'}:
                 if not env.get('OMARCHY_NATIVE_WORKER_IMAGE'):
                     raise ValueError('OMARCHY_NATIVE_WORKER_IMAGE must identify the built native sandbox image')

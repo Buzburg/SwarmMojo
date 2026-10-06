@@ -7,12 +7,17 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+ADAPTER_SOURCES = (
+    'native/rwkv_state.cpp', 'native/rwkv_state.h', 'scripts/build_state_adapter.py',
+    'config/build-inputs.json', 'scripts/build_llama.py', 'config/llama-cancellation.patch',
+)
 
 
 def sources() -> list[Path]:
     files = [p for p in (ROOT / 'app/workbench').rglob('*') if p.is_file() and
              '__pycache__' not in p.parts and p.suffix != '.pyc']
-    files += [ROOT / name for name in ['.gitattributes', 'native/rwkv_state.cpp', 'scripts/build_state_adapter.py',
+    files += [ROOT / name for name in ADAPTER_SOURCES]
+    files += [ROOT / name for name in ['.gitattributes',
         'scripts/workbench.py', 'scripts/verify_workbench.py', 'scripts/package_workbench.py',
         'scripts/project_workshop.py', 'requirements-workbench.txt', 'workbench.workflow.json', 'docs/repository-integrations.md']]
     files += list((ROOT / 'tests').glob('test_workbench_*.py'))
@@ -32,6 +37,8 @@ def verify(path: Path) -> None:
         manifest = json.load(manifest_stream)
         if set(manifest) != {item.name for item in members} - {'WORKBENCH-SHA256.json'}:
             raise ValueError('Package membership differs from the manifest')
+        if not set(ADAPTER_SOURCES).issubset(manifest):
+            raise ValueError('Package is missing required adapter build sources')
         for name, expected in manifest.items():
             stream = archive.extractfile(name)
             if stream is None:

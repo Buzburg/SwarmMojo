@@ -33,6 +33,7 @@ async def serving(app):
 
 @pytest.mark.parametrize('mode', ['nonstream', 'stream', 'draft', 'scoped'])
 def test_client_disconnect_closes_actual_upstream_socket_and_allows_next_request(monkeypatch, mode):
+    monkeypatch.setenv('ROMS_RECORD_CHAT_TRAJECTORIES', '1')
     monkeypatch.setenv('ROMS_GATEWAY_API_KEY', 'fixture-key')
     monkeypatch.setenv('ROMS_UPSTREAM_API_KEY', 'fixture-upstream-key')
     def retrieve(**kwargs):

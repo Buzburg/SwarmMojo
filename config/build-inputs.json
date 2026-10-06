@@ -33,7 +33,7 @@
     "format": "GGUF",
     "backend": "CPU",
     "embedded_ui": false,
-    "native_c_adapter": "not implemented",
+    "native_c_adapter": "implemented: native/rwkv_state.h (ABI 1, CPU)",
     "local_patch": {
       "path": "config/llama-cancellation.patch",
       "sha256": "f76b2593fd6b4c62c9386736e6e8d49868a1e56a77f6711379a6faa34c526c22",

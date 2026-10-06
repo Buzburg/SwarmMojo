@@ -5,7 +5,7 @@ from pathlib import Path
 
 import httpx
 
-from app import patch_tasks, patch_promotion, project_assistant, task_worker_client
+from app import patch_tasks, patch_promotion, project_assistant, project_repair, task_worker_client
 from app.workbench.context import CodeIndex, compact_log
 from app.workbench.integrations import review_task
 from app.workbench.receipts import Collector
@@ -80,7 +80,7 @@ async def main() -> None:
     print('This test build supports Python syntax and unittest checks. Selected files may total up to 4 KiB.')
     project = await select_project()
     files, checks = select_files(project)
-    print('Describe a change. Use /find NAME for code locations, /files to change the selection, or /exit to return.')
+    print('Describe a change. Use /find NAME for code locations, /files to change the selection, /repair TASK_ID for one failed check, or /exit to return.')
     while True:
         instruction = input('\nChange: ').strip()
         if instruction == '/exit':
@@ -99,18 +99,27 @@ async def main() -> None:
         if not instruction:
             continue
         try:
-            print('Goose is drafting the change...', flush=True)
-            draft = await project_assistant.draft_change(project['id'], files, instruction, checks)
+            if instruction.startswith('/repair '):
+                parent_id = instruction[8:].strip()
+                _, _, parent_patch = patch_tasks.load_task(parent_id)
+                if parent_patch['project_id'] != project['id']:
+                    raise ValueError('Select the project belonging to this failed task before repairing it')
+                print('Goose is drafting one repair from the recorded failed check...', flush=True)
+                draft = await project_repair.draft_repair(parent_id)
+            else:
+                print('Goose is drafting the change...', flush=True)
+                draft = await project_assistant.draft_change(project['id'], files, instruction, checks)
             task = draft['task']
             print('Draft saved. Running the selected checks. Task: ' + task['id'], flush=True)
             response = await asyncio.to_thread(task_worker_client.request, 'task.validate', {'task_id': task['id']})
             if not response['ok']:
                 detail = response.get('task', {}).get('error', response.get('detail', response['error']))
                 display('Checks did not pass: ' + detail)
-                failed_task = response.get('task', {})
+                _, failed_task, _ = patch_tasks.load_task(task['id'])
                 for evidence in failed_task.get('evidence', []):
                     display(compact_log(evidence.get('output', ''))['text'])
                 print('Inspect this draft with goose --show-patch ' + task['id'])
+                print('Request one repair with /repair ' + task['id'] + '. No repair is started automatically.')
                 continue
             print('Selected checks passed. Review the actual changes below.')
             advisory = await review_task(task['id'], Collector())
