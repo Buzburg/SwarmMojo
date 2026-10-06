@@ -2,6 +2,7 @@
 #include "rwkv_state.h"
 #include <cstdlib>
 #include <new>
+#include <vector>
 
 static bool fail_allocation = false;
 void * operator new(std::size_t size) {
@@ -32,6 +33,17 @@ int main(int argc, char ** argv) {
     if (grammar != WB_OUT_OF_MEMORY) return 7;
     if (wb_state_size(session) < 12) return 8; // Failed setup left the plain session intact.
     if (wb_session_answer_format(session) != WB_OK) return 9;
+    auto size = wb_state_size(session);
+    if (size < 32) return 10;
+    std::vector<uint8_t> state(size);
+    if (wb_state_get(session, state.data(), state.size()) != WB_OK) return 11;
+    fail_allocation = true;
+    int restored = wb_state_set(session, state.data(), state.size());
+    fail_allocation = false;
+    if (restored != WB_OUT_OF_MEMORY) return 12;
+    std::vector<uint8_t> after(size);
+    if (wb_state_get(session, after.data(), after.size()) != WB_OK || after != state) return 13;
+    if (wb_state_set(session, state.data(), state.size()) != WB_OK) return 14;
     wb_session_close(session);
     wb_model_close(model);
     return 0;

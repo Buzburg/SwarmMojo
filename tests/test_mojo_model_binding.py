@@ -91,6 +91,13 @@ def test_mojo_fixed_answer_format_generates_real_json(binding):
     assert json.loads(bytes.fromhex(result.stdout.strip())) == {'answer': '56'}
 
 
+@pytest.mark.parametrize('mode', ['checkpoint', 'answer-checkpoint'])
+def test_mojo_checkpoint_restores_real_continuation(binding, mode):
+    result = run(binding, mode)
+    assert result.returncode == 0, result.stderr[-4000:]
+    assert result.stdout.strip() == 'checkpoint passed'
+
+
 def test_session_cannot_be_copied_into_two_owners(binding, tmp_path):
     source = tmp_path / 'copy_session.mojo'
     source.write_text('''from app_mojo.rwkv_engine import RWKV7Session

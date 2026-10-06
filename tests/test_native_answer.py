@@ -2,6 +2,7 @@
 import ctypes as c
 import json
 import os
+import struct
 from pathlib import Path
 import subprocess
 import sys
@@ -34,10 +35,9 @@ def probe():
         for session in (first, second):
             assert lib.wb_session_answer_format(session) == 0, lib.wb_error()
             assert lib.wb_session_answer_format(session) == 0, lib.wb_error()
-            assert lib.wb_state_size(session) == -1 and lib.wb_error_code() == -5
-            assert lib.wb_state_set(session, initial, len(initial)) == -5
-            data = c.create_string_buffer(len(initial))
-            assert lib.wb_state_get(session, data, len(initial)) == -5
+            assert lib.wb_state_set(session, initial, len(initial)) == -2
+            empty = snapshot(lib, session)
+            assert lib.wb_state_set(session, empty, len(empty)) == 0
             assert lib.wb_prefill(session, PROMPT, len(PROMPT)) == 0, lib.wb_error()
             assert lib.wb_session_answer_format(session) == -5
             assert lib.wb_prefill(session, b'Unexpected second prompt', 24) == -5
@@ -69,5 +69,101 @@ def probe():
         lib.wb_model_close(model)
 
 
+def test_formatted_checkpoint_replay_fork_rejection_and_recovery():
+    load()
+    completed = subprocess.run([sys.executable, str(Path(__file__).resolve()), '--checkpoint'],
+                               capture_output=True, text=True, timeout=120)
+    assert completed.returncode == 0, (completed.stdout + completed.stderr)[-6000:]
+    assert json.loads(completed.stdout) == {'checkpoint': 'passed'}
+
+
+def checkpoint_probe():
+    lib = load()
+    model = lib.wb_model_open(os.fsencode(os.environ['OMARCHY_STATE_MODEL']), 0)
+    assert model, lib.wb_error()
+    sessions = []
+    try:
+        for _ in range(3):
+            session = lib.wb_session_new(model, 1024, 2)
+            assert session, lib.wb_error()
+            sessions.append(session)
+        first, branch, plain = sessions
+        for session in (first, branch):
+            assert lib.wb_session_answer_format(session) == 0
+        empty = snapshot(lib, first)
+        assert lib.wb_prefill(first, PROMPT, len(PROMPT)) == 0
+        prefix = bytearray()
+        for _ in range(3):
+            status, piece = next_token(lib, first)
+            assert status == 0
+            prefix.extend(piece)
+        saved = snapshot(lib, first)
+        assert struct.unpack_from('=I', saved, 20)[0] == 3
+        assert lib.wb_state_set(plain, saved, len(saved)) == -2
+        assert lib.wb_state_set(branch, saved, len(saved)) == 0, lib.wb_error()
+        query_size = c.c_int()
+        assert lib.wb_next(first, None, 0, c.byref(query_size)) == -6
+        assert snapshot(lib, first) == saved
+        assert lib.wb_state_get(first, None, len(saved)) == -2
+        assert lib.wb_state_get(first, c.create_string_buffer(len(saved)), len(saved) - 1) == -2
+
+        def changed(offset, fmt, value):
+            data = bytearray(saved)
+            struct.pack_into(fmt, data, offset, value)
+            return bytes(data)
+
+        # Preflight rejects malformed envelopes and impossible replay before touching the live state.
+        bad_states = [saved[:20], saved[:-1], saved + b'x',
+                      changed(4, '=I', 2), changed(20, '=I', 0xffffffff),
+                      changed(8, '=i', -1), changed(12, '=I', 2),
+                      changed(16, '=i', 0x7fffffff), changed(32, '=i', -1)]
+        count = c.c_int()
+        assert lib.wb_tokenize(model, b'Z', 1, 0, 0, None, 0, c.byref(count)) == -6
+        tokens = (c.c_int32 * count.value)()
+        assert lib.wb_tokenize(model, b'Z', 1, 0, 0, tokens, count.value, c.byref(count)) == 0
+        bad_states.append(changed(32, '=i', tokens[0]))  # Root requires an opening brace.
+        for data in bad_states:
+            assert lib.wb_state_set(first, data, len(data)) < 0
+            assert snapshot(lib, first) == saved, lib.wb_error()
+
+        # Valid envelope but truncated native payload must invalidate until an authenticated restore.
+        offset = 32 + 3 * 4
+        truncated = bytearray(saved[:offset + 4])
+        struct.pack_into('=Q', truncated, 24, 4)
+        assert lib.wb_state_set(branch, bytes(truncated), len(truncated)) < 0
+        assert lib.wb_next(branch, None, 0, c.byref(query_size)) == -5
+        assert lib.wb_state_set(branch, saved, len(saved)) == 0
+        assert lib.wb_session_cancel(branch) == 0
+        assert lib.wb_state_set(branch, saved, len(saved)) == 0
+        assert lib.wb_next(branch, None, 0, c.byref(query_size)) == -4
+        assert lib.wb_session_reset_cancel(branch) == 0
+
+        expected = []
+        for _ in range(512):
+            token = next_token(lib, first)
+            expected.append(token)
+            if token[0] == 1:
+                break
+        else:
+            raise AssertionError('Checkpoint test generation exceeded token budget')
+        assert snapshot(lib, branch) == saved, 'Advancing the first session changed the fork'
+        assert [next_token(lib, branch) for _ in expected] == expected
+        assert lib.wb_state_set(first, saved, len(saved)) == 0
+        assert [next_token(lib, first) for _ in expected] == expected
+        value = json.loads((prefix + b''.join(piece for _, piece in expected)).decode())
+        assert value == {'answer': '56'}
+        ended = snapshot(lib, first)
+        assert lib.wb_state_set(branch, ended, len(ended)) == 0
+        assert next_token(lib, branch) == (1, b'')
+        assert lib.wb_state_set(first, empty, len(empty)) == 0
+        assert lib.wb_next(first, None, 0, c.byref(query_size)) == -5
+        assert lib.wb_prefill(first, PROMPT, len(PROMPT)) == 0
+        print(json.dumps({'checkpoint': 'passed'}))
+    finally:
+        for session in sessions:
+            lib.wb_session_close(session)
+        lib.wb_model_close(model)
+
+
 if __name__ == '__main__':
-    probe()
+    checkpoint_probe() if '--checkpoint' in sys.argv else probe()

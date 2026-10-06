@@ -31,6 +31,27 @@ def main() raises:
     if mode == "empty":
         session.prefill("")
         return
+    if mode == "checkpoint" or mode == "answer-checkpoint":
+        if mode == "answer-checkpoint":
+            session.answer_format()
+        session.prefill("User: Reply as JSON with one string field named answer. What is 7 times 8? Give only the number in answer.\n\nAssistant:")
+        _ = session.next_piece()
+        _ = session.next_piece()
+        var saved = session.snapshot()
+        var first = session.next_piece()
+        var second = session.next_piece()
+        session.restore(saved)
+        var repeated_first = session.next_piece()
+        var repeated_second = session.next_piece()
+        if first[0] != repeated_first[0] or first[1] != repeated_first[1] or second[0] != repeated_second[0] or second[1] != repeated_second[1]:
+            raise Error("Restored native continuation differs")
+        session.close()
+        try:
+            _ = session.snapshot()
+        except:
+            print("checkpoint passed")
+            return
+        raise Error("Closed session exported state")
     var prompt = String("User: What is 7 times 8?\n\nAssistant:")
     if mode == "unicode":
         prompt = "User: café 中文 🙂\n\nAssistant:"

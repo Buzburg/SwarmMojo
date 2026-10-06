@@ -17,7 +17,7 @@ struct RWKV7Session(Movable):
 
     Call operations serially. Do not share the raw handle or race close with calls.
     CPU cancellation is sticky until reset; an interrupted decode additionally
-    requires verified native state restoration, which this binding does not expose.
+    requires verified native state restoration.
     """
     var _handle: UInt
 
@@ -66,7 +66,7 @@ struct RWKV7Session(Movable):
             self._handle, text.as_c_string_span(), c_int(size)), "Prefill")
 
     def answer_format(mut self) raises:
-        """Enable the fixed JSON answer grammar before prefill; state export is unsupported."""
+        """Enable the fixed JSON answer grammar before prefill."""
         self.require_open()
         check_native(external_call["wb_session_answer_format", c_int](self._handle), "Answer format")
 
@@ -98,6 +98,27 @@ struct RWKV7Session(Movable):
     def cancel(mut self) raises:
         self.require_open()
         check_native(external_call["wb_session_cancel", c_int](self._handle), "Cancel")
+
+    def snapshot(self) raises -> List[UInt8]:
+        """Export opaque state, including grammar history; caller persists/authenticates it."""
+        self.require_open()
+        var size = external_call["wb_state_size", Int64](self._handle)
+        if size < 0:
+            check_native(external_call["wb_error_code", c_int](), "State sizing")
+        if size < 12 or size > 512 * 1024 * 1024:
+            raise Error("Native checkpoint exceeds the state byte budget")
+        var data = List[UInt8](length=Int(size), fill=0)
+        check_native(external_call["wb_state_get", c_int](
+            self._handle, data.unsafe_ptr(), UInt(size)), "State export")
+        return data^
+
+    def restore(mut self, data: List[UInt8]) raises:
+        """Import authenticated state from the same model/runtime/context/answer format."""
+        self.require_open()
+        if len(data) < 12 or len(data) > 512 * 1024 * 1024:
+            raise Error("Invalid checkpoint byte count")
+        check_native(external_call["wb_state_set", c_int](
+            self._handle, data.unsafe_ptr(), UInt(len(data))), "State restore")
 
     def reset_cancel(mut self) raises:
         self.require_open()

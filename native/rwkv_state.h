@@ -32,8 +32,8 @@ int wb_session_cancel(void * session) WB_NOEXCEPT;
 int wb_session_reset_cancel(void * session) WB_NOEXCEPT;
 /* Enable the fixed {"answer": string} JSON grammar before the first prefill.
  * These sessions accept one initial prompt. Sampling remains greedy.
- * Grammar-bearing checkpoints are not yet supported:
- * state_size/get/set reject these sessions rather than omitting sampler state. */
+ * Checkpoints include grammar history; enable this format on the restore target.
+ * Plain and grammar-bearing checkpoints cannot be interchanged. */
 int wb_session_answer_format(void * session) WB_NOEXCEPT;
 int wb_tokenize(void * model, const char * text, int bytes, int add_special,
                 int parse_special, int32_t * tokens, int capacity, int * needed) WB_NOEXCEPT;
@@ -45,7 +45,9 @@ int64_t wb_state_size(void * session) WB_NOEXCEPT;
 int wb_state_get(void * session, uint8_t * data, size_t size) WB_NOEXCEPT;
 /* Import only integrity-checked state from the identical model/runtime/context.
  * A failed native decode/import invalidates the session until successful restore.
- * Caller validates compatibility and authenticates persisted bytes before import. */
+ * Caller validates compatibility and authenticates persisted bytes before import.
+ * Grammar metadata/replay is checked before mutating the active session.
+ * A restore does not clear cancellation; call reset_cancel explicitly. */
 int wb_state_set(void * session, const uint8_t * data, size_t size) WB_NOEXCEPT;
 
 #ifdef __cplusplus
