@@ -10,6 +10,7 @@ from starlette.responses import JSONResponse
 from app.config import ROMS_UPSTREAM_LLM_URL
 from app.json_protocol import unique_object
 from app.project_contract import draft_prompt, response_schema, validate_payload
+from app.request_lifecycle import ClientDisconnected, while_connected
 
 
 async def native_json(client: httpx.AsyncClient, url: str, body: dict, headers: dict) -> dict:
@@ -39,6 +40,13 @@ async def draft_completion(request: Request) -> JSONResponse:
         validate_payload(payload)
     except (ValueError, UnicodeError, RecursionError, TypeError) as error:
         return JSONResponse({'error': str(error)[:256]}, status_code=400)
+    try:
+        return await while_connected(request, lambda: generate_draft(payload))
+    except ClientDisconnected:
+        return JSONResponse({'error': 'Client disconnected; draft cancelled'}, status_code=499)
+
+
+async def generate_draft(payload: dict) -> JSONResponse:
     try:
         upstream = urlsplit(ROMS_UPSTREAM_LLM_URL)
         if (upstream.scheme != 'http' or upstream.hostname not in {'127.0.0.1', '::1', 'localhost'}

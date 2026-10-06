@@ -18,7 +18,7 @@ The GGUF header layout follows the [official GGML format specification](https://
 
 The current environment lockfile is preserved, SHA-256 `ad2ab7b0b761589567bf593d238198379ad9306c565aad5c48b47ee787231936`. Use the checked-in lockfile for environment reproduction; changed lock contents require a deliberate review and manifest update. This increment adds no dependencies and does not resolve a new environment or rebuild/reinstall the working runtime.
 
-The installed server reported `0.5.0-dev`, build 1, commit `46847e6`, built with GNU 13.3.0 for Linux x86_64. Selected installed artifact identities were measured directly:
+At that increment, the installed server reported `0.5.0-dev`, build 1, commit `46847e6`, built with GNU 13.3.0 for Linux x86_64. Its artifact identities were measured directly; the later [cancellation repair](gateway-cancellation-verification.md) records the currently installed derived build and preserves this runtime for rollback:
 
 | Artifact under `/opt/goose-runtime/bin` | SHA-256 |
 |---|---|

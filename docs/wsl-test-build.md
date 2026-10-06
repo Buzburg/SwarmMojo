@@ -55,6 +55,8 @@ The rootless worker lifecycle is verified separately: timeout and cancellation s
 
 Versioned broker validation requests now retain their IDs and replies across restarts. Retrying a completed request returns its saved reply; uncertain interrupted requests require inspection of the original task rather than automatic execution again. The private request history has a fixed 1,000-record capacity and is not automatically pruned. See [replay behavior and verification](broker-replay-verification.md).
 
+Direct HTTP chat and draft requests now release upstream work when their caller disconnects. The installed runtime includes a recorded cancellation-timer repair, verified against the actual 2.9B model under repeated status traffic. The synchronous native broker still needs its own client-disconnect and queue handling. See [cancellation evidence and rollback location](gateway-cancellation-verification.md).
+
 The 7.2B Q8 model loaded on this PC, but its CPU smoke test took about 108 seconds to become ready and generated about 2.9 tokens/second. The 2.9B smoke test took about 15 seconds to become ready and answered the arithmetic question correctly. Its approximately 14.5 tokens/second figure came from only three generated tokens, so it is not a representative benchmark. Actual gateway latency also includes retrieval and prompt processing.
 
 This host is Ryzen 9 5980HX / 16 GB RAM, with WSL limited to 10 GB. It is not the future 128 GB target discussed in the PDF. Mesa exposes the Radeon RX 6800M through Direct3D12/Vulkan in the new system, but the installed inference build uses CPU and GPU inference is unverified.

@@ -36,7 +36,7 @@ The socket directory must be private and owned by the service user. Native code 
 
 The installed system unit provides `/run/omarchy-broker` with private permissions and owns its lifecycle. Standalone callers must supply an existing private directory through `OMARCHY_BROKER_SOCKET`; the binary never removes an existing socket or another file. Normal service restarts rely on systemd's managed runtime directory, not unchecked stale-path deletion.
 
-The implementation remains serial. Read deadlines apply after acceptance, not time waiting in the listen queue. A long chat or validation delays later requests. Socket loss does not yet cancel broker-forwarded model generation or validation; the direct private worker already handles its own disconnected clients. These remaining R02 requirements must pass before the full protocol milestone is marked complete.
+The implementation remains serial. Read deadlines apply after acceptance, not time waiting in the listen queue. A long chat or validation delays later requests. Socket loss does not yet cancel broker-forwarded model generation or validation; the direct private worker already handles its own disconnected clients. The downstream [gateway-to-model cancellation path](gateway-cancellation-verification.md) now works, including under frequent native status requests, but broker-client disconnection still needs to reach that path. These remaining R02 requirements must pass before the full protocol milestone is marked complete.
 
 ## Durable validation requests
 

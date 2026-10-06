@@ -26,7 +26,15 @@
     "revision": "46847e61582097979f539595d893d83d8e1d1af1",
     "format": "GGUF",
     "backend": "CPU",
-    "native_c_adapter": "not implemented"
+    "embedded_ui": false,
+    "native_c_adapter": "not implemented",
+    "local_patch": {
+      "path": "config/llama-cancellation.patch",
+      "sha256": "f76b2593fd6b4c62c9386736e6e8d49868a1e56a77f6711379a6faa34c526c22",
+      "target": "tools/server/server-queue.cpp",
+      "before_sha256": "0e196113d16f130230d2cc0b232915e1f5b4f1dda184790afbfdc4986dd1fd58",
+      "after_sha256": "d5f27920be281161f5ea473518698ef53ca09251128abc96556541e63b266c0d"
+    }
   },
   "environment": {
     "lockfile": "pixi.lock",

@@ -38,7 +38,7 @@ def main() -> None:
     prefix = Path(os.getenv('ROMS_PYTHON_PREFIX', str(root / '.pixi/envs/default')))
     binary = Path(os.getenv('OMARCHY_BROKER_BINARY', str(prefix / 'bin/omarchy-broker')))
     suites = ['release_safety', 'memory', 'context', 'retrieval_quality', 'ingestion_quality',
-              'tools_quality', 'throttle', 'broker_actions', 'broker_protocol', 'broker_requests', 'goose_response', 'document_identity', 'source_library', 'build_readiness', 'validation_policy', 'model_inputs']
+              'tools_quality', 'throttle', 'broker_actions', 'broker_protocol', 'broker_requests', 'goose_response', 'request_lifecycle', 'gateway_disconnect', 'document_identity', 'source_library', 'build_readiness', 'validation_policy', 'model_inputs', 'runtime_patch']
     checks = [
         ('ROMS offline regressions', [sys.executable, '-m', 'pytest',
             *[f'tests/test_{name}.py' for name in suites], '-q', '--tb=short']),
@@ -62,7 +62,8 @@ def main() -> None:
             checks.append(('Installed project worker boundary', [sys.executable, 'scripts/verify_task_worker_service.py']))
     if args.drafts:
         checks.append(('Model-assisted project workflow', [sys.executable, '-m', 'pytest',
-                       'tests/test_project_assistant.py', 'tests/test_project_model.py', 'tests/test_rwkv_prompt.py', '-q', '--tb=short']))
+                       'tests/test_project_assistant.py', 'tests/test_project_model.py', 'tests/test_rwkv_prompt.py',
+                       'tests/test_gateway_cancellation_live.py', '-q', '--tb=short']))
     failed = 0
     env = dict(os.environ, OMARCHY_BROKER_BINARY=str(binary))
     print('WSL test build. Tool execution, training and full desktop are not certified.')

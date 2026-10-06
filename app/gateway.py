@@ -11,6 +11,7 @@ Provides an OpenAI-compatible API endpoint (/v1/chat/completions, /v1/models):
 Experimental text-only proxy; individual client integrations require verification.
 """
 
+import asyncio
 import json
 import os
 import secrets
@@ -39,6 +40,7 @@ from app.tool_rag import format_tool_search_results
 from app.trajectory_recorder import start_session, record_step, finish_session
 from app.project_model import draft_completion
 from app.goose_response import decode_completed_response
+from app.request_lifecycle import ClientDisconnected, while_connected
 
 app = Starlette(debug=False)
 
@@ -201,6 +203,9 @@ async def chat_completions(request: Request) -> Response:
                         async for chunk in upstream_resp.aiter_bytes():
                             yield chunk
                 finish_session(session_id=session_id, success=True, final_result="Streamed completion successfully")
+            except asyncio.CancelledError:
+                finish_session(session_id=session_id, success=False, final_result="Streaming request cancelled; upstream connection closed")
+                raise
             except Exception as e:
                 err_payload = {"error": f"Upstream LLM connection error: {str(e)}"}
                 yield f"data: {json.dumps(err_payload)}\n\n".encode("utf-8")
@@ -213,21 +218,26 @@ async def chat_completions(request: Request) -> Response:
             headers={"Cache-Control": "no-cache", "Connection": "keep-alive", "X-ROMS-Session": session_id},
         )
     else:
-        try:
+        async def generate() -> httpx.Response:
             async with httpx.AsyncClient(timeout=120.0) as client:
-                upstream_resp = await client.post(
-                    target_url, json=body, headers=upstream_headers()
-                )
-                if upstream_resp.status_code == 200:
-                    resp_data = decode_completed_response(upstream_resp.json())
-                    finish_session(session_id=session_id, success=True, final_result="Completed successfully")
-                    return JSONResponse(resp_data, headers={"X-ROMS-Cache": "DISABLED", "X-ROMS-Session": session_id})
+                return await client.post(target_url, json=body, headers=upstream_headers())
 
-                return Response(
-                    content=upstream_resp.content,
-                    status_code=upstream_resp.status_code,
-                    media_type="application/json",
-                )
+        try:
+            upstream_resp = await while_connected(request, generate)
+            if upstream_resp.status_code == 200:
+                resp_data = decode_completed_response(upstream_resp.json())
+                finish_session(session_id=session_id, success=True, final_result="Completed successfully")
+                return JSONResponse(resp_data, headers={"X-ROMS-Cache": "DISABLED", "X-ROMS-Session": session_id})
+
+            finish_session(session_id=session_id, success=False, final_result="Upstream rejected the completion request")
+            return Response(content=upstream_resp.content, status_code=upstream_resp.status_code,
+                            media_type="application/json")
+        except ClientDisconnected:
+            finish_session(session_id=session_id, success=False, final_result="Client disconnected; upstream connection closed")
+            return Response(status_code=499)
+        except asyncio.CancelledError:
+            finish_session(session_id=session_id, success=False, final_result="Request cancelled; upstream connection closed")
+            raise
         except Exception as e:
             finish_session(session_id=session_id, success=False, final_result=f"Backend error: {str(e)}")
             return JSONResponse(
