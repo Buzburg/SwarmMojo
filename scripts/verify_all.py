@@ -43,7 +43,7 @@ def main() -> None:
         ('ROMS offline regressions', [sys.executable, '-m', 'pytest',
             *[f'tests/test_{name}.py' for name in suites], '-q', '--tb=short']),
         ('Compiled native broker', [sys.executable, '-m', 'pytest', 'tests/test_omarchy_broker.py',
-                                    'tests/test_broker_concurrency.py', '-q', '--tb=short']),
+                                    'tests/test_broker_concurrency.py', 'tests/test_broker_memory.py', '-q', '--tb=short']),
     ]
     if not args.offline:
         checks.append(('Live model and ROMS', ['/usr/local/bin/goose', '--status']))

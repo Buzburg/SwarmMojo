@@ -41,6 +41,9 @@ async def dispatch(request: dict, frame: bytearray, legacy: bool) -> str:
                                                return_exceptions=True)
         result = actions.status_result(health if type(health) is dict else {},
                                       type(worker) is dict and worker.get('ok') is True and worker.get('result') == 'pong')
+    elif action == 'memory.search':
+        from app.broker_memory import search
+        result = {'ok': True, 'result': await search(args)}
     elif action == 'chat':
         response = await gateway('/v1/chat/completions', {'messages': [{'role': 'user', 'content': args['prompt']}],
                                                         'max_tokens': 256, 'stream': False, 'temperature': 0.3})
@@ -69,8 +72,8 @@ class Scheduler:
         self.loop = asyncio.new_event_loop()
         self.jobs: dict[int, Job] = {}
         self.next_token = 1
-        self.gates = {'chat': asyncio.Semaphore(1), 'validation': asyncio.Semaphore(1)}
-        self.counts = {'chat': 0, 'validation': 0}
+        self.gates = {lane: asyncio.Semaphore(1) for lane in ('chat', 'validation', 'memory')}
+        self.counts = {lane: 0 for lane in self.gates}
 
     def submit(self, frame: bytearray) -> tuple[int, str]:
         request_id = None
@@ -84,7 +87,8 @@ class Scheduler:
                 cached = broker_requests.replay(request)
                 if cached is not None:
                     return -1, cached
-            lane = ('chat' if request['action'] == 'chat' else
+            lane = ('memory' if request['action'] == 'memory.search' else
+                    'chat' if request['action'] == 'chat' else
                     'validation' if request['action'] in {'task.validate', 'worker_status'} else None)
             if len(self.jobs) >= MAX_JOBS or (lane and self.counts[lane] >= MAX_LANE_REQUESTS):
                 raise protocol.ProtocolError('QUEUE_FULL', 'The broker is at capacity; retry later')

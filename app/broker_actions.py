@@ -58,6 +58,10 @@ def status_result(health: dict, worker_reachable: bool) -> dict:
                      'reason': 'Live gateway and model health' if model_ready and gateway_ready else 'Gateway or model is not ready'},
             'knowledge_library': {'state': 'not_probed',
                                   'reason': 'Status does not test indexing; use --library for text files, repositories and folders'},
+            'project_memory': {'state': 'not_probed',
+                               'reason': 'memory.search performs an actual scoped MCP lookup; status does not inspect lessons'},
+            'project_memory': {'state': 'not_probed',
+                               'reason': 'memory.search performs an actual scoped MCP lookup; status does not inspect lessons'},
             'project_workshop': {'state': 'available' if model_ready and gateway_ready and worker_reachable and os.getenv('ROMS_GATEWAY_API_KEY') else 'unavailable',
                                  'reason': 'Requires authenticated gateway, model and worker; enforcement probe, checks and operator approval still required'},
             'validation_worker': {'state': 'reachable' if worker_reachable else 'unavailable',
@@ -74,10 +78,13 @@ def status_result(health: dict, worker_reachable: bool) -> dict:
 
 def validate_action(action: str, args: dict) -> None:
     supported = {'ping', 'status', 'rwkv_status', 'mock', 'anchor', 'sandbox_status', 'landlock_probe',
-                 'telemetry', 'os_controller', 'chat', 'worker_status', 'worker_recovery', 'task.status', 'task.validate'}
+                 'telemetry', 'os_controller', 'chat', 'worker_status', 'worker_recovery', 'task.status', 'task.validate', 'memory.search'}
     if action not in supported:
         raise protocol.ProtocolError('NOT_IMPLEMENTED', 'This broker action is not implemented')
-    if action == 'chat':
+    if action == 'memory.search':
+        from app.broker_memory import validate_args
+        validate_args(args)
+    elif action == 'chat':
         if set(args) != {'prompt'} or not isinstance(args['prompt'], str) or not args['prompt'].strip():
             raise ValueError('chat requires a text prompt')
     elif action in {'task.status', 'task.validate'}:
@@ -121,6 +128,10 @@ def handle(frame: bytearray) -> str:
             result = {"ok": True, "controller": "unavailable", "hyprland_ipc": False,
                       "quickshell_ipc": False, "fastpath_enabled": False,
                       "reason": "Desktop adapters are not integrated; use the reviewed project workshop for file edits"}
+        elif action == 'memory.search':
+            import asyncio
+            from app.broker_memory import search
+            result = {'ok': True, 'result': asyncio.run(search(args))}
         elif action == "chat":
             prompt = args.get("prompt")
             response = gateway("/v1/chat/completions", {"messages": [{"role": "user", "content": prompt}],

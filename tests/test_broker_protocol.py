@@ -46,13 +46,20 @@ def test_args_error_preserves_valid_request_id():
     assert response['id'] == REQUEST['id'] and response['error']['code'] == 'INVALID_REQUEST'
 
 
-@pytest.mark.parametrize('action', ['memory.search', 'state.save', 'state.restore', 'state.fork',
+@pytest.mark.parametrize('action', ['state.save', 'state.restore', 'state.fork',
                                    'task.stage', 'task.apply', 'task.rollback', 'task.cancel', 'unknown'])
 def test_unimplemented_actions_are_honest_and_have_no_side_effects(monkeypatch, action):
     monkeypatch.setattr(broker_actions, 'worker_request', lambda *_: pytest.fail('Unimplemented action reached worker'))
     response = send(dict(REQUEST, action=action, args={'untrusted': 'data'}))
     assert response['id'] == REQUEST['id']
     assert response['error']['code'] == 'NOT_IMPLEMENTED' and 'result' not in response
+
+
+def test_memory_search_requires_scope_before_service_start(monkeypatch):
+    from app import broker_memory
+    monkeypatch.setattr(broker_memory, 'parameters', lambda: pytest.fail('Invalid memory request spawned a process'))
+    response = send(dict(REQUEST, action='memory.search', args={'query': 'unscoped'}))
+    assert response['id'] == REQUEST['id'] and response['error']['code'] == 'INVALID_REQUEST'
 
 
 def test_oversized_response_fails_with_safe_bounded_error(monkeypatch):

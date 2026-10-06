@@ -12,6 +12,22 @@ class ClientDisconnected(Exception):
     pass
 
 
+async def cancel_and_settle(tasks: list[asyncio.Task]) -> None:
+    """Cancel owned work once; repeated caller cancellation cannot break cleanup."""
+    for task in tasks:
+        if not task.done():
+            task.cancel()
+    cleanup = asyncio.gather(*tasks, return_exceptions=True)
+    cancelled_again = False
+    while not cleanup.done():
+        try:
+            await asyncio.shield(cleanup)
+        except asyncio.CancelledError:
+            cancelled_again = True
+    if cancelled_again:
+        raise asyncio.CancelledError
+
+
 async def while_connected(request: Request, operation: Callable[[], Awaitable[T]]) -> T:
     """Call only after consuming the request body; own and settle both tasks."""
     async def disconnected() -> None:
@@ -34,15 +50,4 @@ async def while_connected(request: Request, operation: Callable[[], Awaitable[T]
         return work.result()
     finally:
         pending = [task for task in (watcher, work) if task is not None]
-        for task in pending:
-            if not task.done():
-                task.cancel()
-        cleanup = asyncio.gather(*pending, return_exceptions=True)
-        cancelled_again = False
-        while not cleanup.done():
-            try:
-                await asyncio.shield(cleanup)
-            except asyncio.CancelledError:
-                cancelled_again = True
-        if cancelled_again:
-            raise asyncio.CancelledError
+        await cancel_and_settle(pending)

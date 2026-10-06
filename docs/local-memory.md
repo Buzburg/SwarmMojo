@@ -4,6 +4,8 @@ ROMS can keep small lessons between sessions through eight MCP tools. Both the P
 
 The feature uses the existing SQLite database and standard Python library. It adds no runtime dependency, embedding model, external service or background LLM call. Hindsight inspired the lifecycle design, but no Hindsight package or source code was imported.
 
+The installed native broker also exposes read-only `memory.search` through a dedicated local MCP subprocess using this same `memory_recall` schema. It retains project filters, source references and evidence labels. See [broker memory integration](broker-memory-verification.md) for bounds, cancellation checks and its distinction from document retrieval.
+
 ## Getting started
 
 Restart the ROMS MCP server and reconnect your client to refresh its tool list. Existing launch commands and `ROMS_DB_PATH`/`ROMS_DATA_DIR` settings still apply. Memory tables are created additively in that database; existing documents, tickets and trajectories are preserved.

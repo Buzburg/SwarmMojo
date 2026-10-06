@@ -41,7 +41,7 @@ def test_cancel_before_first_tick_releases_admission_count(scheduler, monkeypatc
     token, _ = scheduler.submit(frame())
     scheduler.detach(token)
     until(scheduler, lambda: not scheduler.jobs)
-    assert scheduler.counts == {'chat': 0, 'validation': 0}
+    assert scheduler.counts == {'chat': 0, 'validation': 0, 'memory': 0}
 
 
 def test_one_chat_lane_has_bounded_queue_and_timeout_without_dispatch(scheduler, monkeypatch):
@@ -77,7 +77,7 @@ def test_client_departure_settles_upstream_before_freeing_capacity(scheduler, mo
     until(scheduler, lambda: bool(entered))
     scheduler.detach(token)
     assert scheduler.counts['chat'] == 1
-    until(scheduler, lambda: not scheduler.jobs)
+    until(scheduler, lambda: not scheduler.jobs and scheduler.counts['chat'] == 0)
     assert closed == [True] and scheduler.counts['chat'] == 0
 
 
