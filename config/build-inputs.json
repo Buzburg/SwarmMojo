@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "default_model": "2.9b",
+  "models": {
+    "2.9b": {
+      "filename": "rwkv7-g1g-2.9b-Q4_K_M.gguf",
+      "format": "GGUF",
+      "bytes": 1919047616,
+      "sha256": "72f0fbb674ca21acf035b66023083055f6cede4942deb1f1b8475390752cfdf3",
+      "origin": "user-supplied local file",
+      "publisher_provenance": "unverified",
+      "url": null
+    },
+    "7.2b-q8": {
+      "filename": "rwkv7-g1k-7.2b-Q8_0.gguf",
+      "format": "GGUF",
+      "bytes": 7930820544,
+      "sha256": "cc93dce01fb8750627e4ba2a853de7803655b2fa65b74206587a5d9620bba14f",
+      "origin": "user-supplied local file",
+      "publisher_provenance": "unverified",
+      "url": null
+    }
+  },
+  "runtime": {
+    "repository": "https://github.com/ggml-org/llama.cpp.git",
+    "revision": "46847e61582097979f539595d893d83d8e1d1af1",
+    "format": "GGUF",
+    "backend": "CPU",
+    "native_c_adapter": "not implemented"
+  },
+  "environment": {
+    "lockfile": "pixi.lock",
+    "sha256": "ad2ab7b0b761589567bf593d238198379ad9306c565aad5c48b47ee787231936",
+    "platform": "linux-64",
+    "mojo_tested": "1.1.0",
+    "python_tested": "3.12"
+  }
+}

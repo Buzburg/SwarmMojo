@@ -96,12 +96,11 @@ The release-safety and memory tests use isolated files and mocked upstream respo
 
 ## Omarchy Mojo RWKV7 foundation
 
-The native userspace harness establishes the OS hypervisor and tool broker for Omarchy:
-- **IPC Broker (`app_mojo/omarchy_broker.mojo`):** Native Linux Unix-socket daemon supporting Protocol v0 (`PING`, `STATUS`, `MOCK`, `ANCHOR`) and Protocol v1 structured JSON commands with caller UID matching, umask 077, and directory pinning. Passed 21 real-process socket tests.
-- **Landlock Sandbox (`app_mojo/staging_sandbox.mojo`):** Enforces Linux Landlock kernel filesystem restrictions (ABI v1 verified) confining mutating actions to `/tmp/omarchy-staging`. Passed 4 confinement and dry-run tests.
-- **RWKV-7 State Engine (`app_mojo/rwkv_engine.mojo`):** Manages continuous in-memory recurrent state buffers ($S_t$), atomic disk serialization, sub-2ms cold restore, and speculative state cloning for zero-pollution dry runs.
-- **Turnkey Automation:** `scripts/download_rwkv7.py` for model checkpoints, `scripts/setup_omarchy.sh` for systemd user service setup, and `pixi run verify-all` for the 6-suite master test harness.
-- Full reproduction and deployment details: [Readiness & Deployment Guide](docs/omarchy-rwkv7-harness-ready.md) and [Broker Guide](docs/omarchy-broker.md).
+The custom Arch/Omarchy WSL test build runs Goose 2.9B with ROMS, a native authenticated socket broker and an operator-guided project workshop. The actual Mojo sandbox requires Landlock ABI 3+ and combines with rootless containers for registered Python checks. Reviewed patches support controlled apply and rollback. Real model-state persistence/fork, desktop control, web evidence and guest delegation remain unfinished.
+
+`config/build-inputs.json` pins supplied GGUF identities, the native runtime revision and the reviewed environment lockfile. `scripts/download_rwkv7.py` verifies local files by default; explicit HTTPS acquisition requires matching the recorded bytes. It performs no checkpoint conversion or unpinned native-library build. See [model input verification](docs/model-input-verification.md).
+
+Use the [current readiness guide](docs/omarchy-rwkv7-harness-ready.md) and [operating guide](docs/wsl-test-build.md) for supported launchers, installed service architecture, verification profiles and remaining limits. A passing selected profile does not certify the full PDF roadmap.
 
 ## License and attribution
 

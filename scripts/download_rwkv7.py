@@ -1,163 +1,160 @@
-"""Turnkey downloader and compiler for RWKV-7 Goose checkpoints and librwkv.so."""
+"""Verify supplied GGUF inputs or acquire an explicitly identified HTTPS artifact."""
 import argparse
 import hashlib
+import json
 import os
 from pathlib import Path
+import re
 import shutil
-import subprocess
-import sys
+import stat
+import struct
+import tempfile
+import time
+import urllib.parse
 import urllib.request
 
-MODEL_CATALOG = {
-    "1.5b": {
-        "name": "RWKV-7-World-1.5B-v0.1.pth",
-        "url": "https://huggingface.co/BlinkDL/rwkv-7-world/resolve/main/RWKV-x070-World-1.5B-v2.9-20250127-ctx4096.pth",
-        "size_mb": 3100,
-        "recommended_for": "Low-power SBCs / laptops (4-8 GB RAM)",
-        "vram_footprint": "~850 MB (Q4)"
-    },
-    "2.9b": {
-        "name": "RWKV-7-World-2.9B-v0.1.pth",
-        "url": "https://huggingface.co/BlinkDL/rwkv-7-world/resolve/main/RWKV-x070-World-2.9B-v2.9-20250115-ctx4096.pth",
-        "size_mb": 5800,
-        "recommended_for": "Standard desktop / 16-32 GB RAM",
-        "vram_footprint": "~1.6 GB (Q4)"
-    },
-    "7.2b-q8": {
-        "name": "RWKV-7-World-7.2B-Q8_0.bin",
-        "url": "https://huggingface.co/BlinkDL/rwkv-7-world/resolve/main/RWKV-x070-World-7.2B-v2.9-20250107-ctx4096.pth",
-        "size_mb": 14400,
-        "recommended_for": "Minisforum Ryzen AI Max+ 395 128GB Unified Memory (Recommended)",
-        "vram_footprint": "~8.2 GB (Q8_0) - Zero quantization noise, 60-85 tok/s"
-    },
-    "7.2b-q4": {
-        "name": "RWKV-7-World-7.2B-Q4_K.bin",
-        "url": "https://huggingface.co/BlinkDL/rwkv-7-world/resolve/main/RWKV-x070-World-7.2B-v2.9-20250107-ctx4096.pth",
-        "size_mb": 14400,
-        "recommended_for": "Fast low-latency inference on mid-tier GPUs",
-        "vram_footprint": "~4.5 GB (Q4_K) - 90-130 tok/s"
-    }
-}
+ROOT = Path(__file__).resolve().parents[1]
+MANIFEST = ROOT / 'config/build-inputs.json'
+MAX_BYTES = 64 * 1024**3
 
 
-def check_disk_space(target_dir: Path, required_mb: int) -> bool:
-    target_dir.mkdir(parents=True, exist_ok=True)
-    total, used, free = shutil.disk_usage(target_dir)
-    free_mb = free // (1024 * 1024)
-    print(f"[*] Disk space in {target_dir}: {free_mb:,} MB free (requires ~{required_mb:,} MB)")
-    return free_mb >= required_mb
+def validate_spec(spec: dict) -> None:
+    if (spec.get('format') != 'GGUF' or type(spec.get('bytes')) is not int
+            or not 24 <= spec['bytes'] <= MAX_BYTES
+            or not re.fullmatch('[a-f0-9]{64}', spec.get('sha256', ''))):
+        raise ValueError('GGUF format, exact size and lowercase SHA-256 are required')
 
 
-def download_with_progress(url: str, output_path: Path):
-    tmp_path = output_path.with_suffix(".download.tmp")
-    print(f"[*] Downloading {url} -> {output_path.name}...")
-    
-    def reporthook(block_num, block_size, total_size):
-        if total_size > 0:
-            downloaded = block_num * block_size
-            pct = min(100.0, (downloaded / total_size) * 100.0)
-            mb_down = downloaded / (1024 * 1024)
-            mb_total = total_size / (1024 * 1024)
-            sys.stdout.write(f"\r    [{pct:5.1f}%] {mb_down:7.1f} MB / {mb_total:7.1f} MB")
-            sys.stdout.flush()
+def validate_url(url: str) -> str:
+    parsed = urllib.parse.urlsplit(url)
+    if (parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password
+            or parsed.fragment or any(ord(character) < 33 for character in url)):
+        raise ValueError('Use an explicit HTTPS URL without credentials, fragments or whitespace')
+    return url
 
+
+class HTTPSRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, fp, code, msg, headers, newurl):
+        validate_url(newurl)
+        return super().redirect_request(request, fp, code, msg, headers, newurl)
+
+
+def check_header(header: bytes) -> None:
+    if len(header) != 24:
+        raise ValueError('Truncated GGUF header')
+    magic, version, tensors, metadata = struct.unpack('<4sIQQ', header)
+    if magic != b'GGUF' or version != 3 or not tensors or not metadata:
+        raise ValueError('Expected a little-endian GGUF v3 model; no format conversion is performed')
+
+
+def verify_file(path: Path, spec: dict) -> dict:
+    validate_spec(spec)
+    if path.suffix.lower() != '.gguf' or path.is_symlink():
+        raise ValueError('Use a regular .gguf file, not a symlink or renamed checkpoint')
+    fd = os.open(path, os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_BINARY', 0))
+    with os.fdopen(fd, 'rb') as source:
+        before = os.fstat(source.fileno())
+        if not stat.S_ISREG(before.st_mode) or before.st_size != spec['bytes']:
+            raise ValueError('Model size or file type does not match the input record')
+        check_header(source.read(24))
+        source.seek(0)
+        digest = hashlib.file_digest(source, 'sha256').hexdigest()
+        after = os.fstat(source.fileno())
+        identity = lambda info: (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+        if identity(before) != identity(after) or identity(after) != identity(path.lstat()):
+            raise ValueError('Model changed during verification')
+        if digest != spec['sha256']:
+            raise ValueError('Model SHA-256 does not match the input record')
+    return {'status': 'verified_local_bytes', 'path': str(path), 'format': 'GGUF',
+            'bytes': after.st_size, 'sha256': digest,
+            'publisher_provenance': spec.get('publisher_provenance', 'unverified')}
+
+
+def acquire(url: str, destination: Path, spec: dict) -> dict:
+    validate_spec(spec)
+    validate_url(url)
+    if destination.suffix.lower() != '.gguf':
+        raise ValueError('GGUF downloads must retain a .gguf filename')
+    if destination.exists() or destination.is_symlink():
+        return verify_file(destination, spec)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if shutil.disk_usage(destination.parent).free < spec['bytes']:
+        raise ValueError('Insufficient space for the exact model size')
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), HTTPSRedirect())
+    fd, temporary = tempfile.mkstemp(prefix='.' + destination.stem + '-', suffix='.part', dir=destination.parent)
+    temporary = Path(temporary)
     try:
-        urllib.request.urlretrieve(url, tmp_path, reporthook=reporthook)
-        print()
-        os.replace(tmp_path, output_path)
-        print(f"[✓] Download completed successfully: {output_path} ({output_path.stat().st_size:,} bytes)")
-    except Exception as e:
-        if tmp_path.exists():
-            tmp_path.unlink()
-        print(f"\n[!] Download failed: {e}")
-        raise
+        with os.fdopen(fd, 'wb') as output:
+            request = urllib.request.Request(url, headers={'Accept-Encoding': 'identity'})
+            with opener.open(request, timeout=30) as response:
+                validate_url(response.geturl())
+                if response.status != 200 or response.headers.get('Content-Encoding', 'identity') != 'identity':
+                    raise ValueError('Expected an unencoded complete HTTP 200 response')
+                length = response.headers.get('Content-Length')
+                if length is not None and int(length) != spec['bytes']:
+                    raise ValueError('Download Content-Length does not match the input record')
+                digest, header, total = hashlib.sha256(), bytearray(), 0
+                deadline = time.monotonic() + 1800
+                while True:
+                    if time.monotonic() >= deadline:
+                        raise TimeoutError('Download exceeded its total deadline')
+                    chunk = response.read(min(1024**2, spec['bytes'] + 1 - total))
+                    if not chunk:
+                        break
+                    total += len(chunk)
+                    if total > spec['bytes']:
+                        raise ValueError('Download exceeds the expected size')
+                    header.extend(chunk[:max(0, 24 - len(header))])
+                    digest.update(chunk)
+                    output.write(chunk)
+                if total != spec['bytes'] or digest.hexdigest() != spec['sha256']:
+                    raise ValueError('Incomplete download or SHA-256 mismatch')
+                check_header(bytes(header))
+            output.flush()
+            os.fsync(output.fileno())
+        # Same-filesystem hard link publishes a complete file without replacing an existing path.
+        os.link(temporary, destination)
+        if hasattr(os, 'O_DIRECTORY'):
+            directory = os.open(destination.parent, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                os.fsync(directory)
+            finally:
+                os.close(directory)
+        return {'status': 'verified_download', 'path': str(destination), 'format': 'GGUF',
+                'bytes': total, 'sha256': digest.hexdigest(), 'publisher_provenance': 'unverified'}
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
-def compile_librwkv(build_dir: Path, output_lib: Path) -> bool:
-    """Clones rwkv.cpp and compiles librwkv.so with native AVX2 optimizations."""
-    print(f"[*] Compiling librwkv.so for Linux x86-64 into {output_lib}...")
-    build_dir.mkdir(parents=True, exist_ok=True)
-    repo_dir = build_dir / "rwkv.cpp"
-    
-    if not repo_dir.exists():
-        print("    Cloning rwkv.cpp repository...")
-        res = subprocess.run(["git", "clone", "--depth", "1", "https://github.com/saharNooby/rwkv.cpp.git", str(repo_dir)])
-        if res.returncode != 0:
-            print("[!] Failed to clone rwkv.cpp")
-            return False
-
-    cmake_build = repo_dir / "build"
-    cmake_build.mkdir(exist_ok=True)
-    print("    Configuring CMake with AVX2...")
-    cmake_res = subprocess.run(
-        ["cmake", "-B", str(cmake_build), "-S", str(repo_dir), "-DRWKV_BUILD_SHARED_LIBRARY=ON", "-DRWKV_AVX2=ON"],
-        cwd=str(repo_dir)
-    )
-    if cmake_res.returncode != 0:
-        print("[!] CMake configuration failed")
-        return False
-
-    print("    Building shared library...")
-    build_res = subprocess.run(["cmake", "--build", str(cmake_build), "--config", "Release", "-j4"], cwd=str(repo_dir))
-    if build_res.returncode != 0:
-        print("[!] CMake build failed")
-        return False
-
-    candidates = list(cmake_build.glob("**/librwkv.so")) + list(cmake_build.glob("librwkv.so"))
-    if candidates:
-        output_lib.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(candidates[0], output_lib)
-        print(f"[✓] librwkv.so built successfully: {output_lib}")
-        return True
-    else:
-        print("[!] librwkv.so not found after build")
-        return False
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Download RWKV-7 Goose model checkpoints and build librwkv.so")
-    parser.add_argument("--model", choices=list(MODEL_CATALOG.keys()), default="7.2b-q8",
-                        help="Model checkpoint to download (default: 7.2b-q8 for Minisforum 128GB unified RAM)")
-    parser.add_argument("--target-dir", default="data/models", help="Directory where model files are stored")
-    parser.add_argument("--dry-run", action="store_true", help="Inspect model metadata and verify connectivity without downloading")
-    parser.add_argument("--build-librwkv", action="store_true", help="Clone and build librwkv.so from rwkv.cpp")
+def main() -> None:
+    inputs = json.loads(MANIFEST.read_text())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--model', choices=inputs['models'], default=inputs['default_model'])
+    parser.add_argument('--target-dir', type=Path, default=ROOT.parent,
+                        help='Folder containing the supplied model, or destination for an explicit download')
+    parser.add_argument('--url', help='Operator-reviewed HTTPS source; downloaded bytes must match the input record')
+    parser.add_argument('--dry-run', action='store_true', help='Show the plan without network, hashing or writes')
+    parser.add_argument('--build-librwkv', action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args()
-
-    meta = MODEL_CATALOG[args.model]
-    target_dir = Path(args.target_dir)
-    out_file = target_dir / meta["name"]
-
-    print("=" * 70)
-    print(" Omarchy Mojo RWKV-7 Goose Ingestion Setup")
-    print("=" * 70)
-    print(f" Target Model:       RWKV-7 Goose {args.model}")
-    print(f" File Name:          {meta['name']}")
-    print(f" Estimated Size:     ~{meta['size_mb']:,} MB")
-    print(f" Memory Footprint:   {meta['vram_footprint']}")
-    print(f" Recommendation:     {meta['recommended_for']}")
-    print(f" Target Destination: {out_file.resolve()}")
-    print("=" * 70)
-
-    if not check_disk_space(target_dir, meta["size_mb"]):
-        print("[!] Warning: Disk space may be insufficient for full checkpoint extraction.")
-
-    if args.dry_run:
-        print("[*] Dry run mode enabled. URL and path verified.")
-        print(f"    URL: {meta['url']}")
-        return
-
-    if out_file.exists():
-        print(f"[✓] Model checkpoint already exists on disk: {out_file} ({out_file.stat().st_size:,} bytes)")
-    else:
-        confirm = input(f"Proceed with downloading {meta['name']} (~{meta['size_mb']} MB)? [y/N]: ").strip().lower()
-        if confirm == 'y':
-            download_with_progress(meta["url"], out_file)
-        else:
-            print("[*] Download skipped by user. Run with --dry-run or approve prompt when ready.")
-
     if args.build_librwkv:
-        compile_librwkv(Path("data/build"), Path("data/lib/librwkv.so"))
+        parser.error('The unpinned librwkv build was removed; use scripts/build_llama.py for the pinned GGUF runtime')
+    spec = inputs['models'][args.model]
+    validate_spec(spec)
+    if args.url:
+        validate_url(args.url)
+    destination = args.target_dir / spec['filename']
+    if args.dry_run:
+        result = {'status': 'planned_not_verified', 'path': str(destination), 'expected': spec,
+                  'network_planned': bool(args.url), 'note': 'No URL connectivity or local file identity was verified'}
+    elif args.url:
+        result = acquire(args.url, destination, spec)
+    else:
+        result = verify_file(destination, spec)
+    print(json.dumps(result, indent=2))
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, ValueError) as error:
+        raise SystemExit('Model input verification failed: ' + str(error)) from error
