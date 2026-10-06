@@ -32,6 +32,7 @@ def main() -> None:
     parser.add_argument('--containers', action='store_true', help='Require live rootless worker lifecycle checks')
     parser.add_argument('--sandbox', action='store_true', help='Require native and combined confinement checks')
     parser.add_argument('--staging', action='store_true', help='Require real fixture patch staging and validation')
+    parser.add_argument('--drafts', action='store_true', help='Require a real model draft through validation, apply and rollback')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     prefix = Path(os.getenv('ROMS_PYTHON_PREFIX', str(root / '.pixi/envs/default')))
@@ -59,6 +60,9 @@ def main() -> None:
                        'tests/test_worker_recovery.py', '-q', '--tb=short']))
         if not args.offline:
             checks.append(('Installed project worker boundary', [sys.executable, 'scripts/verify_task_worker_service.py']))
+    if args.drafts:
+        checks.append(('Model-assisted project workflow', [sys.executable, '-m', 'pytest',
+                       'tests/test_project_assistant.py', 'tests/test_project_model.py', '-q', '--tb=short']))
     failed = 0
     env = dict(os.environ, OMARCHY_BROKER_BINARY=str(binary))
     print('WSL test build. Tool execution, training and full desktop are not certified.')
@@ -68,7 +72,9 @@ def main() -> None:
                 raise FileNotFoundError(f'Required current-build artifact missing: {binary}')
             if name == 'Rootless worker lifecycle' and not env.get('ROMS_LIVE_CONTAINER_IMAGE'):
                 raise ValueError('ROMS_LIVE_CONTAINER_IMAGE must identify a reviewed local image; skipped tests cannot certify execution')
-            if name in {'Native and combined sandbox', 'Staged patch validation', 'Project validation service'}:
+            if name == 'Model-assisted project workflow' and not env.get('ROMS_LIVE_DRAFT'):
+                raise ValueError('ROMS_LIVE_DRAFT must explicitly enable the live model check; a skipped test cannot certify drafting')
+            if name in {'Native and combined sandbox', 'Staged patch validation', 'Project validation service', 'Model-assisted project workflow'}:
                 if not env.get('OMARCHY_NATIVE_WORKER_IMAGE'):
                     raise ValueError('OMARCHY_NATIVE_WORKER_IMAGE must identify the built native sandbox image')
                 sandbox = Path(env.get('OMARCHY_SANDBOX_BINARY', str(prefix / 'bin/staging-sandbox')))

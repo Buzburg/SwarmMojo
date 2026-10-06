@@ -19,6 +19,7 @@ def main() -> None:
     intake.add_argument('--add-folder')
     intake.add_argument('--sources', action='store_true')
     intake.add_argument('--library', action='store_true', help='Open the knowledge library menu')
+    intake.add_argument('--project-workshop', action='store_true', help='Describe and review changes to selected project files')
     intake.add_argument('--remove-source')
     intake.add_argument('--refresh-source')
     intake.add_argument('--cleanup-worker', help='Retry container cleanup for a retained task ID')
@@ -37,7 +38,7 @@ def main() -> None:
     args = parser.parse_args()
     operation = next(((name, value) for name, value in [
         ('file', args.add_file), ('repo', args.add_repo), ('folder', args.add_folder),
-        ('list', args.sources), ('menu', args.library), ('remove', args.remove_source),
+        ('list', args.sources), ('menu', args.library), ('workshop', args.project_workshop), ('remove', args.remove_source),
         ('refresh', args.refresh_source), ('cleanup', args.cleanup_worker),
         ('register', args.register_project), ('propose', args.stage_patch),
         ('validate', args.validate_patch), ('worker-status', args.worker_status), ('recover-workers', args.recover_workers),
@@ -48,7 +49,11 @@ def main() -> None:
             parser.error('Management actions cannot be combined with chat or --status')
         action, value = operation
         command = ['/usr/bin/python', str(Path(__file__).with_name('run_linux_env.py')), 'python', '-m']
-        if action == 'cleanup':
+        if action == 'workshop':
+            if args.preview:
+                parser.error('--preview applies to source imports')
+            command.append('scripts.project_workshop')
+        elif action == 'cleanup':
             if args.preview:
                 parser.error('--preview does not apply to worker cleanup')
             command.append('scripts.cleanup_worker')
@@ -58,7 +63,7 @@ def main() -> None:
             command.extend(['scripts.patch_tasks_cli', 'list' if action == 'tasks' else action])
         else:
             command.extend(['app.source_library', action])
-        if action not in {'list', 'menu', 'tasks', 'worker-status', 'recover-workers'}:
+        if action not in {'list', 'menu', 'workshop', 'tasks', 'worker-status', 'recover-workers'}:
             command.append(value)
         if args.preview:
             command.append('--preview')
@@ -80,7 +85,7 @@ def main() -> None:
             print(json.dumps(json.loads(data), indent=2))
         return
     messages: list[dict[str, str]] = []
-    print('Goose — local Omarchy test build. Type /exit to leave, /reset to clear this chat.')
+    print('Goose — local Omarchy test build. Type /exit to leave, /reset to clear this chat, /project to edit a project.')
     headers = {'Content-Type': 'application/json',
                'Authorization': 'Bearer ' + os.environ['ROMS_GATEWAY_API_KEY']}
     deadline = time.monotonic() + 90
@@ -108,6 +113,11 @@ def main() -> None:
             break
         if prompt == '/reset':
             messages.clear()
+            continue
+        if prompt == '/project':
+            subprocess.run(['/usr/local/bin/goose', '--project-workshop'], check=False)
+            if args.prompt:
+                break
             continue
         if not prompt:
             continue

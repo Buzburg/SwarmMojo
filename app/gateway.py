@@ -37,6 +37,7 @@ from app.rag_engine import hybrid_search
 from app.prompt_builder import format_context_for_local_llm
 from app.tool_rag import format_tool_search_results
 from app.trajectory_recorder import start_session, record_step, finish_session
+from app.project_model import draft_completion
 
 app = Starlette(debug=False)
 
@@ -264,6 +265,7 @@ async def health_check(request: Request) -> JSONResponse:
 app.routes.extend([
     Route("/v1/models", list_models, methods=["GET"]),
     Route("/v1/chat/completions", chat_completions, methods=["POST"]),
+    Route("/v1/project/draft", draft_completion, methods=["POST"]),
     Route("/health", health_check, methods=["GET"]),
     Route("/", health_check, methods=["GET"]),
 ])
