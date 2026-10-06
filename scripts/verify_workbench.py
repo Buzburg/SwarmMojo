@@ -33,7 +33,7 @@ def main() -> None:
             raise SystemExit('Native verification requires the built adapter and --model')
         env.update(OMARCHY_STATE_LIBRARY=str(ROOT / 'build/libomarchy_state.so'),
                    OMARCHY_STATE_MODEL=str(args.model.resolve()))
-    suites = ['context', 'receipts', 'integrations', 'baseline', 'state', 'package']
+    suites = ['context', 'receipts', 'integrations', 'triggertangle', 'baseline', 'state', 'package']
     started = time.monotonic()
     command = [sys.executable, '-m', 'pytest', *['tests/test_workbench_' + name + '.py' for name in suites],
                '-q', '--tb=short', '--show-capture=no', '--junitxml=' + str(junit.resolve())]

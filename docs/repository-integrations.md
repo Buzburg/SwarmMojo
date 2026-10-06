@@ -14,6 +14,8 @@ python -m scripts.workbench find /path/to/project function_name
 python -m scripts.workbench log /path/to/original.log --max-lines 60 --max-bytes 6000
 python -m scripts.workbench review task_ID
 python -m scripts.workbench analyze runs.csv policy.json /path/to/new/report
+python -m scripts.workbench configure --triggertangle /path/to/trigger-tangle
+python -m scripts.workbench rehearse baseline.json candidate.json outcomes.json
 python -m scripts.workbench verify-receipt RECEIPT_ID
 ```
 
@@ -24,6 +26,22 @@ The integration archive includes the adapter's C++ source, public header, build-
 PTRM uses the reviewed external source checkout and its compiled `bin/ptrm-review-worker`. Triad uses its own pinned runtime and `scripts/run.sh`. Their paths can also be set with `OMARCHY_PTRM_ROOT` and `OMARCHY_TRIAD_ROOT`. Both fail visibly if unavailable; neither result authorizes a patch. Rebuild/reinstall these dependencies on the future Linux machine instead of copying relocated environments. The installed workshop supports `/find NAME` and displays PTRM findings after registered validation, before the existing exact-patch confirmation.
 
 Symdex's language patterns are reused with fresh bounded file reads. Python definitions/calls use the AST to avoid comment/string matches; other languages remain heuristic. Queries never expand editable file selection. Symlinks, excluded credential paths, excessive files, binary content, and oversized files are rejected or explicitly omitted. Sieve's scoring is reused with enforced line and UTF-8 byte budgets. Original logs remain separate and unmodified; summaries carry the original text digest and a truncation flag.
+
+## Workflow rehearsal with TriggerTangle
+
+TriggerTangle compares an existing automation design with a proposed change against a separate, operator-owned outcome suite. For example, a CRM loop repair must still produce the required invoice draft. Turning everything off cannot satisfy an outcome that disappears with it. The suite describes up to eight starting events, required outcomes, and optional forbidden outcomes; keep it outside the agent's proposed changes.
+
+Build a reviewed TriggerTangle 0.3.0 checkout first, then configure its root as shown above (or set `OMARCHY_TRIGGERTANGLE_ROOT`). The adapter runs the fixed `dist/trigger-tangle-harness.mjs` file through `/usr/bin/node`. Set `OMARCHY_NODE_BINARY` to another absolute executable path when needed. Both the runtime and runner are operator-trusted programs: their invocation is not a security sandbox for arbitrary code. Updating one integration's configuration preserves the other settings.
+
+Rehearsal reads bounded regular files without following symlink components and runs private snapshots under the evidence directory. It checks the original files, snapshots, and runner again after execution. Reports must match the selected inputs, runner version, budgets, case coverage, and process exit status. A receipt records raw input and runner hashes; the runner also binds its report to the decoded UTF-8 input text. A leading UTF-8 BOM is removed for that text hash only. Input files may contain example business data, so receipt storage and reports remain private.
+
+Each file is limited to 800,000 bytes. The process has a 45-second timeout and a 2 MiB output limit. Defaults are 256 states and 2,048 transitions per analysis; `--max-states` and `--max-transitions` allow bounded adjustments up to 512 and 8,192. Oversized, malformed, changed, missing, or interrupted evidence never becomes a successful review. A missing installation is reported as unavailable.
+
+The operator command returns `review-required`, `blocked`, or `inconclusive`; unavailable or invalid runs return failure. Its exit code is zero only for `review-required`, which still requires the existing human review. Every result includes `advisory_only: true`, `authorizes_apply: false`, and `executionAllowed: false`. It does not change a staged patch's validation state, invoke a business system, authorize an OS change, or alter broker permissions.
+
+These findings describe only the supplied deterministic model and selected starting events. There are no live account connections, retries, timing, concurrency, persistent business state, or proof of production safety. A settled model with preserved sample outcomes still needs review and testing against the real integration before deployment.
+
+The TriggerTangle addition passed 93 focused Linux checks, including malformed evidence, scalar-type substitutions, contradictory verdicts, source changes, timeout and output limits. The full portable workbench verification passed 114 checks with one expected native-state skip. Three actual runner checks reproduced `review-required`, `blocked`, and `inconclusive`, and their receipts verified. These checks used WSL and a temporary Node 22 runtime; they do not qualify the future machine or install an autonomous model service.
 
 ## Authenticated evidence
 

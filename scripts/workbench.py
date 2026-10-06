@@ -31,8 +31,9 @@ def parser() -> argparse.ArgumentParser:
     baseline.add_argument('--model-key', choices=['2.9b', '7.2b-q8'], required=True)
     baseline.add_argument('--gpu-layers', type=int, default=0)
     configure = commands.add_parser('configure')
-    configure.add_argument('--ptrm', type=Path, required=True)
-    configure.add_argument('--triad', type=Path, required=True)
+    configure.add_argument('--ptrm', type=Path)
+    configure.add_argument('--triad', type=Path)
+    configure.add_argument('--triggertangle', type=Path)
     build = commands.add_parser('build', help='Run an operator-owned trusted build manifest')
     build.add_argument('manifest', type=Path)
     find = commands.add_parser('find')
@@ -48,6 +49,12 @@ def parser() -> argparse.ArgumentParser:
     analysis.add_argument('runs', type=Path)
     analysis.add_argument('policy', type=Path)
     analysis.add_argument('output', type=Path)
+    rehearsal = commands.add_parser('rehearse', help='Compare workflow designs against an operator-owned outcome suite')
+    rehearsal.add_argument('baseline', type=Path)
+    rehearsal.add_argument('candidate', type=Path)
+    rehearsal.add_argument('suite', type=Path)
+    rehearsal.add_argument('--max-states', type=int, default=256)
+    rehearsal.add_argument('--max-transitions', type=int, default=2048)
     verify = commands.add_parser('verify-receipt')
     verify.add_argument('run_id')
     qualify = commands.add_parser('probe')
@@ -75,14 +82,23 @@ def main(argv: list[str] | None = None) -> int:
     result: dict[str, Any]
     if args.command == 'status':
         result = {'environment': environment_record(), 'integrations': {
-            name: 'configured' if integrations.get_dependency(name) else 'unavailable' for name in ['ptrm', 'triad']},
+            name: 'configured' if integrations.get_dependency(name) else 'unavailable' for name in ['ptrm', 'triad', 'triggertangle']},
             'broker_permissions_changed': False}
     elif args.command == 'configure':
-        for path, marker in [(args.ptrm, 'ptrm_reviewer/__main__.py'), (args.triad, 'scripts/run.sh')]:
+        selected = {name: getattr(args, name) for name in ('ptrm', 'triad', 'triggertangle') if getattr(args, name)}
+        if not selected:
+            raise ValueError('Select at least one integration to configure')
+        markers = {'ptrm': 'ptrm_reviewer/__main__.py', 'triad': 'scripts/run.sh',
+                   'triggertangle': 'dist/trigger-tangle-harness.mjs'}
+        for name, path in selected.items():
+            marker = markers[name]
             if not (path / marker).is_file():
                 raise ValueError('Expected an existing reviewed repository: ' + str(path))
         from app.patch_tasks import durable_json
-        result = {'ptrm': str(args.ptrm.resolve()), 'triad': str(args.triad.resolve())}
+        result = json.loads(integrations.SETTINGS.read_text()) if integrations.SETTINGS.is_file() else {}
+        if type(result) is not dict:
+            raise ValueError('Invalid operator integration settings')
+        result.update({name: str(path.resolve()) for name, path in selected.items()})
         durable_json(integrations.SETTINGS, result)
     elif args.command == 'find':
         result = CodeIndex(args.root).query(args.symbol)
@@ -105,6 +121,10 @@ def main(argv: list[str] | None = None) -> int:
             result = asyncio.run(integrations.review_task(args.task_id, collector))
         elif args.command == 'analyze':
             result = asyncio.run(integrations.analyze_runs(args.runs, args.policy, args.output, collector))
+        elif args.command == 'rehearse':
+            from app.workbench.triggertangle import rehearse
+            result = asyncio.run(rehearse(args.baseline, args.candidate, args.suite, collector,
+                max_states=args.max_states, max_transitions=args.max_transitions))
         elif args.command == 'verify-receipt':
             result = collector.verify(args.run_id)
         elif args.command == 'probe':
@@ -140,7 +160,7 @@ def main(argv: list[str] | None = None) -> int:
                 durable_json(intent, result)
                 result['receipt'] = collector.record('recurrent-turn', [result])
     print(json.dumps(result, indent=2, ensure_ascii=True))
-    failed = result.get('status') in {'failed', 'unavailable'} or result.get('valid') is False
+    failed = result.get('status') in {'failed', 'unavailable', 'blocked', 'inconclusive'} or result.get('valid') is False
     failed = failed or result.get('workflow', {}).get('success') is False
     failed = failed or result.get('eligible') is False
     return 1 if failed else 0
