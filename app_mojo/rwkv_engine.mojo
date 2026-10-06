@@ -1,167 +1,99 @@
-"""RWKV-7 recurrent state lifecycle, C FFI engine bindings, and temporal grounding in Mojo."""
-from std.ffi import c_int, c_uint, c_long, external_call
-from std.os import stat
-from std.memory import Pointer
+"""Move-only CPU model session using native/rwkv_state.h (Linux x86-64).
 
-comptime SYS_READ = 0
-comptime SYS_WRITE = 1
-comptime O_RDONLY = 0
-comptime O_WRONLY = 1
-comptime O_CREAT = 64
-comptime O_TRUNC = 512
-comptime DEFAULT_MODE = 0o644
+Link the verified adapter explicitly. The caller supplies a rendered prompt and
+owns conversation policy, deadlines and persisted checkpoint authentication.
+Token pieces are bytes: an individual piece need not be valid UTF-8.
+"""
+from std.ffi import c_int, c_uint, external_call
 
 
-struct RWKVStateBuffer:
-    """Contiguous in-memory recurrent state buffer for RWKV-7 linear recurrence."""
-    var size: Int
-    var data: List[Float32]
-
-    def __init__(out self, size: Int):
-        self.size = size
-        self.data = List[Float32]()
-        for _ in range(size):
-            self.data.append(0.0)
-
-    def element_count(self) -> Int:
-        return self.size
-
-    def byte_size(self) -> Int:
-        return self.size * 4 # 4 bytes per Float32
-
-    def save_to_disk(self, file_path: String) raises:
-        """
-        Atomic serialization of the recurrent state matrix to disk.
-        Writes to a temporary sibling file and renames atomically to prevent corruption.
-        """
-        var tmp_path = file_path + ".tmp"
-        var tmp_mut = tmp_path
-        var target_mut = file_path
-
-        var fd = external_call["open", c_int, num_fixed_args=3](
-            tmp_mut.as_c_string_span(),
-            c_int(O_WRONLY | O_CREAT | O_TRUNC),
-            c_uint(DEFAULT_MODE)
-        )
-        if fd < 0:
-            raise Error("Cannot open temporary state file for write: " + tmp_path)
-
-        var bytes_to_write = self.byte_size()
-        var raw_ptr = self.data.unsafe_ptr().unsafe_bitcast[UInt8]()
-        var written = external_call["syscall", c_long](
-            c_long(SYS_WRITE),
-            c_int(fd),
-            raw_ptr,
-            UInt(bytes_to_write)
-        )
-        _ = external_call["close", c_int](fd)
-
-        if written != c_long(bytes_to_write):
-            _ = external_call["unlink", c_int](tmp_mut.as_c_string_span())
-            raise Error("Failed to write complete state buffer to disk")
-
-        var ren = external_call["rename", c_int](
-            tmp_mut.as_c_string_span(),
-            target_mut.as_c_string_span()
-        )
-        if ren != 0:
-            raise Error("Failed to atomically rename state file to: " + file_path)
-
-    def load_from_disk(mut self, file_path: String) raises -> Bool:
-        """
-        Sub-2ms cold restore of recurrent state directly into memory buffer.
-        """
-        var path_mut = file_path
-        var fd = external_call["open", c_int, num_fixed_args=3](
-            path_mut.as_c_string_span(),
-            c_int(O_RDONLY),
-            c_uint(0)
-        )
-        if fd < 0:
-            return False
-
-        var bytes_to_read = self.byte_size()
-        var raw_ptr = self.data.unsafe_ptr().unsafe_bitcast[UInt8]()
-        var n_read = external_call["syscall", c_long](
-            c_long(SYS_READ),
-            c_int(fd),
-            raw_ptr,
-            UInt(bytes_to_read)
-        )
-        _ = external_call["close", c_int](fd)
-        return n_read == c_long(bytes_to_read)
-
-    def clone_state(self) raises -> RWKVStateBuffer:
-        """
-        Creates an in-memory clone of the recurrent state for speculative sandboxing.
-        Mutations during dry-run validation can be evaluated in the fork and discarded.
-        """
-        var copy = RWKVStateBuffer(self.size)
-        var src_ptr = self.data.unsafe_ptr().unsafe_bitcast[UInt8]()
-        var dst_ptr = copy.data.unsafe_ptr().unsafe_bitcast[UInt8]()
-        _ = external_call["memcpy", Pointer[NoneType, MutUntrackedOrigin]](
-            dst_ptr,
-            src_ptr,
-            UInt(self.byte_size())
-        )
-        return copy^
+def check_native(result: c_int, operation: String) raises:
+    if result != 0:
+        raise Error(operation + " failed (native code " + String(Int(result)) + ")")
 
 
-struct RWKV7Runtime:
-    """Manages the RWKV-7 inference runtime, recurrent state buffer, and temporal anchor."""
-    var state: RWKVStateBuffer
-    var is_librwkv_loaded: Bool
-    var model_path: String
+struct RWKV7Session(Movable):
+    """Exclusive session ownership; close is idempotent and destruction releases it.
 
-    def __init__(out self, default_state_dim: Int = 4096):
-        # Default state dimension for testing/mock mode: 4096 elements
-        self.state = RWKVStateBuffer(default_state_dim)
-        self.is_librwkv_loaded = False
-        self.model_path = ""
+    Call operations serially. Do not share the raw handle or race close with calls.
+    CPU cancellation is sticky until reset; an interrupted decode additionally
+    requires verified native state restoration, which this binding does not expose.
+    """
+    var _handle: UInt
 
-    def check_library_available(mut self, lib_path: String) -> Bool:
-        var p = lib_path
-        var handle = external_call["dlopen", c_long](
-            p.as_c_string_span(),
-            c_int(1) # RTLD_LAZY
-        )
-        if handle != 0:
-            _ = external_call["dlclose", c_int](handle)
-            self.is_librwkv_loaded = True
-            return True
-        return False
+    def __init__(out self, path: String, context: Int = 4096, threads: Int = 4) raises:
+        self._handle = 0
+        if context < 128 or context > 32768 or threads < 1 or threads > 128:
+            raise Error("Invalid native session context or thread count")
+        if path == "" or len(path.as_bytes()) > 4096 or "\0" in path:
+            raise Error("Invalid native model path")
+        var model_path = path
+        var model = external_call["wb_model_open", UInt](model_path.as_c_string_span(), c_int(0))
+        if model == 0:
+            check_native(external_call["wb_error_code", c_int](), "Model load")
+            raise Error("Model load returned no handle")
+        self._handle = external_call["wb_session_new", UInt](model, c_uint(context), c_int(threads))
+        var result = external_call["wb_error_code", c_int]()
+        # The C session retains its model, including after the model handle closes.
+        external_call["wb_model_close", NoneType](model)
+        if self._handle == 0:
+            check_native(result, "Session creation")
+            raise Error("Session creation returned no handle")
 
-    def format_temporal_anchor(self, year: String = "2026") -> String:
-        return "[SYSTEM_ANCHOR]\n" +
-               "Current Date: " + year + "\n" +
-               "Strict Rule: The current year is " + year + ". Do NOT assume earlier dates.\n" +
-               "Temporal Rule: Any post-cutoff events MUST be verified via search.\n\n"
+    def __deinit__(deinit self):
+        if self._handle != 0:
+            external_call["wb_session_close", NoneType](self._handle)
 
-    def build_grounded_envelope(self, user_prompt: String, search_evidence: String = "") -> String:
-        var anchor = self.format_temporal_anchor()
-        var evidence_block = ""
-        if search_evidence != "":
-            evidence_block = "[VERIFIED_GROUND_TRUTH_SEARCH]\n" + search_evidence + "\n[END_GROUND_TRUTH]\n\n"
-        return anchor + evidence_block + "User: " + user_prompt + "\nGoose:"
+    def close(mut self):
+        if self._handle != 0:
+            external_call["wb_session_close", NoneType](self._handle)
+            self._handle = 0
 
+    def is_open(self) -> Bool:
+        return self._handle != 0
 
-def main() raises:
-    print("Testing RWKV7 Recurrent State Buffer...")
-    var buf = RWKVStateBuffer(1024)
-    print("Allocated State Elements:", buf.element_count())
-    print("Byte Size:", buf.byte_size())
+    def require_open(self) raises:
+        if self._handle == 0:
+            raise Error("Native session is closed")
 
-    # Test state clone
-    var cloned = buf.clone_state()
-    print("Cloned State Elements:", cloned.element_count())
+    def prefill(mut self, prompt: String) raises:
+        self.require_open()
+        var size = len(prompt.as_bytes())
+        if size == 0 or size > 65536:
+            raise Error("Prompt must contain 1 to 65536 UTF-8 bytes")
+        var text = prompt
+        check_native(external_call["wb_prefill", c_int](
+            self._handle, text.as_c_string_span(), c_int(size)), "Prefill")
 
-    # Test atomic disk serialization
-    var test_file = String("/tmp/rwkv7_test_state.bin")
-    buf.save_to_disk(test_file)
-    print("State saved atomically to:", test_file)
+    def next_piece(mut self) raises -> Tuple[Bool, List[UInt8]]:
+        """Return (end-of-generation, bytes); no string decoding or hidden token loop."""
+        self.require_open()
+        var output = List[UInt8](length=256, fill=0)
+        var size = List[c_int](length=1, fill=0)
+        var result = external_call["wb_next", c_int](self._handle,
+            output.unsafe_ptr(), c_int(len(output)), size.unsafe_ptr())
+        if result == -6:
+            var needed = Int(size[0])
+            if needed <= len(output) or needed > 65536:
+                raise Error("Native token exceeds the output byte budget")
+            for _ in range(needed - len(output)):
+                output.append(0)
+            result = external_call["wb_next", c_int](self._handle,
+                output.unsafe_ptr(), c_int(len(output)), size.unsafe_ptr())
+        if result == 1:
+            return (True, List[UInt8]())
+        check_native(result, "Token decode")
+        if size[0] < 0 or Int(size[0]) > len(output):
+            raise Error("Native token returned an invalid byte count")
+        var piece = List[UInt8]()
+        for i in range(Int(size[0])):
+            piece.append(output[i])
+        return (False, piece^)
 
-    var loaded = cloned.load_from_disk(test_file)
-    print("State loaded from disk:", loaded)
+    def cancel(mut self) raises:
+        self.require_open()
+        check_native(external_call["wb_session_cancel", c_int](self._handle), "Cancel")
 
-    var rt = RWKV7Runtime()
-    print("Grounded Envelope Check:\n" + rt.build_grounded_envelope("Check Linux kernel status"))
+    def reset_cancel(mut self) raises:
+        self.require_open()
+        check_native(external_call["wb_session_reset_cancel", c_int](self._handle), "Reset cancel")

@@ -29,4 +29,4 @@ The adapter was built against the pinned public runtime headers and verified ins
 
 Installed workshop library: `build/libomarchy_state.so`, SHA-256 `123f510d4bbcf85262a0ab378f1fe1393c10b194ff7cf9200c75d6eb440a08e2`. Its adjacent manifest records source/header/runtime hashes. The prior library and manifest are preserved in `deployment/backups/native-adapter-before-abi-hardening` in the parent workspace. Replacement used new files and atomic rename, preserving existing mappings rather than truncating a loaded library.
 
-The model service and native broker binary were not replaced. Mojo-to-C wiring, memory-grounded native conversation, runtime-derived backend/session status, sequenced streaming and durable turn recovery remain open under T09/T10. No 7.2B loading or training occurred.
+The model service and native broker binary were not replaced. The subsequent [compiled Mojo binding](mojo-model-binding-verification.md) now reaches the C adapter. Memory-grounded native conversation, runtime-derived backend/session status, sequenced streaming and durable turn recovery remain open under T09/T10. No 7.2B loading or training occurred.
