@@ -1,4 +1,4 @@
-"""Bounded read-only broker actions; native Mojo owns socket access and framing."""
+"""Bounded broker actions; native Mojo owns socket access and framing."""
 import ctypes
 import json
 import os
@@ -6,6 +6,8 @@ import re
 import urllib.error
 import urllib.request
 from app.runtime_clock import current_time
+from app.json_protocol import unique_object
+from app.task_worker_client import request as worker_request
 
 
 def landlock_abi() -> int:
@@ -24,15 +26,6 @@ def gateway(path: str, body: dict | None = None) -> dict:
     request = urllib.request.Request(f"http://127.0.0.1:{port}" + path, data, headers)
     with urllib.request.urlopen(request, timeout=120 if body else 3) as response:
         return json.load(response)
-
-
-def unique_object(pairs: list) -> dict:
-    result = {}
-    for key, value in pairs:
-        if key in result:
-            raise ValueError("duplicate key")
-        result[key] = value
-    return result
 
 
 def handle(frame: bytearray) -> str:
@@ -58,7 +51,7 @@ def handle(frame: bytearray) -> str:
             action, args = request.get("action"), request.get("args", {})
             if not isinstance(action, str) or not isinstance(args, dict):
                 raise ValueError("invalid action or args")
-        if action != 'chat' and args:
+        if action not in {'chat', 'task.status', 'task.validate'} and args:
             raise ValueError('action does not accept arguments')
         if action == "ping":
             result = {"ok": True, "result": "pong"}
@@ -92,6 +85,12 @@ def handle(frame: bytearray) -> str:
             response = gateway("/v1/chat/completions", {"messages": [{"role": "user", "content": prompt}],
                                "max_tokens": 256, "stream": False, "temperature": 0.3})
             result = {"ok": True, "result": response["choices"][0]["message"]["content"]}
+        elif action == 'worker_status':
+            result = worker_request('capabilities', timeout=45)
+        elif action in {'task.status', 'task.validate'}:
+            if set(args) != {'task_id'} or not isinstance(args['task_id'], str) or not re.fullmatch(r'[a-f0-9]{32}', args['task_id']):
+                raise ValueError('A valid task ID is required')
+            result = worker_request(action, args)
         else:
             result = {"ok": False, "error": "unsupported_v1_action" if version else "unsupported_command"}
     except UnicodeError:

@@ -54,7 +54,9 @@ def main() -> None:
                        'tests/test_native_sandbox.py', 'tests/test_combined_sandbox.py', '-q', '--tb=short']))
     if args.staging:
         checks.append(('Staged patch validation', [sys.executable, '-m', 'pytest',
-                       'tests/test_patch_staging.py', 'tests/test_patch_promotion.py', '-q', '--tb=short']))
+                       'tests/test_patch_staging.py', 'tests/test_patch_promotion.py', 'tests/test_task_worker.py', '-q', '--tb=short']))
+        if not args.offline:
+            checks.append(('Installed project worker boundary', [sys.executable, 'scripts/verify_task_worker_service.py']))
     failed = 0
     env = dict(os.environ, OMARCHY_BROKER_BINARY=str(binary))
     print('WSL test build. Tool execution, training and full desktop are not certified.')

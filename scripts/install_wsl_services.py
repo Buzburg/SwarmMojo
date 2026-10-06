@@ -73,6 +73,8 @@ def main() -> None:
     subprocess.run(['chown', '-R', 'rryan:rryan', str(home)], check=True)
     subprocess.run(['systemctl', 'daemon-reload'], check=True)
     subprocess.run(['systemctl', 'enable', '--now', *[name + '.service' for name in units]], check=True)
+    from install_task_worker import install
+    install()
     print('Installed services; use goose --status to check actual readiness.')
 
 

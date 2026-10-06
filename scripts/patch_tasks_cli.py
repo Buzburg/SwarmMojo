@@ -4,16 +4,16 @@ import asyncio
 import json
 import sys
 
-from app import patch_tasks, patch_promotion
+from app import patch_tasks, patch_promotion, task_worker_client
 from app.source_library import local_path
 
 
 async def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['register', 'propose', 'validate', 'show', 'list', 'review', 'apply', 'rollback'])
+    parser.add_argument('action', choices=['register', 'propose', 'validate', 'show', 'list', 'review', 'apply', 'rollback', 'worker-status'])
     parser.add_argument('value', nargs='?')
     args = parser.parse_args()
-    if args.action != 'list' and not args.value:
+    if args.action not in {'list', 'worker-status'} and not args.value:
         parser.error('A path or task ID is required')
     if args.action == 'register':
         result = await patch_tasks.register_project(args.value)
@@ -26,7 +26,15 @@ async def main() -> None:
             raise ValueError('Proposal fields must be project_id, base_commit, changes and checks')
         result = await patch_tasks.propose(**request)
     elif args.action == 'validate':
-        result = await patch_tasks.validate_task(args.value)
+        response = await asyncio.to_thread(task_worker_client.request, 'task.validate', {'task_id': args.value})
+        if not response['ok']:
+            detail = response.get('task', {}).get('error', response.get('detail', ''))
+            raise RuntimeError('Validation service: ' + response['error'] + ': ' + detail)
+        result = response['task']
+    elif args.action == 'worker-status':
+        result = await asyncio.to_thread(task_worker_client.request, 'capabilities', timeout=45)
+        if not result['ok']:
+            raise RuntimeError('Validation service: ' + result['error'] + ': ' + result.get('detail', ''))
     elif args.action in {'review', 'apply', 'rollback'}:
         rollback = args.action == 'rollback'
         result = patch_promotion.review(args.value, rollback=rollback)
@@ -59,4 +67,4 @@ if __name__ == '__main__':
     try:
         asyncio.run(main())
     except (OSError, ValueError, RuntimeError, EOFError) as error:
-        raise SystemExit(f'Patch operation failed: {error}') from error
+        raise SystemExit('Patch operation failed: ' + json.dumps(str(error), ensure_ascii=True)) from error
