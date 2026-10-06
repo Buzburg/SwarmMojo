@@ -22,6 +22,7 @@ def main() -> None:
     intake.add_argument('--library', action='store_true', help='Open the knowledge library menu')
     intake.add_argument('--project-workshop', action='store_true', help='Describe and review changes to selected project files')
     intake.add_argument('--system', action='store_true', help='Inspect services and open reviewed installed applications')
+    intake.add_argument('--voice', action='store_true', help='Talk with Goose using local speech models')
     intake.add_argument('--remove-source')
     intake.add_argument('--refresh-source')
     intake.add_argument('--cleanup-worker', help='Retry container cleanup for a retained task ID')
@@ -40,7 +41,7 @@ def main() -> None:
     args = parser.parse_args()
     operation = next(((name, value) for name, value in [
         ('file', args.add_file), ('repo', args.add_repo), ('folder', args.add_folder),
-        ('list', args.sources), ('menu', args.library), ('workshop', args.project_workshop), ('system', args.system), ('remove', args.remove_source),
+        ('list', args.sources), ('menu', args.library), ('workshop', args.project_workshop), ('system', args.system), ('voice', args.voice), ('remove', args.remove_source),
         ('refresh', args.refresh_source), ('cleanup', args.cleanup_worker),
         ('register', args.register_project), ('propose', args.stage_patch),
         ('validate', args.validate_patch), ('worker-status', args.worker_status), ('recover-workers', args.recover_workers),
@@ -50,6 +51,21 @@ def main() -> None:
         if args.status or args.doctor or args.prompt:
             parser.error('Management actions cannot be combined with chat, --status or --doctor')
         action, value = operation
+        if action == 'voice':
+            if args.preview:
+                parser.error('--preview does not apply to voice')
+            voice_python = Path('/opt/goose-voice-env/bin/python')
+            if not voice_python.is_file():
+                raise SystemExit('Voice is not installed. See docs/voice.md for setup.')
+            allowed = {'HOME', 'USER', 'LOGNAME', 'LANG', 'LC_ALL', 'TERM', 'COLORTERM',
+                       'PULSE_SERVER', 'XDG_RUNTIME_DIR', 'WAYLAND_DISPLAY', 'DISPLAY',
+                       'DBUS_SESSION_BUS_ADDRESS', 'TZ', 'ROMS_GATEWAY_API_KEY'}
+            environment = {key: val for key, val in os.environ.items() if key in allowed}
+            environment.update(PATH='/usr/local/bin:/usr/bin:/bin', PYTHONNOUSERSITE='1',
+                               PYTHONPATH=str(Path(__file__).resolve().parents[1]),
+                               OMP_NUM_THREADS='2', MKL_NUM_THREADS='2', OPENBLAS_NUM_THREADS='2',
+                               TOKENIZERS_PARALLELISM='false')
+            os.execve(str(voice_python), [str(voice_python), '-m', 'scripts.voice_chat'], environment)
         command = ['/usr/bin/python', str(Path(__file__).with_name('run_linux_env.py')), 'python', '-m']
         if action in {'workshop', 'system'}:
             if args.preview:
@@ -94,7 +110,7 @@ def main() -> None:
             print(json.dumps(json.loads(data), indent=2))
         return
     messages: list[dict[str, str]] = []
-    print('Goose — local Omarchy test build. Type /exit to leave, /reset to clear this chat, /project to edit a project, /system for system controls.')
+    print('Goose — local Omarchy test build. Type /exit to leave, /reset to clear this chat, /project to edit a project, /system for system controls, /voice to talk.')
     headers = {'Content-Type': 'application/json',
                'Authorization': 'Bearer ' + os.environ['ROMS_GATEWAY_API_KEY']}
     deadline = time.monotonic() + 90
@@ -123,8 +139,8 @@ def main() -> None:
         if prompt == '/reset':
             messages.clear()
             continue
-        if prompt in {'/project', '/system'}:
-            subprocess.run(['/usr/local/bin/goose', '--project-workshop' if prompt == '/project' else '--system'], check=False)
+        if prompt in {'/project', '/system', '/voice'}:
+            subprocess.run(['/usr/local/bin/goose', {'/project': '--project-workshop', '/system': '--system', '/voice': '--voice'}[prompt]], check=False)
             if args.prompt:
                 break
             continue

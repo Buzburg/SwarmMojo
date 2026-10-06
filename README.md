@@ -41,6 +41,8 @@ The default embedding model is `sentence-transformers/all-MiniLM-L6-v2`. Its fir
 
 ## Optional chat gateway
 
+The Omarchy test build also provides an optional CPU voice client: `goose --voice` starts push-to-talk conversation with local speech recognition and spoken replies. It uses a separate speech environment. See [voice setup, controls and verification limits](docs/voice.md).
+
 Start your own OpenAI-compatible model server, then run:
 
 ```powershell
