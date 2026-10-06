@@ -1,6 +1,6 @@
 # Reproducible model inputs — October 5, 2026
 
-`config/build-inputs.json` records exact filenames, sizes and SHA-256 identities for the two supplied GGUF models, the default 2.9B selection, the native runtime repository/revision and the unchanged reviewed `pixi.lock` identity. The hashes identify user-supplied bytes; they are not publisher authentication. Both publisher-provenance fields remain `unverified`, and neither model has an invented download URL. The 7.2B model remains deferred for deployment/training.
+`config/build-inputs.json` records exact filenames, sizes and SHA-256 identities for the two supplied GGUF models, the default 2.9B selection, the native runtime repository/revision and the unchanged reviewed `pixi.lock` identity. These initially identified only user-supplied bytes. A subsequent [compatibility and provenance check](model-compatibility-verification.md) matched both against immutable publisher LFS records and added the actual pinned download URLs. The 7.2B model remains deferred for deployment/training.
 
 ## Use
 

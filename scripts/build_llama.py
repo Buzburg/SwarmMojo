@@ -1,5 +1,6 @@
 """Build the pinned GGUF runtime on Linux without installing a service."""
 from pathlib import Path
+import argparse
 import hashlib
 import json
 import subprocess
@@ -42,6 +43,9 @@ def patched_source(root: Path) -> Path:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--backend', choices=('cpu', 'vulkan'), default='cpu')
+    backend = parser.parse_args().backend
     root = Path.home() / ".local/share/omarchy-harness/llama.cpp"
     root.parent.mkdir(parents=True, exist_ok=True)
     if not root.exists():
@@ -59,11 +63,11 @@ def main() -> None:
         raise RuntimeError('Runtime source revision does not match the pinned input record')
     verify_clean_source(root)
     root = patched_source(root)
-    build = root / "build-cpu"
+    build = root / ('build-' + backend)
     if any(path.exists() or path.is_symlink() for path in (root / 'tools/ui/dist', build / 'tools/ui/dist')):
         raise RuntimeError('Preserve and relocate existing UI assets before building the headless runtime')
     subprocess.run(["cmake", "-S", str(root), "-B", str(build),
-                    "-DCMAKE_BUILD_TYPE=Release", "-DGGML_VULKAN=OFF",
+                    "-DCMAKE_BUILD_TYPE=Release", '-DGGML_VULKAN=' + ('ON' if backend == 'vulkan' else 'OFF'),
                     "-DLLAMA_CURL=OFF", "-DLLAMA_BUILD_TESTS=OFF",
                     "-DLLAMA_BUILD_UI=OFF", "-DLLAMA_USE_PREBUILT_UI=OFF"], check=True)
     subprocess.run(["cmake", "--build", str(build), "--target", "llama-server",
@@ -72,7 +76,7 @@ def main() -> None:
                  for path in sorted((build / 'bin').iterdir()) if path.is_file() and path.name != 'omarchy-runtime.json'}
     (build / 'bin/omarchy-runtime.json').write_text(json.dumps({
         'schema_version': 1, 'revision': REVISION, 'local_patch_sha256': INPUTS['runtime']['local_patch']['sha256'],
-        'embedded_ui': False, 'artifacts': artifacts}, indent=2) + '\n')
+        'backend': backend, 'embedded_ui': False, 'artifacts': artifacts}, indent=2) + '\n')
     print(f"Built pinned runtime {REVISION}: {build / 'bin'}", flush=True)
 
 

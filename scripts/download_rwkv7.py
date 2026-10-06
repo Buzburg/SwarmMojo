@@ -121,7 +121,8 @@ def acquire(url: str, destination: Path, spec: dict) -> dict:
             finally:
                 os.close(directory)
         return {'status': 'verified_download', 'path': str(destination), 'format': 'GGUF',
-                'bytes': total, 'sha256': digest.hexdigest(), 'publisher_provenance': 'unverified'}
+                'bytes': total, 'sha256': digest.hexdigest(),
+                'publisher_provenance': spec.get('publisher_provenance', 'unverified')}
     finally:
         temporary.unlink(missing_ok=True)
 

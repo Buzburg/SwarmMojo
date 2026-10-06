@@ -142,7 +142,11 @@ def test_lockfile_identity_matches_reviewed_manifest():
     assert inputs['default_model'] == '2.9b'
     for spec in inputs['models'].values():
         models.validate_spec(spec)
-        assert spec['filename'].endswith('.gguf') and spec['url'] is None
+        assert spec['filename'].endswith('.gguf')
+        assert models.validate_url(spec['url']) == spec['url']
+        assert '/' + spec['publisher_revision'] + '/' in spec['url']
+        assert (models.ROOT / spec['publisher_pointer']).read_text().splitlines() == [
+            'version https://git-lfs.github.com/spec/v1', 'oid sha256:' + spec['sha256'], 'size ' + str(spec['bytes'])]
 
 
 @pytest.mark.parametrize('dirty,origin', [(True, 'expected'), (False, 'https://unexpected.example/source.git')])
