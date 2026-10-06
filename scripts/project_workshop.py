@@ -6,6 +6,9 @@ from pathlib import Path
 import httpx
 
 from app import patch_tasks, patch_promotion, project_assistant, task_worker_client
+from app.workbench.context import CodeIndex, compact_log
+from app.workbench.integrations import review_task
+from app.workbench.receipts import Collector
 
 
 def display(value: str) -> None:
@@ -77,13 +80,21 @@ async def main() -> None:
     print('This test build supports Python syntax and unittest checks. Selected files may total up to 4 KiB.')
     project = await select_project()
     files, checks = select_files(project)
-    print('Describe a change. Use /files to change the selection, or /exit to return.')
+    print('Describe a change. Use /find NAME for code locations, /files to change the selection, or /exit to return.')
     while True:
         instruction = input('\nChange: ').strip()
         if instruction == '/exit':
             return
         if instruction == '/files':
             files, checks = select_files(project)
+            continue
+        if instruction.startswith('/find '):
+            try:
+                found = CodeIndex(Path(project['source'])).query(instruction[6:].strip())
+                display(json.dumps(found, indent=2))
+                print('Locations are advisory. Use /files to select editable files explicitly.')
+            except (OSError, ValueError) as error:
+                display(str(error))
             continue
         if not instruction:
             continue
@@ -96,9 +107,19 @@ async def main() -> None:
             if not response['ok']:
                 detail = response.get('task', {}).get('error', response.get('detail', response['error']))
                 display('Checks did not pass: ' + detail)
+                failed_task = response.get('task', {})
+                for evidence in failed_task.get('evidence', []):
+                    display(compact_log(evidence.get('output', ''))['text'])
                 print('Inspect this draft with goose --show-patch ' + task['id'])
                 continue
             print('Selected checks passed. Review the actual changes below.')
+            advisory = await review_task(task['id'], Collector())
+            print('Advisory code review: ' + advisory['status'])
+            for finding in advisory.get('findings', [])[:20]:
+                display(json.dumps(finding, ensure_ascii=True))
+            if advisory.get('reason'):
+                display(advisory['reason'])
+            print('Evidence receipt: ' + advisory['receipt']['id'])
             if await approve(response['task']):
                 if input('Press Enter for another change, or type UNDO to review a rollback: ').strip() == 'UNDO':
                     await approve(response['task'], rollback=True)

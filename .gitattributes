@@ -1,1 +1,2 @@
 config/llama-cancellation.patch text eol=lf whitespace=-blank-at-eol
+app/workbench/vendor/** -text

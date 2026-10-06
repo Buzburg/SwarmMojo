@@ -54,6 +54,8 @@ build/
 # Unreviewed generated skills and local reference archives
 /skills/_candidates/
 /config/worker-image.local.json
+/config/workbench.local.json
+/.workflowproof/
 *.zip
 *.gguf
 *.pth
