@@ -1,5 +1,5 @@
 """Durable at-most-once dispatch for the broker's registered validation action."""
-from collections.abc import Callable, Iterator
+from collections.abc import Awaitable, Callable, Iterator
 from contextlib import contextmanager
 import fcntl
 import json
@@ -111,7 +111,28 @@ def available_slot(root: Path) -> None:
         raise protocol.ProtocolError('JOURNAL_FULL', 'Request history is full; retained requests remain replayable')
 
 
-def execute(request: dict, operation: Callable[[], str]) -> str:
+def saved_response(record: dict, request: dict) -> str:
+    if record['digest'] != sha(canonical(request)):
+        raise protocol.ProtocolError('CONFLICT', 'This request ID is already bound to different arguments')
+    if record['response'] is None:
+        raise protocol.ProtocolError('REQUEST_UNCERTAIN', 'No completed reply is recorded; query task.status for the retained task')
+    return record['response']
+
+
+def replay(request: dict) -> str | None:
+    """Return a prior reply before queue admission, without reserving a new ID."""
+    try:
+        with journal() as root, locked(root):
+            record = read_record(root / (request['id'] + '.json'))
+            return None if record is None else saved_response(record, request)
+    except protocol.ProtocolError:
+        raise
+    except (OSError, ValueError, TypeError, KeyError, RecursionError) as error:
+        raise protocol.ProtocolError('JOURNAL_UNAVAILABLE', 'The request journal is unavailable; no validation was dispatched') from error
+
+
+@contextmanager
+def reservation(request: dict) -> Iterator[tuple[Path, dict]]:
     dispatched = False
     try:
         with journal() as root:
@@ -120,23 +141,14 @@ def execute(request: dict, operation: Callable[[], str]) -> str:
             with locked(root):
                 record = read_record(path)
                 if record is not None:
-                    if record['digest'] != digest:
-                        raise protocol.ProtocolError('CONFLICT', 'This request ID is already bound to different arguments')
-                    if record['response'] is None:
-                        raise protocol.ProtocolError('REQUEST_UNCERTAIN', 'No completed reply is recorded; query task.status for the retained task')
-                    return record['response']
-                available_slot(root)
-                record = {'request': request, 'digest': digest, 'response': None, 'response_sha256': None}
-                durable_json(path, record)
+                    saved_response(record, request)
+                else:
+                    available_slot(root)
+                    record = {'request': request, 'digest': digest, 'response': None, 'response_sha256': None}
+                    durable_json(path, record)
             # Intent and its directory entry are durable before any worker contact.
-            dispatched = True
-            response = operation()
-            record.update(response=response, response_sha256=sha(response.encode()))
-            with locked(root):
-                if read_record(path) != dict(record, response=None, response_sha256=None):
-                    raise ValueError('Request intent changed during dispatch')
-                durable_json(path, record)
-            return response
+            dispatched = record['response'] is None
+            yield root, record
     except protocol.ProtocolError as error:
         if dispatched:
             raise protocol.ProtocolError('REQUEST_UNCERTAIN', 'No completed reply is confirmed; query task.status for the retained task') from error
@@ -146,3 +158,22 @@ def execute(request: dict, operation: Callable[[], str]) -> str:
         message = ('No completed reply is confirmed; query task.status for the retained task' if dispatched else
                    'The request journal is unavailable; no validation was dispatched')
         raise protocol.ProtocolError(code, message) from error
+
+
+def complete(root: Path, record: dict, response: str) -> str:
+    path = root / (record['request']['id'] + '.json')
+    with locked(root):
+        if read_record(path) != record:
+            raise ValueError('Request intent changed during dispatch')
+        durable_json(path, dict(record, response=response, response_sha256=sha(response.encode())))
+    return response
+
+
+def execute(request: dict, operation: Callable[[], str]) -> str:
+    with reservation(request) as (root, record):
+        return record['response'] if record['response'] is not None else complete(root, record, operation())
+
+
+async def execute_async(request: dict, operation: Callable[[], Awaitable[str]]) -> str:
+    with reservation(request) as (root, record):
+        return record['response'] if record['response'] is not None else complete(root, record, await operation())

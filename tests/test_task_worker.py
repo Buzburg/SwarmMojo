@@ -105,7 +105,7 @@ def test_existing_endpoint_is_never_replaced(tmp_path):
 def test_real_validation_through_native_broker_keeps_no_new_privileges(worker, project, tmp_path):
     task = staged(project)
     broker_socket = tmp_path / 'broker.sock'
-    binary = Path(os.getenv('ROMS_PYTHON_PREFIX', '/opt/roms-env')) / 'bin/omarchy-broker'
+    binary = Path(os.getenv('OMARCHY_BROKER_BINARY', str(Path(os.getenv('ROMS_PYTHON_PREFIX', '/opt/roms-env')) / 'bin/omarchy-broker')))
     def restrict_broker():
         libc = ctypes.CDLL(None)
         if libc.prctl(38, 1, 0, 0, 0):

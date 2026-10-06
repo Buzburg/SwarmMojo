@@ -1,5 +1,5 @@
 """Native authenticated socket transport with Python JSON and ROMS integration."""
-from std.python import Python
+from std.python import Python, PythonObject
 from std.ffi import c_int, c_uint, c_long, external_call
 from std.os import stat
 from std.os.env import getenv
@@ -10,6 +10,7 @@ comptime AF_UNIX = 1
 comptime SOCK_STREAM_FLAGS = 1 | 0x800 | 0x80000  # NONBLOCK | CLOEXEC
 comptime MSG_NOSIGNAL = 0x4000
 comptime MAX_FRAME = 65536
+comptime MAX_CONNECTIONS = 16
 
 
 def monotonic_milliseconds() raises -> Int:
@@ -86,37 +87,95 @@ def send_response(fd: c_int, response: String):
             _ = external_call["usleep", c_int](c_uint(20000))
 
 
-def receive_request(fd: c_int) raises -> String:
-    var buffer = List[UInt8]()
-    for _ in range(MAX_FRAME + 1):
-        buffer.append(0)
-    var used = 0
-    var deadline = monotonic_milliseconds() + 5000
-    while monotonic_milliseconds() < deadline:
-        var n = external_call["recv", c_long](
-            fd, buffer.unsafe_ptr().unsafe_offset(used),
-            UInt(MAX_FRAME + 1 - used), c_int(0))
-        if n == 0:
-            return transport_error("INCOMPLETE_REQUEST", "Connection closed before a complete frame")
-        if n < 0:
-            if not retryable_error():
-                return transport_error("CONNECTION_ERROR", "Could not read the request frame")
-            _ = external_call["usleep", c_int](c_uint(20000))
-            continue
-        used += Int(n)
-        for i in range(used):
-            if buffer[i] == 10:
-                if i != used - 1:
-                    return transport_error("MULTIPLE_FRAMES", "Only one frame is accepted per connection")
-                var builtins = Python.import_module("builtins")
-                var actions = Python.import_module("app.broker_actions")
-                var frame = builtins.bytearray()
-                for j in range(i):
-                    _ = frame.append(Int(buffer[j]))
-                return String(actions.handle(frame))
-        if used > MAX_FRAME:
-            return transport_error("REQUEST_TOO_LARGE", "Request exceeds the 65536-byte frame limit")
-    return transport_error("REQUEST_TIMEOUT", "Request frame was not completed within five seconds")
+struct Client(Movable):
+    var fd: c_int
+    var buffer: List[UInt8]
+    var used: Int
+    var deadline: Int
+    var phase: Int  # 0 frame, 1 asynchronous action, 2 response.
+    var token: Int
+    var response: String
+    var sent: Int
+
+    def __init__(out self, fd: c_int, now: Int):
+        self.fd = fd
+        self.buffer = List[UInt8]()
+        for _ in range(MAX_FRAME + 1):
+            self.buffer.append(0)
+        self.used = 0
+        self.deadline = now + 5000
+        self.phase = 0
+        self.token = -1
+        self.response = String("")
+        self.sent = 0
+
+    def reply(mut self, response: String, now: Int):
+        self.response = response
+        self.phase = 2
+        self.deadline = now + 2000
+
+
+def peer_gone(fd: c_int) -> Bool:
+    # Linux x86-64 pollfd: s32 fd, s16 events, s16 revents. HUP distinguishes
+    # a closed peer from a legitimate write-half-close awaiting its response.
+    var pollfd = List[c_int]()
+    pollfd.append(fd)
+    pollfd.append(0)
+    var result = external_call["poll", c_int](pollfd.unsafe_ptr(), UInt(1), c_int(0))
+    return result > 0 and (Int(pollfd[1]) >> 16) & 0x38 != 0
+
+
+def drive(mut client: Client, scheduler: PythonObject, now: Int) raises -> Bool:
+    if client.phase == 0:
+        if now >= client.deadline:
+            client.reply(transport_error("REQUEST_TIMEOUT", "Request frame was not completed within five seconds"), now)
+        else:
+            var n = external_call["recv", c_long](client.fd,
+                client.buffer.unsafe_ptr().unsafe_offset(client.used), UInt(MAX_FRAME + 1 - client.used), c_int(0))
+            if n == 0:
+                client.reply(transport_error("INCOMPLETE_REQUEST", "Connection closed before a complete frame"), now)
+            elif n < 0:
+                if not retryable_error():
+                    return False
+            else:
+                var previous = client.used
+                client.used += Int(n)
+                for i in range(previous, client.used):
+                    if client.buffer[i] == 10:
+                        if i != client.used - 1:
+                            client.reply(transport_error("MULTIPLE_FRAMES", "Only one frame is accepted per connection"), now)
+                            break
+                        var builtins = Python.import_module("builtins")
+                        var frame = builtins.bytearray()
+                        for j in range(i):
+                            _ = frame.append(Int(client.buffer[j]))
+                        var submitted = scheduler.submit(frame)
+                        client.token = Int(py=submitted[0])
+                        if client.token < 0:
+                            client.reply(String(submitted[1]), now)
+                        else:
+                            client.phase = 1
+                        break
+                if client.phase == 0 and client.used > MAX_FRAME:
+                    client.reply(transport_error("REQUEST_TOO_LARGE", "Request exceeds the 65536-byte frame limit"), now)
+    if client.phase == 1:
+        if peer_gone(client.fd):
+            _ = scheduler.detach(client.token)
+            return False
+        if Bool(scheduler.ready(client.token)):
+            client.reply(String(scheduler.take(client.token)), now)
+    if client.phase == 2:
+        if now >= client.deadline:
+            return False
+        var bytes = client.response.as_bytes()
+        var n = external_call["send", c_long](client.fd, bytes.unsafe_ptr().unsafe_offset(client.sent),
+                                            UInt(len(bytes) - client.sent), c_int(MSG_NOSIGNAL))
+        if n > 0:
+            client.sent += Int(n)
+            return client.sent < len(bytes)
+        if n == 0 or not retryable_error():
+            return False
+    return True
 
 
 def same_user(fd: c_int) -> Bool:
@@ -131,18 +190,39 @@ def same_user(fd: c_int) -> Bool:
 
 
 def serve(fd: c_int) raises:
-    while True:
-        # sockaddr is not requested; nonblocking accepted descriptors are explicit.
-        var client = external_call["accept4", c_int](
-            fd, UInt(0), UInt(0), c_int(0x800 | 0x80000))
-        if client < 0:
-            if not retryable_error():
-                raise Error("accept failed with a non-retryable error")
-            _ = external_call["usleep", c_int](c_uint(20000))
-            continue
-        if same_user(client):
-            send_response(client, receive_request(client))
-        _ = external_call["close", c_int](client)
+    var module = Python.import_module("app.broker_scheduler")
+    var scheduler = module.Scheduler()
+    var clients = List[Client]()
+    try:
+        while True:
+            _ = scheduler.tick()
+            var now = monotonic_milliseconds()
+            var i = 0
+            while i < len(clients):
+                if not drive(clients[i], scheduler, now):
+                    _ = external_call["close", c_int](clients[i].fd)
+                    _ = clients.pop(i)
+                else:
+                    i += 1
+            # Bound acceptance per iteration so traffic cannot starve active work.
+            for _ in range(MAX_CONNECTIONS):
+                var client = external_call["accept4", c_int](fd, UInt(0), UInt(0), c_int(0x800 | 0x80000))
+                if client < 0:
+                    if not retryable_error():
+                        raise Error("accept failed with a non-retryable error")
+                    break
+                if same_user(client) and len(clients) < MAX_CONNECTIONS:
+                    clients.append(Client(client, monotonic_milliseconds()))
+                else:
+                    if same_user(client):
+                        send_response(client, transport_error("QUEUE_FULL", "The broker connection limit is reached"))
+                    _ = external_call["close", c_int](client)
+            _ = external_call["usleep", c_int](c_uint(10000))
+    except error:
+        for i in range(len(clients)):
+            _ = external_call["close", c_int](clients[i].fd)
+        _ = scheduler.close()
+        raise error
 
 
 def main() raises:

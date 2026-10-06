@@ -35,13 +35,17 @@ def build_status() -> dict:
             raise ValueError('Invalid gateway health response')
     except (OSError, ValueError):
         health = {}
-    model_ready = health.get('upstream_ready') is True
-    gateway_ready = health.get('status') == 'ready'
     try:
         worker = worker_request('ping', timeout=1)
         worker_reachable = worker.get('ok') is True and worker.get('result') == 'pong'
     except (OSError, ValueError):
         worker_reachable = False
+    return status_result(health, worker_reachable)
+
+
+def status_result(health: dict, worker_reachable: bool) -> dict:
+    model_ready = health.get('upstream_ready') is True
+    gateway_ready = health.get('status') == 'ready'
     return {
         'ok': True, 'transport': 'native-mojo-unix', 'profile': 'omarchy-wsl-test',
         'rwkv7': 'ready' if model_ready else 'not_connected',
@@ -68,6 +72,21 @@ def build_status() -> dict:
     }
 
 
+def validate_action(action: str, args: dict) -> None:
+    supported = {'ping', 'status', 'rwkv_status', 'mock', 'anchor', 'sandbox_status', 'landlock_probe',
+                 'telemetry', 'os_controller', 'chat', 'worker_status', 'worker_recovery', 'task.status', 'task.validate'}
+    if action not in supported:
+        raise protocol.ProtocolError('NOT_IMPLEMENTED', 'This broker action is not implemented')
+    if action == 'chat':
+        if set(args) != {'prompt'} or not isinstance(args['prompt'], str) or not args['prompt'].strip():
+            raise ValueError('chat requires a text prompt')
+    elif action in {'task.status', 'task.validate'}:
+        if set(args) != {'task_id'} or not isinstance(args['task_id'], str) or not re.fullmatch(r'[a-f0-9]{32}', args['task_id']):
+            raise ValueError('A valid task ID is required')
+    elif args:
+        raise ValueError('action does not accept arguments')
+
+
 def handle(frame: bytearray) -> str:
     result: dict
     request_id = None
@@ -79,12 +98,7 @@ def handle(frame: bytearray) -> str:
             request = protocol.parse(bytes(frame))
             request_id = request['id']
             action, args = request['action'], request['args']
-        supported = {'ping', 'status', 'rwkv_status', 'mock', 'anchor', 'sandbox_status', 'landlock_probe',
-                     'telemetry', 'os_controller', 'chat', 'worker_status', 'worker_recovery', 'task.status', 'task.validate'}
-        if action not in supported:
-            raise protocol.ProtocolError('NOT_IMPLEMENTED', 'This broker action is not implemented')
-        if action not in {'chat', 'task.status', 'task.validate'} and args:
-            raise ValueError('action does not accept arguments')
+        validate_action(action, args)
         if action == "ping":
             result = {"ok": True, "result": "pong"}
         elif action in ("status", "rwkv_status"):
@@ -109,8 +123,6 @@ def handle(frame: bytearray) -> str:
                       "reason": "Desktop adapters are not integrated; use the reviewed project workshop for file edits"}
         elif action == "chat":
             prompt = args.get("prompt")
-            if set(args) != {"prompt"} or not isinstance(prompt, str) or not prompt.strip():
-                raise ValueError("chat requires a text prompt")
             response = gateway("/v1/chat/completions", {"messages": [{"role": "user", "content": prompt}],
                                "max_tokens": 256, "stream": False, "temperature": 0.3})
             result = {"ok": True, "result": response["choices"][0]["message"]["content"]}
@@ -119,8 +131,6 @@ def handle(frame: bytearray) -> str:
         elif action == 'worker_recovery':
             result = worker_request('recovery', timeout=5)
         elif action in {'task.status', 'task.validate'}:
-            if set(args) != {'task_id'} or not isinstance(args['task_id'], str) or not re.fullmatch(r'[a-f0-9]{32}', args['task_id']):
-                raise ValueError('A valid task ID is required')
             if action == 'task.validate':
                 from app import broker_requests
                 return broker_requests.execute(request, lambda: encode_result(worker_request(action, args), request_id))
