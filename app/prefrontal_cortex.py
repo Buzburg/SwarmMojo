@@ -20,6 +20,11 @@ import hashlib
 import argparse
 from pathlib import Path
 
+if __package__:
+    from .context_select import select_context
+else:
+    from context_select import select_context
+
 try:
     from app.config import DATA_DIR
     DEFAULT_STATE_DIR = str(Path(DATA_DIR) / "prefrontal")
@@ -954,53 +959,6 @@ class TernaryToolRouter:
 # ============================================================================
 # 7. RUNTIME PRIMITIVES (0/1 KNAPSACK, PROMPT LOOKUP, PREFIX TRIE, BINARYVEC)
 # ============================================================================
-
-def select_context(
-    costs: list,
-    utilities: list,
-    budget: int,
-    required: int = -1
-) -> list:
-    n = len(costs)
-    if n != len(utilities) or n > 64 or budget < 0 or budget > 20000:
-        raise ValueError("Invalid context selector dimensions or budget")
-    if required < -1 or required >= n:
-        raise ValueError("Invalid required record")
-    total = 0
-    for i in range(n):
-        if costs[i] < 1 or costs[i] > 20000 or utilities[i] < 1 or utilities[i] > 1000000:
-            raise ValueError("Invalid record cost or utility")
-        total += costs[i]
-    if required >= 0 and costs[required] > budget:
-        raise ValueError("Required record cannot fit")
-    if total <= budget:
-        return list(range(n))
-
-    remaining = budget - (costs[required] if required >= 0 else 0)
-    width = remaining + 1
-    scores = [0] * width
-    decisions = [False] * (n * width)
-
-    for i in range(n):
-        if i == required:
-            continue
-        weight = costs[i]
-        value = utilities[i]
-        for capacity in range(remaining, weight - 1, -1):
-            proposed = scores[capacity - weight] + value
-            if proposed > scores[capacity]:
-                scores[capacity] = proposed
-                decisions[i * width + capacity] = True
-
-    chosen = [i == required for i in range(n)]
-    capacity = remaining
-    for i in range(n - 1, -1, -1):
-        if decisions[i * width + capacity]:
-            chosen[i] = True
-            capacity -= costs[i]
-
-    return [i for i in range(n) if chosen[i]]
-
 
 def prompt_lookup(history: list, window: int, limit: int) -> list:
     if window < 1 or limit < 1 or len(history) <= window:

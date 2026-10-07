@@ -10,11 +10,13 @@ import pytest
 
 from app import memory
 from app.context_select import select_context
+from app.prefrontal_cortex import select_context as legacy_select_context
 from app.memory_context import prepare_context
 from app.memory_tools import register_memory_tools
 
 
-def test_selector_matches_exhaustive_optimum() -> None:
+@pytest.mark.parametrize('selector', [select_context, legacy_select_context])
+def test_selector_matches_exhaustive_optimum(selector) -> None:
     rng = random.Random(717)
     for _ in range(150):
         count = rng.randrange(1, 9)
@@ -24,7 +26,7 @@ def test_selector_matches_exhaustive_optimum() -> None:
         required = rng.randrange(-1, count)
         if required >= 0 and costs[required] > budget:
             required = -1
-        actual = select_context(costs, values, budget, required)
+        actual = selector(costs, values, budget, required)
         valid = [items for n in range(count + 1) for items in itertools.combinations(range(count), n)
                  if sum(costs[i] for i in items) <= budget and (required < 0 or required in items)]
         optimum = max(sum(values[i] for i in items) for items in valid)
@@ -33,11 +35,12 @@ def test_selector_matches_exhaustive_optimum() -> None:
         assert sum(costs[i] for i in actual) <= budget
 
 
-def test_packing_beats_prefix_and_preserves_required_warning() -> None:
-    assert select_context([9, 5, 5], [10, 8, 8], 10) == [1, 2]
-    assert select_context([9, 5, 5], [10, 8, 8], 10, 0) == [0]
-    assert select_context([5, 5], [10, 10], 5) == [0]
-    assert select_context([], [], 0) == []
+@pytest.mark.parametrize('selector', [select_context, legacy_select_context])
+def test_packing_beats_prefix_and_preserves_required_warning(selector) -> None:
+    assert selector([9, 5, 5], [10, 8, 8], 10) == [1, 2]
+    assert selector([9, 5, 5], [10, 8, 8], 10, 0) == [0]
+    assert selector([5, 5], [10, 10], 5) == [0]
+    assert selector([], [], 0) == []
 
 
 @pytest.mark.parametrize('costs,values,budget,required', [
@@ -45,10 +48,13 @@ def test_packing_beats_prefix_and_preserves_required_warning() -> None:
     ([1], [0], 5, -1), ([1], [1000001], 5, -1), ([1], [1], -1, -1),
     ([1], [1], 20001, -1), ([1]*65, [1]*65, 10, -1),
     ([1], [1], 5, 1), ([10], [1], 5, 0), ([True], [1], 5, -1),
+    ([1], [True], 5, -1), ([1], [1], True, -1), ([1], [1], 5, True),
+    ([1.0], [1], 5, -1), ([1], [1.0], 5, -1),
 ])
-def test_selector_rejects_bad_inputs(costs: list[int], values: list[int], budget: int, required: int) -> None:
+@pytest.mark.parametrize('selector', [select_context, legacy_select_context])
+def test_selector_rejects_bad_inputs(selector, costs: list[int], values: list[int], budget: int, required: int) -> None:
     with pytest.raises(ValueError):
-        select_context(costs, values, budget, required)
+        selector(costs, values, budget, required)
 
 
 @pytest.fixture
