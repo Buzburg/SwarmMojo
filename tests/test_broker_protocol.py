@@ -37,7 +37,8 @@ def test_depth_limit_counts_containers_but_not_string_contents(monkeypatch):
     assert protocol.parse(json.dumps(request).encode()) == request  # root + args + 14 arrays
     request['args']['nested'] = [nested]
     assert send(request)['error']['code'] == 'INVALID_REQUEST'
-    monkeypatch.setattr(broker_actions, 'gateway', lambda *_: {'choices': [{'message': {'content': 'ok'}}]})
+    monkeypatch.setattr(broker_actions, 'gateway', lambda *_: {
+        'choices': [{'message': {'content': 'ok'}, 'finish_reason': 'stop'}]})
     assert send(dict(REQUEST, action='chat', args={'prompt': 'escaped "\\ brackets ' + '[{' * 100}))['result'] == 'ok'
 
 
@@ -63,7 +64,8 @@ def test_memory_search_requires_scope_before_service_start(monkeypatch):
 
 
 def test_oversized_response_fails_with_safe_bounded_error(monkeypatch):
-    monkeypatch.setattr(broker_actions, 'gateway', lambda *_: {'choices': [{'message': {'content': 'x' * 65536}}]})
+    monkeypatch.setattr(broker_actions, 'gateway', lambda *_: {
+        'choices': [{'message': {'content': 'x' * 65536}, 'finish_reason': 'stop'}]})
     response = send(dict(REQUEST, action='chat', args={'prompt': 'fixture'}))
     assert response['error']['code'] == 'RESPONSE_TOO_LARGE'
     assert response['id'] == REQUEST['id'] and len(json.dumps(response)) < 256

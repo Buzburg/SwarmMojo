@@ -41,6 +41,7 @@ from app.trajectory_recorder import start_session, finish_session
 from app.project_model import draft_completion
 from app.os_model import plan_completion
 from app.goose_response import decode_completed_response
+from app.completion_status import StreamCompletion, response_complete
 from app.request_lifecycle import ClientDisconnected, while_connected
 
 app = Starlette(debug=False)
@@ -205,6 +206,7 @@ async def chat_completions(request: Request) -> Response:
 
     if stream:
         async def stream_generator() -> AsyncGenerator[bytes, None]:
+            completion = StreamCompletion(body.get('n', 1))
             try:
                 async with httpx.AsyncClient(timeout=120.0) as client:
                     async with client.stream(
@@ -212,9 +214,13 @@ async def chat_completions(request: Request) -> Response:
                     ) as upstream_resp:
                         upstream_resp.raise_for_status()
                         async for chunk in upstream_resp.aiter_bytes():
+                            completion.feed(chunk)
                             yield chunk
                 if session_id:
-                    finish_session(session_id=session_id, success=True, final_result="Streamed completion successfully")
+                    complete = completion.complete()
+                    finish_session(session_id=session_id, success=complete,
+                                   final_result="Upstream stream protocol completed; task outcome not verified" if complete else
+                                   "Upstream stream was incomplete or malformed")
             except asyncio.CancelledError:
                 if session_id:
                     finish_session(session_id=session_id, success=False, final_result="Streaming request cancelled; upstream connection closed")
@@ -241,7 +247,10 @@ async def chat_completions(request: Request) -> Response:
             if upstream_resp.status_code == 200:
                 resp_data = decode_completed_response(upstream_resp.json())
                 if session_id:
-                    finish_session(session_id=session_id, success=True, final_result="Completed successfully")
+                    complete = response_complete(resp_data, body.get('n', 1))
+                    finish_session(session_id=session_id, success=complete,
+                                   final_result="Upstream response protocol completed; task outcome not verified" if complete else
+                                   "Upstream completion was incomplete or malformed")
                 return JSONResponse(resp_data, headers={"X-ROMS-Cache": "DISABLED", **session_headers})
 
             if session_id:

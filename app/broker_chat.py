@@ -3,6 +3,7 @@ import json
 
 from app import broker_memory
 from app.broker_protocol import ProtocolError
+from app.completion_status import response_complete
 from app.json_protocol import unique_object
 from app.runtime_clock import current_time
 
@@ -70,11 +71,13 @@ def no_evidence(context: dict) -> dict:
 
 
 def result(response: dict, context: dict | None) -> str | dict:
+    if not response_complete(response) or len(response['choices']) != 1:
+        raise ProtocolError('GENERATION_INCOMPLETE', 'The model did not return one complete answer')
     choice = response['choices'][0]
-    answer = choice['message']['content']
-    if not isinstance(answer, str):
-        raise ValueError('Model response must contain text')
-    if context is not None and (choice.get('finish_reason') != 'stop' or not answer.strip()):
+    message = choice['message']
+    answer = message.get('content')
+    if (choice['finish_reason'] != 'stop' or type(answer) is not str or not answer.strip()
+            or message.get('tool_calls') or message.get('function_call') or message.get('refusal')):
         raise ProtocolError('GENERATION_INCOMPLETE', 'The model did not return a complete nonempty answer')
     if context is None:
         return answer
