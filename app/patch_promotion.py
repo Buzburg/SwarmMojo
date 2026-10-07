@@ -11,6 +11,7 @@ import time
 from collections.abc import Callable
 
 from app import patch_tasks as tasks
+from app import validation_policy
 from app.container_runner import run_process
 from app.git_workspace import safe_git
 
@@ -19,12 +20,20 @@ class Conflict(RuntimeError):
     pass
 
 
+def _require_current_policy(task: dict, patch: dict, *, rollback: bool) -> None:
+    # Already-dispatched transactions must remain recoverable after a policy update.
+    if (not rollback and task.get('transaction') is None
+            and patch.get('policy_version') != validation_policy.POLICY_VERSION):
+        raise ValueError('Validation policy changed; propose and validate a new patch before approval')
+
+
 def review(task_id: str, *, rollback: bool = False) -> dict:
     control = tasks.task_directory(task_id)
     with tasks.task_lock(control):
         _, task, patch = tasks.load_task(task_id)
         if task.get('validated_patch_sha256') != task['patch_sha256']:
             raise ValueError('Only an exactly validated patch can be promoted')
+        _require_current_policy(task, patch, rollback=rollback)
         originals = json.loads((control / 'preimages.json').read_text())
         diff = []
         changes = []
@@ -52,7 +61,7 @@ def authorize(task_id: str, digest: str, direction: str) -> str:
     """Trusted operator UI only. Never register this function as a model tool."""
     control = tasks.task_directory(task_id)
     with tasks.task_lock(control):
-        _, task, _ = tasks.load_task(task_id)
+        _, task, patch = tasks.load_task(task_id)
         if (direction not in {'apply', 'rollback'} or not isinstance(digest, str)
                 or digest != task['patch_sha256'] or digest != task.get('validated_patch_sha256')):
             raise ValueError('Authorization must name the exact validated patch')
@@ -60,6 +69,7 @@ def authorize(task_id: str, digest: str, direction: str) -> str:
             raise ValueError('Review the validated patch before authorizing apply')
         if direction == 'rollback' and task['state'] not in {'applying', 'applied', 'failed', 'rolling_back', 'rollback_failed', 'rolled_back'}:
             raise ValueError('Task has no promotion to roll back')
+        _require_current_policy(task, patch, rollback=direction == 'rollback')
         token = secrets.token_hex(32)
         tasks.durable_json(control / ('approval-' + direction + '.json'), {
             'patch_sha256': digest, 'token_sha256': tasks.sha(token.encode()), 'direction': direction,
@@ -70,7 +80,7 @@ def authorize(task_id: str, digest: str, direction: str) -> str:
 def check_authorization(control: Path, task: dict, token: str, direction: str) -> None:
     approval = json.loads((control / ('approval-' + direction + '.json')).read_text())
     if (approval['direction'] != direction or approval['patch_sha256'] != task['patch_sha256']
-            or approval['operator_uid'] != os.getuid() or time.time() > approval['expires_at']
+            or approval['operator_uid'] != os.getuid() or time.time() >= approval['expires_at']
             or not secrets.compare_digest(approval['token_sha256'], tasks.sha(token.encode()))):
         raise PermissionError('Missing, expired or mismatched concrete approval')
 
@@ -241,6 +251,7 @@ async def promote(task_id: str, token: str, *, rollback: bool = False) -> dict:
     with tasks.task_lock(control):
         _, task, patch = tasks.load_task(task_id)
         check_authorization(control, task, token, direction)
+        _require_current_policy(task, patch, rollback=rollback)
         final_state = 'rolled_back' if rollback else 'applied'
         if task['state'] == final_state:
             return task  # Idempotent retry must never overwrite later user edits.
