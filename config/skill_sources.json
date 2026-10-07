@@ -1,0 +1,35 @@
+{
+  "schema": "swarmmojo.skill-sources/v1",
+  "upstream": "https://github.com/msitarzewski/agency-agents",
+  "commit": "5baafd5f1452e9785c413065b033ec083ab27757",
+  "license": "MIT",
+  "license_path": "third_party/agency-agents/LICENSE",
+  "license_sha256": "9a45258434d5cedf0af73c9ad4771373701225038d246c49219026c33677f66f",
+  "execution_allowed": false,
+  "skills": [
+    {
+      "name": "agency-code-reviewer",
+      "path": "skills/agency-code-reviewer.md",
+      "upstream_path": "engineering/engineering-code-reviewer.md",
+      "source_url": "https://github.com/msitarzewski/agency-agents/blob/5baafd5f1452e9785c413065b033ec083ab27757/engineering/engineering-code-reviewer.md",
+      "sha256": "7509fcc3ea1dda46511b2801996305bf3d4a125576f9655ff0b63df25602f446",
+      "bytes": 3076
+    },
+    {
+      "name": "agency-software-architect",
+      "path": "skills/agency-software-architect.md",
+      "upstream_path": "engineering/engineering-software-architect.md",
+      "source_url": "https://github.com/msitarzewski/agency-agents/blob/5baafd5f1452e9785c413065b033ec083ab27757/engineering/engineering-software-architect.md",
+      "sha256": "b85121691776147bacde26673e68fbbacd6a7f0816d1ca8e203c264d25ce1d30",
+      "bytes": 6485
+    },
+    {
+      "name": "agency-technical-writer",
+      "path": "skills/agency-technical-writer.md",
+      "upstream_path": "engineering/engineering-technical-writer.md",
+      "source_url": "https://github.com/msitarzewski/agency-agents/blob/5baafd5f1452e9785c413065b033ec083ab27757/engineering/engineering-technical-writer.md",
+      "sha256": "bf5c809977e10904b988ab8b218853ce8dfa38b2cbd89a7d2cfadba44ac25761",
+      "bytes": 14214
+    }
+  ]
+}

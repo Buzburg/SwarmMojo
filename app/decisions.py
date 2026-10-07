@@ -1,4 +1,4 @@
-"""ROMS Decision Maker: advisory lexical ranking with explicit abstention.
+"""SwarmMojo Decision Maker: advisory lexical ranking with explicit abstention.
 
 This Python implementation combines hashed word features, a deterministic
 recurrent sketch, and hand-weighted lexical scores. Softmax values are normalized
@@ -31,7 +31,7 @@ STOPWORDS = {
 }
 
 ADVISORY_METADATA = {
-    "engine": "ROMS Decision Maker",
+    "engine": "SwarmMojo Decision Maker",
     "backend": "lexical_heuristic",
     "probabilities_calibrated": False,
     "advisory_only": True,

@@ -1,5 +1,10 @@
-ROMS: RAG + OKF + MCP + Skills All-In-One Server
+SwarmMojo: portable agent harness, derived from ROMS
 Copyright 2026 Buzburg LLC
 
 This software and related documentation are licensed under the Apache License, Version 2.0.
 Third-party libraries (e.g. SQLite, SentenceTransformers, FastMCP, Mojo) retain their respective licenses.
+
+Selected Agency Agents playbooks are distributed under their original MIT license.
+See third_party/agency-agents/LICENSE and config/skill_sources.json for attribution,
+upstream revision, original paths and content hashes. Their fictional role identities
+do not certify SwarmMojo capabilities, experience, memory or autonomous authority.

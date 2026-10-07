@@ -1,8 +1,7 @@
-"""Agency Agents Role Registry.
+"""Legacy specialist-role metadata catalog, separate from loaded skill text.
 
-Indexes and manages the 279 production-tested specialist agent roles ported
-from Final Harness (Company Harness / Agency Agents).
-Provides category filtering, fuzzy search, and dynamic prompt injection for Omarchy Broker.
+Catalog descriptions do not establish that a role has been tested or executes
+as an independent agent. Selected source-verified playbooks live in skills/.
 """
 
 from __future__ import annotations
@@ -24,7 +23,7 @@ class AgentRole:
 
 
 class RoleRegistry:
-    """Registry managing the 279 specialized agent personas for autonomous delegation."""
+    """Look up descriptive role metadata; never execute or approve an action."""
 
     def __init__(self, catalog_path: Optional[Path | str] = None):
         if catalog_path is None:
@@ -85,7 +84,7 @@ class RoleRegistry:
         lines = [
             f"You are the {role.name} ({role.id}).",
             f"Role Specification: {role.description}",
-            "Operating Invariants: Strict adherence to Omarchy safety policies, typed contracts, and zero unhandled errors.",
+            "Operating Invariants: Follow the operator's approval rules and tool boundaries. This role grants no additional permissions.",
         ]
         if custom_instructions:
             lines.append(f"\nTask Context & Instructions:\n{custom_instructions}")

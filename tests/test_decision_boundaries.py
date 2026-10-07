@@ -86,7 +86,7 @@ def test_truthful_metadata_and_compatibility_aliases(tmp_path):
     report = engine.ask("", [{"id": "q", "type": "noul", "question": "Did tests pass?"}])
     result = report["results"]["q"]
     for item in (report, result):
-        assert item["engine"] == "ROMS Decision Maker"
+        assert item["engine"] == "SwarmMojo Decision Maker"
         assert item["backend"] == "lexical_heuristic"
         assert item["probabilities_calibrated"] is False
         assert item["advisory_only"] is True

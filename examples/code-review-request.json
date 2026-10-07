@@ -1,0 +1,10 @@
+{
+  "goal": "Choose the next step for this failing invoice check",
+  "options": {
+    "review": "Review the invoice calculation and its missing delivery charge",
+    "publish": "Publish a website announcement"
+  },
+  "evidence": "Example observation: the invoice check failed because the invoice calculation is missing the delivery charge.",
+  "skills": ["agency-code-reviewer"],
+  "max_context_chars": 6000
+}

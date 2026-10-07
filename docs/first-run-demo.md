@@ -2,7 +2,7 @@
 
 An agent makes an edit. A check fails inside a noisy log. Before asking another model to guess what happened, you need the error, the relevant code location, and a verified way back to the original file.
 
-ROMS's first-run demo exercises that sequence with existing Python tools. It generates a small, disposable invoice program; the program and its failure are deliberately simple so you can inspect every step.
+SwarmMojo's first-run demo exercises that sequence with existing Python tools. It generates a small, disposable invoice program; the program and its failure are deliberately simple so you can inspect every step.
 
 ## Run it
 
@@ -14,7 +14,7 @@ python -I -S -B scripts/demo_first_run.py
 
 Python's `-I -S` options keep the demonstration independent of installed third-party packages and user Python configuration. No model or package downloads are performed. It works from another directory if you supply the script's absolute path.
 
-The script accepts only `--json` and `--help`. It does not accept a project directory, run a model, or contact a service. The temporary workspace and ROMS state are removed before success is reported. Existing ROMS data directories are not used.
+The script accepts only `--json` and `--help`. It does not accept a project directory, run a model, or contact a service. The temporary workspace and SwarmMojo state are removed before success is reported. Existing SwarmMojo data directories are not used.
 
 ## What really happens
 
@@ -40,7 +40,7 @@ The captured traceback includes an absolute temporary path. That directory has b
 
 ## What this does not establish
 
-- The edit is scripted. ROMS neither discovers a fix nor asks a model to produce one.
+- The edit is scripted. SwarmMojo neither discovers a fix nor asks a model to produce one.
 - The log contains generated progress messages and a real Python exception. Its compression ratio is not a claim about other projects or logs.
 - The symbol indexer uses pattern matching here. This demonstration does not establish complete AST analysis, a call graph, or stale-index protection.
 - Recovery is limited to one known file in an isolated workspace. It does not establish transactional multi-file recovery, integrity of untrusted snapshot stores, or preservation of concurrent user edits. Do not treat this demo as authorization to rewind a real workspace.
@@ -56,6 +56,6 @@ These checks also use only the Python standard library:
 python -m unittest discover -s tests -p test_first_run_demo.py -v
 ```
 
-They run the command outside the checkout with third-party packages disabled, preserve a caller-owned file and configured ROMS data location, reject a compacted log that loses its error, reject a false successful restore, require the restored program to pass, verify cleanup on failure, and require a nonzero exit code when evidence is missing.
+They run the command outside the checkout with third-party packages disabled, preserve a caller-owned file and configured SwarmMojo data location, reject a compacted log that loses its error, reject a false successful restore, require the restored program to pass, verify cleanup on failure, and require a nonzero exit code when evidence is missing.
 
 Checked on 2026-10-06: the five new demo tests and five existing `test_prefrontal_integration.py` tests passed on Windows with Python 3.14 and Linux with Python 3.12 (**10 passed on each platform**). The Windows pytest run used a fresh workspace-local temporary directory because the shared pytest temporary directory was not accessible. The no-install command and standard-library unittest command also passed on Windows.

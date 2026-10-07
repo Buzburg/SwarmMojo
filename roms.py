@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ROMS agent harness, local tools and MCP entry point.
+Compatibility entry point for SwarmMojo; existing ROMS commands remain available.
 Usage:
   python roms.py harness --request examples/harness-request.json
   python roms.py mcp                  # Launch the configured MCP server

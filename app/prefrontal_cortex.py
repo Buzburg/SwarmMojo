@@ -1227,7 +1227,7 @@ def generate_roms_dashboard(state_dir: str = None, output_path: str = "roms_dash
 <body>
   <header>
     <div>
-      <h1>ROMS harness telemetry</h1>
+      <h1>SwarmMojo harness telemetry</h1>
       <p class="subtitle">Decision Maker • RAG • OKF • MCP • Skills</p>
     </div>
     <span class="subtitle">Local statistics, not a readiness certificate</span>
@@ -1293,7 +1293,7 @@ def generate_roms_dashboard(state_dir: str = None, output_path: str = "roms_dash
 # ============================================================================
 
 def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(description="ROMS local tools. Use 'python roms.py harness --help' for the preparation harness.")
+    parser = argparse.ArgumentParser(description="SwarmMojo local tools. Use 'python swarmmojo.py harness --help' for the preparation harness.")
     sub = parser.add_subparsers(dest="cmd")
 
     p_rem = sub.add_parser("remember")

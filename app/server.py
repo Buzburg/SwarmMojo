@@ -1,4 +1,4 @@
-"""ROMS FastMCP Unified Server Entrypoint."""
+"""SwarmMojo FastMCP Server Entrypoint."""
 
 import importlib.util
 import os
@@ -31,18 +31,28 @@ from app.tools import (
 
 from app.memory_tools import register_memory_tools
 
-mcp = FastMCP("ROMS")
+mcp = FastMCP("SwarmMojo")
 register_memory_tools(mcp)
 
 
-@mcp.tool()
-def roms_prepare_harness(request_json: str) -> str:
-    """Prepare bounded knowledge, selected skills and a heuristic decision for review. Never executes or approves an action."""
+def _prepare_harness_json(request_json: str) -> str:
     import json
     from app.harness import decode_request, prepare_request
 
     report = prepare_request(decode_request(request_json), db_path=DB_PATH, skills_dir=SKILLS_DIR)
     return json.dumps(report, indent=2, ensure_ascii=True, allow_nan=False)
+
+
+@mcp.tool()
+def swarmmojo_prepare_harness(request_json: str) -> str:
+    """Prepare bounded knowledge, selected skills and an advisory decision. Never executes or approves an action."""
+    return _prepare_harness_json(request_json)
+
+
+@mcp.tool()
+def roms_prepare_harness(request_json: str) -> str:
+    """Compatibility alias for swarmmojo_prepare_harness; the same approval boundary applies."""
+    return _prepare_harness_json(request_json)
 
 
 # ============================================================================
@@ -144,7 +154,7 @@ def list_tickets(status: str = "") -> str:
 
 @mcp.tool()
 def get_system_metrics() -> str:
-    """Returns real-time host hardware metrics (CPU %, available RAM) and ROMS database statistics."""
+    """Returns real-time host hardware metrics (CPU %, available RAM) and SwarmMojo database statistics."""
     metrics = _get_metrics()
     return (
         f"Host CPU Load: {metrics['host_cpu_percent']}%\n"
@@ -519,9 +529,9 @@ def load_custom_tools():
                 spec.loader.exec_module(mod)
                 if hasattr(mod, "register_tools"):
                     mod.register_tools(mcp)
-                    print(f"[ROMS] Loaded custom tools plugin: {py_file.name}", file=sys.stderr)
+                    print(f"[SwarmMojo] Loaded custom tools plugin: {py_file.name}", file=sys.stderr)
         except Exception as e:
-            print(f"[ROMS Warning] Failed to load custom tool {py_file.name}: {e}", file=sys.stderr)
+            print(f"[SwarmMojo Warning] Failed to load custom tool {py_file.name}: {e}", file=sys.stderr)
 
 
 # ============================================================================
@@ -531,17 +541,17 @@ def load_custom_tools():
 
 def start_server():
     """Bootstraps database, ingests OKF documents, loads plugins, starts watcher, and launches FastMCP."""
-    print("[ROMS] Initializing database schema...", file=sys.stderr)
+    print("[SwarmMojo] Initializing database schema...", file=sys.stderr)
     init_database()
-    print("[ROMS] Initializing Smart Tool RAG registry...", file=sys.stderr)
+    print("[SwarmMojo] Initializing Smart Tool RAG registry...", file=sys.stderr)
     _init_default_tool_registry()
-    print("[ROMS] Ingesting OKF knowledge documents...", file=sys.stderr)
+    print("[SwarmMojo] Ingesting OKF knowledge documents...", file=sys.stderr)
     count = ingest_okf_directory(KNOWLEDGE_DIR)
-    print(f"[ROMS] OKF ingestion complete ({count} files processed).", file=sys.stderr)
+    print(f"[SwarmMojo] OKF ingestion complete ({count} files processed).", file=sys.stderr)
     load_custom_tools()
-    print("[ROMS] Starting background file watcher...", file=sys.stderr)
+    print("[SwarmMojo] Starting background file watcher...", file=sys.stderr)
     start_watcher(mcp)
-    print("[ROMS] Starting FastMCP server...", file=sys.stderr)
+    print("[SwarmMojo] Starting FastMCP server...", file=sys.stderr)
     mcp.run()
 
 

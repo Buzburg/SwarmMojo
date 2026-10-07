@@ -118,4 +118,4 @@ def test_ternary_router_and_runtime_primitives(tmp_path: Path):
     dash_file = tmp_path / "roms_dashboard.html"
     out = generate_roms_dashboard(state_dir=str(tmp_path / "prefrontal"), output_path=str(dash_file))
     assert os.path.exists(out)
-    assert "ROMS harness telemetry" in dash_file.read_text(encoding="utf-8")
+    assert "SwarmMojo harness telemetry" in dash_file.read_text(encoding="utf-8")

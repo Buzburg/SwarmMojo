@@ -1,10 +1,10 @@
-# ROMS
+# SwarmMojo
 
 **An agent harness for decisions, knowledge and reusable workflows.**
 
-ROMS combines a Decision Maker, retrieval, open knowledge files, MCP tools and skills to prepare work for review. It brings the goal, relevant sources and selected instructions into a bounded request, then returns an advisory decision and a proposed next step. Your model and execution permissions remain separate.
+SwarmMojo combines a Decision Maker, retrieval, open knowledge files, MCP tools and skills to prepare work for review. It brings the goal, relevant sources and selected instructions into a bounded request, then returns an advisory decision and a proposed next step. Your model and execution permissions remain separate.
 
-The portable Python path is used on Windows and Linux. Omarchy is an optional integration; it is not required to use ROMS. macOS has not been verified.
+The portable Python path is used on Windows and Linux. Omarchy is an optional integration; it is not required to use SwarmMojo. macOS has not been verified.
 
 ## Five parts
 
@@ -26,7 +26,7 @@ From a downloaded or cloned checkout, with **Python 3.11 or later**:
 python -I -S -B scripts/demo_first_run.py
 ```
 
-No installation, account, model, GPU or network connection is needed. The demo creates a temporary invoice program, introduces a known bad edit and runs a real failing check. ROMS extracts the error from the log, locates the function and restores the original file. The check must pass again before the temporary files are removed and success is reported.
+No installation, account, model, GPU or network connection is needed. The demo creates a temporary invoice program, introduces a known bad edit and runs a real failing check. SwarmMojo extracts the error from the log, locates the function and restores the original file. The check must pass again before the temporary files are removed and success is reported.
 
 Add `--json` to inspect the original failure log, compacted log, source location and before/after file hashes. The demo accepts no path to your project. It demonstrates controlled recovery, not autonomous repair or safe rollback of concurrent edits. [Verification scope](docs/first-run-demo.md).
 
@@ -42,7 +42,7 @@ Use `.venv/bin/python` on Linux or `.venv/Scripts/python.exe` on Windows for the
 
 ```sh
 python -m pip install -r requirements-ci.txt
-python roms.py harness --request examples/harness-request.json
+python swarmmojo.py harness --request examples/harness-request.json
 python -B scripts/demo_harness.py
 ```
 
@@ -59,15 +59,15 @@ This path does not call a model, use the network, run tools, edit documents or s
 The existing utility CLI uses Python's standard library:
 
 ```sh
-python roms.py --help
-python roms.py index --path .
-python roms.py lookup --query invoice_total_cents
-python roms.py pack --costs "50,40,30" --values "100,60,50" --budget 70 --required 2
+python swarmmojo.py --help
+python swarmmojo.py index --path .
+python swarmmojo.py lookup --query invoice_total_cents
+python swarmmojo.py pack --costs "50,40,30" --values "100,60,50" --budget 70 --required 2
 ```
 
-Commands for advisory decisions, memory, log compaction and snapshots are listed in `--help`. Utilities can write local state under `data/prefrontal/`; set `ROMS_DATA_DIR` to use another data directory. Snapshot restoration writes files; review its limits before applying it to a real workspace.
+Commands for advisory decisions, memory, log compaction and snapshots are listed in `--help`. Utilities can write local state under `data/prefrontal/`; set `SWARMMOJO_DATA_DIR` when using the new launcher to choose another directory. Snapshot restoration writes files; review its limits before applying it to a real workspace.
 
-Standalone Decision Maker utilities can also persist topic discovery under `ROMS_STATE_DIR` (default `~/.roms`). Harness preparation disables that persistence.
+Standalone Decision Maker utilities can also persist topic discovery. The new launcher defaults to `~/.swarmmojo`; set `SWARMMOJO_STATE_DIR` to choose another location. Harness preparation disables that persistence. Existing ROMS settings, command aliases and protocol IDs remain compatible; see the [migration guide](docs/MIGRATION.md).
 
 <a id="-10-second-mcp-setup-claude-code-cursor-windsurf"></a>
 
@@ -77,7 +77,7 @@ The full server needs the packages in `requirements.txt` and an embedding model.
 
 ```sh
 python -m pip install -r requirements.txt
-python roms.py mcp
+python swarmmojo.py mcp
 ```
 
 The command uses stdio and waits for MCP messages. For clients with an `mcpServers` configuration, use absolute paths:
@@ -85,9 +85,9 @@ The command uses stdio and waits for MCP messages. For clients with an `mcpServe
 ```json
 {
   "mcpServers": {
-    "roms": {
-      "command": "/absolute/path/to/ROMS/.venv/bin/python",
-      "args": ["/absolute/path/to/ROMS/roms.py", "mcp"]
+    "swarmmojo": {
+      "command": "/absolute/path/to/SwarmMojo/.venv/bin/python",
+      "args": ["/absolute/path/to/SwarmMojo/swarmmojo.py", "mcp"]
     }
   }
 }
@@ -101,7 +101,7 @@ Startup initializes the database, indexes supported files in `knowledge/`, loads
 
 | Task | Interface |
 | --- | --- |
-| Prepare a reviewable request | `roms_prepare_harness` with `request_json` |
+| Prepare a reviewable request | `swarmmojo_prepare_harness` with `request_json` |
 | Search knowledge | `search_knowledge_base`, `search_grounded_context` |
 | Add or refresh documents | `add_knowledge_document`, `reload_knowledge`, `list_knowledge_documents` |
 | Retain and recall project lessons | `memory_retain`, `memory_recall`, `memory_get`, `memory_prepare_context` |
@@ -115,11 +115,11 @@ The server advertises the full tool list and schemas on connection. The harness 
 
 ## Status and limits
 
-ROMS is a developer project for a trusted local operator. Its Python tools, native components and optional integrations have different prerequisites and verification scopes.
+SwarmMojo is a developer project for a trusted local operator. Its Python tools, native components and optional integrations have different prerequisites and verification scopes.
 
 - Decision scores and retrieved text can be wrong. They do not establish truth or grant permission to change a system.
 - Local plugins run with the server's permissions. Skills and retrieved documents are untrusted input to the agent.
-- The optional model gateway needs a separately configured inference service. Installing ROMS does not install model weights or an operating system.
+- The optional model gateway needs a separately configured inference service. Installing SwarmMojo does not install model weights or an operating system.
 - Dataset export does not train a model. Routing prototypes do not establish measured model-quality improvements.
 - Benchmark reports cover specific fixtures and machines. No general latency, token-saving or GPU-performance guarantee is made. The planned 128 GB machine needs its own qualification.
 
@@ -140,6 +140,10 @@ python -m pytest tests/test_first_run_demo.py tests/test_prefrontal_integration.
 The [harness guide](docs/HARNESS.md) records its checks, and the [CI workflow](.github/workflows/checks.yml) defines the portable test matrix. Native builds and live-model checks have separate prerequisites.
 
 ## Optional integrations and documentation
+
+Three explicitly selected [specialist playbooks](docs/IMPORTED-SKILLS.md) are available for code review, architecture and technical writing. They are pinned to reviewed upstream source and retain their license. They are prompt text, not independently running agents or permissions.
+
+The [upstream evaluation](docs/UPSTREAM-EVALUATION.md) distinguishes what is included from promising adapters, overlapping systems and unresolved project names.
 
 The Linux/Omarchy workshop adds staged changes, registered validation and operator-approved promotion. It requires its own configured runtime and confinement components; those execution features are not established by the portable preparation command or a positive decision score.
 

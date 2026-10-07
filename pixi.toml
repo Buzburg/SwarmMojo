@@ -1,7 +1,7 @@
 [project]
-name = "roms-mojo"
+name = "swarmmojo-native"
 version = "0.1.0"
-description = "ROMS All-In-One Agentic Server in Mojo"
+description = "Optional native components for the SwarmMojo agent harness"
 authors = ["Buzburg LLC <contact@buzburg.com>"]
 channels = ["https://conda.modular.com/max/", "conda-forge"]
 platforms = ["linux-64"]

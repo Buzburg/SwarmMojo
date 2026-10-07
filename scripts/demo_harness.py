@@ -42,7 +42,7 @@ def run_demo() -> dict:
                        "ROMS_STATE_DIR": str(root / "unused-state"),
                        "PYTHONDONTWRITEBYTECODE": "1", "HF_HUB_OFFLINE": "1"}
         process = subprocess.run(
-            [sys.executable, "-B", str(ROOT / "roms.py"), "harness", "--request", str(request_file),
+            [sys.executable, "-B", str(ROOT / "swarmmojo.py"), "harness", "--request", str(request_file),
              "--db", str(database), "--skills-dir", str(skills)],
             cwd=ROOT, env=environment, text=True, capture_output=True, timeout=30, check=False,
         )
@@ -61,7 +61,7 @@ def run_demo() -> dict:
         }
         if not all(checks.values()):
             raise RuntimeError("Harness demo checks failed: " + json.dumps(checks))
-        return {"scope": "Synthetic OKF/FTS fixture; real ROMS retrieval, Decision Maker and CLI. No model or execution.",
+        return {"scope": "Synthetic OKF/FTS fixture; real SwarmMojo retrieval, Decision Maker and CLI. No model or execution.",
                 "checks": checks, "report": report}
 
 

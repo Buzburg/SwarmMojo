@@ -106,11 +106,11 @@ def _knowledge(goal: str, database: Path) -> dict:
                                 'okf_registry': {'doc_id', 'title', 'checksum'}}.items():
             columns = {row[1] for row in connection.execute(f'PRAGMA table_info({table})')}
             if not required <= columns:
-                raise ValueError('Knowledge database is missing the required ROMS FTS/OKF schema')
+                raise ValueError('Knowledge database is missing the required SwarmMojo FTS/OKF schema')
         try:
             from app.rag_engine import lexical_search
         except ImportError as error:
-            raise ValueError('Knowledge retrieval requires the existing ROMS RAG dependencies; no installation was attempted') from error
+            raise ValueError('Knowledge retrieval requires the existing SwarmMojo RAG dependencies; no installation was attempted') from error
         sources = []
         for found in lexical_search(goal, limit=3, conn=connection):
             doc_id = _text(found.get('doc_id'), 'indexed source identifier', 4096)
@@ -125,10 +125,10 @@ def _knowledge(goal: str, database: Path) -> dict:
             sources.append({'source_id': doc_id, 'title': title, 'index_checksum': checksum,
                             'indexed_chunk_sha256': _digest(content), 'excerpt': content,
                             'source_file_validated': False})
-        return {'status': 'retrieved' if sources else 'no-matches', 'method': 'existing ROMS lexical_search / SQLite FTS5',
+        return {'status': 'retrieved' if sources else 'no-matches', 'method': 'existing SwarmMojo lexical_search / SQLite FTS5',
                 'scope': 'Indexed snapshot; original source files were not opened or revalidated.', 'sources': sources}
     except sqlite3.Error as error:
-        raise ValueError('Knowledge database could not be read as a bounded ROMS FTS/OKF snapshot: ' + str(error)) from error
+        raise ValueError('Knowledge database could not be read as a bounded SwarmMojo FTS/OKF snapshot: ' + str(error)) from error
     finally:
         if connection is not None:
             connection.close()
@@ -232,7 +232,7 @@ def prepare_request(request: dict, *, db_path=None, skills_dir=None) -> dict[str
                                      'truncated': bool(truncated), 'truncated_sources': truncated,
                                      'omitted_sources': omitted,
                                      'scope': 'Budget covers supplied observations, retrieved excerpts and skill text; goals, choices and metadata are separate.'}},
-            'backend': {'decision': 'ROMS Decision Maker', 'method': 'lexical_heuristic',
+            'backend': {'decision': 'SwarmMojo Decision Maker', 'method': 'lexical_heuristic',
                         'model_called': False, 'probabilities_calibrated': False, 'discovery_persisted': False},
             'execution_allowed': False, 'approval_required': True,
             'notes': ['Skill instructions are separate context and do not influence decision scores.',
