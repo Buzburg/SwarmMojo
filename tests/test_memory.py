@@ -189,7 +189,7 @@ def test_memory_mcp_lifecycle_and_playbook(database: Path) -> None:
     async def run():
         async with Client(server) as client:
             tools = await client.list_tools()
-            assert len([tool for tool in tools if tool.name.startswith('memory_')]) == 8
+            assert len([tool for tool in tools if tool.name.startswith('memory_')]) == 9
             saved = await client.call_tool('memory_retain', {'project_id':'repo-a', 'summary':'Use UTC', 'source_ref':'commit:1'})
             record = json.loads(saved.content[0].text)
             await client.call_tool('memory_record_verification', {'project_id':'repo-a', 'memory_id':record['id'], 'command':'pytest', 'exit_code':0, 'evidence_ref':'run:2'})
