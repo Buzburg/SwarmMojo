@@ -38,9 +38,10 @@ def recording(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         connection.close()
 
 
-def complete(monkeypatch: pytest.MonkeyPatch, *, stream=False, outcome='success', prompt=PROMPT):
+def complete(monkeypatch: pytest.MonkeyPatch, *, stream=False, outcome='success', prompt=PROMPT,
+             upstream_json=None, upstream_chunks=None, choices=1):
     body = {'messages': [{'role': 'user', 'content': prompt}],
-            'stream': stream, 'roms_retrieval': 'disabled'}
+            'stream': stream, 'roms_retrieval': 'disabled', 'n': choices}
     status = 503 if outcome == 'rejected' else 200
 
     def fail_if_requested():
@@ -61,8 +62,9 @@ def complete(monkeypatch: pytest.MonkeyPatch, *, stream=False, outcome='success'
 
         async def post(self, *args, **kwargs):
             fail_if_requested()
-            return httpx.Response(status, json={'choices': [{'message': {'content': COMPLETION},
-                                                             'finish_reason': 'stop'}]})
+            value = upstream_json if upstream_json is not None else {
+                'choices': [{'message': {'content': COMPLETION}, 'finish_reason': 'stop'}]}
+            return httpx.Response(status, json=value)
 
         @asynccontextmanager
         async def stream(self, *args, **kwargs):
@@ -76,7 +78,13 @@ def complete(monkeypatch: pytest.MonkeyPatch, *, stream=False, outcome='success'
 
         async def aiter_bytes(self):
             fail_if_requested()
+            if upstream_chunks is not None:
+                for chunk in upstream_chunks:
+                    yield chunk
+                return
             yield ('data: ' + json.dumps({'choices': [{'delta': {'content': COMPLETION}}]}) + '\n\n').encode()
+            yield b'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n'
+            yield b'data: [DONE]\n\n'
 
     async def connected(request, generate):
         if outcome == 'disconnected':

@@ -49,6 +49,7 @@ def forwarded(monkeypatch):
 
         async def aiter_bytes(self):
             yield b'data: {"choices":[{"delta":{"content":"fixture answer"}}]}\n\n'
+            yield b'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n'
             yield b'data: [DONE]\n\n'
 
     monkeypatch.setattr(gateway, 'while_connected', connected)

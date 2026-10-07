@@ -8,7 +8,13 @@ The review inspected primary GitHub sources at pinned revisions and local projec
 
 SwarmMojo has its own launcher, MCP identity and migration guide. The ROMS knowledge formats, decision engine, MCP compatibility names and approval boundaries remain available. Omarchy is optional.
 
-Three Agency Agents Markdown playbooks are included: **code reviewer, software architect and technical writer**. They are exact upstream text with an immutable revision, SHA-256 records and the original MIT license. They load only when selected and stay outside Decision Maker scoring. Persona claims do not confer experience, memory or permissions. [Imported skills and verification](IMPORTED-SKILLS.md).
+Three Agency Agents ideas are distilled into local Markdown checklists: **code reviewer, software architect and technical writer**. The source revision and original hashes are recorded separately from the adapted file hashes, with the original MIT license retained. They load only when selected and stay outside Decision Maker scoring. [Adapted skills and verification](IMPORTED-SKILLS.md).
+
+The correction-to-regression proposal pattern now uses the existing scoped lesson store. CLI and MCP callers can save a bounded, revision-linked proposal with supplied evidence hashes and receive an inactive draft. Exact retries reuse the record, including its existing lifecycle. No check is executed, evidence authenticated, skill activated or permission granted. [Contract and example](local-memory.md#propose-a-regression-after-a-failure).
+
+The existing model gateway now accounts for complete response termination, and ordinary broker chat rejects incomplete answers. This applies lifecycle ideas from Pi and related harnesses without embedding their agent loops. The Linux workshop also rejects fresh patch approvals after its validation policy changes, while retaining authorized recovery and rollback of dispatched transactions.
+
+The [local coding-source review](research/local-coding-sources.md) covers selected material from `Harness Repos` and the HKUDS PTRM copy. SwarmMojo reuses PTRM's file/hash/coverage report through its existing adapter and shares one context selector across both entry points. It adds no second reviewer, scheduler, memory database or execution engine.
 
 No other evaluated runtime was installed, vendored or silently connected. No credentialed service, business action, publication or autonomous worker was enabled.
 
@@ -16,7 +22,7 @@ No other evaluated runtime was installed, vendored or silently connected. No cre
 
 | Project / resolved identity | What would help | Decision and limit |
 | --- | --- | --- |
-| [Agency Agents](https://github.com/msitarzewski/agency-agents/tree/5baafd5f1452e9785c413065b033ec083ab27757) | Explicit specialist review and architecture/documentation checklists. | **Included selectively:** three pinned MIT playbooks. The large role catalog is metadata; it is not hundreds of tested independent agents. |
+| [Agency Agents](https://github.com/msitarzewski/agency-agents/tree/5baafd5f1452e9785c413065b033ec083ab27757) | Explicit specialist review and architecture/documentation checklists. | **Included selectively:** three concise local MIT adaptations. The large role catalog is metadata; it is not hundreds of tested independent agents. |
 | [Prime Agent](https://github.com/PrimeIntellect-ai/prime-agent/tree/419777a893e8d32bc752085d10320183ff0b6a10) | Separate refinement planning from application; record scope and baseline state. | **Study the proposal pattern.** Keep its Rust runtime and unrestricted execution separate. MIT with retained original attribution; no improvement benchmark was run. |
 | [Pi](https://github.com/earendil-works/pi/tree/eb326d265ae0b88489a6d10319307780df827cdf) | Tool lifecycle events, cancellation, branching session records and refusal to execute incomplete tool calls. | **Best next execution-adapter candidate.** Preserve SwarmMojo authorization and confinement. Conversation branching is not a recurrent-model checkpoint. MIT. |
 | [Paperclip](https://github.com/paperclipai/paperclip/tree/99a9de9940bf5974352d9dbfbb2f21e62e89689f) | Invocation-time capabilities, business approvals and cost accounting. | **Best business-control reference.** Connect a worker to it if a company dashboard is needed; do not duplicate its server/UI/database in the core. MIT. |
@@ -40,7 +46,7 @@ Exact implementation files, license evidence, name ambiguity and acceptance case
 ## Recommended next build order
 
 1. **Measure the selected skills.** Use representative coding/documentation tasks with and without each playbook. Track verified success, recurring failures, context size, elapsed time and abstention. Keep failures and timeouts in the denominator; current tests prove integration boundaries, not improved model quality.
-2. **Add a correction-to-regression proposal queue.** Reuse existing scoped lessons and the validator. Record source run/revision, observed failure, proposed test or inactive skill draft, validation result and review status. Repeated retrieval may rank a proposal, never activate it.
+2. **Use the correction-to-regression candidates now available.** Review proposals against actual failures, implement accepted checks in the existing workshop and record real validation separately. Repeated retrieval may rank a proposal, never activate it.
 3. **Choose one external worker, probably Pi or Goose.** Qualify event/schema handling, cancellation, incomplete responses, duplicate and late results, replay, bounded output and revoked approval. Retain full original transcripts separately from compacted context.
 4. **Add a business connector with durable approval records.** Combine existing promotion principles with Paperclip/OpenMuse/OpenBot/OpenDots patterns. Bind actor/account, exact arguments, target revision, adapter, policy version and expiry. An uncertain remote outcome must be reconciled before retrying; a worker lease alone cannot guarantee exactly-once remote effects.
 5. **Add UI, console and channel adapters afterward.** Website edits, invoices and calendar changes need observable outcomes and exact approvals. Herdr/OpenClaw and richer interfaces stay optional. Test against development accounts before enabling real effects.

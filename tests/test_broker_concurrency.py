@@ -73,11 +73,11 @@ def broker(tmp_path):
             body = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
             prompt = body['messages'][0]['content']
             if prompt == 'oversized':
-                self.reply({'choices': [{'message': {'content': 'x' * 65536}}]})
+                self.reply({'choices': [{'message': {'content': 'x' * 65536}, 'finish_reason': 'stop'}]})
                 return
             if prompt != 'quick' and not chat.hold(self.connection, prompt):
                 return
-            self.reply({'choices': [{'message': {'content': 'ready'}}]})
+            self.reply({'choices': [{'message': {'content': 'ready'}, 'finish_reason': 'stop'}]})
     class Unix(socketserver.StreamRequestHandler):
         def handle(self):
             request = json.loads(self.rfile.readline(4097))

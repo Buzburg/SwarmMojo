@@ -30,6 +30,7 @@ Never invent an evidence reference or interpret a completed chat response as a s
 | --- | --- |
 | `memory_prepare_context` | Pack source-bearing lessons and a failed-attempt warning within a JSON character budget; native Mojo or Python selection. |
 | `memory_retain` | Store a candidate with source, optional revision/session and expiry. |
+| `memory_propose_correction` | Save an observed failure, proposed fix and regression check as an inactive candidate; exact retries reuse the same record. |
 | `memory_record_verification` | Record one caller-supplied test result against a current candidate. |
 | `memory_recall` | Search one project's current lessons with count and output limits. |
 | `memory_get` | Inspect a record and its lifecycle/evidence history, including inactive records. |
@@ -42,6 +43,22 @@ Never invent an evidence reference or interpret a completed chat response as a s
 `expires_at` is an optional timezone-aware ISO 8601 timestamp, for example `2027-01-01T00:00:00Z`. Expired entries are hidden from recall and cannot receive verification, but remain available through `memory_get`. Repeated verification is rejected; create a correction when the evidence or lesson changes.
 
 Forgetting removes the selected record from normal database queries. It does not erase other records in a correction chain, their references, logs, database free pages or backups. Use retraction when you need a visible audit trail. Keep sensitive content out of lessons and source references unless it belongs in your local database.
+
+## Propose a regression after a failure
+
+Use `memory_propose_correction` with `project_id`, `failure`, `correction`, `proposed_check`, `revision`, and one to four `evidence` objects containing `ref` and `sha256`. An optional `session_id` links your source session. References and hashes are supplied claims: this tool does not open files, authenticate evidence, execute a test or approve a change.
+
+The CLI uses the same store and implementation:
+
+```sh
+python swarmmojo.py correction --project invoice-app --revision abc123 --failure "Total rounded twice" --correction "Round once at the boundary" --check "Assert the exact cent total" --evidence "fixture:example-only" aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --db data/proposal-demo.db
+```
+
+This is a synthetic example, including its hash. It creates the named local database. Use actual revision/evidence values for real work. `--check` is descriptive text, never a command to run. CLI settings can select the database; the MCP tool only uses the server's configured database.
+
+The result includes the candidate ID, complete proposal, fingerprint and an inactive Markdown draft returned as text. Default recall excludes it. Inspect it using `memory_get` or `memory_recall` with `include_candidates=true`. Identical normalized content, project, revision, session and evidence reuse the same record across restarts and concurrent retries. Retrying a retracted or superseded proposal preserves that lifecycle. Changed input creates a new candidate.
+
+Review the proposed regression, implement any accepted test through the existing coding/workshop process, and record an actual result separately. No active skill, verification receipt or permission is created by saving a proposal. This borrows the correction-to-regression idea from [AI Engineering lesson 46](https://github.com/rohitg00/ai-engineering-from-scratch/tree/7a181b46332db6d2e1274c798e851bf978a008a9); it reuses SwarmMojo's lesson store instead of importing another learning runtime.
 
 ## Generated skills remain drafts
 
