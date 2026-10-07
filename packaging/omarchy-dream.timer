@@ -1,0 +1,10 @@
+[Unit]
+Description=Nightly 3:00 AM Timer for Omarchy Dream Cycle State-Tuning
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target

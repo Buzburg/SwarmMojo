@@ -1,0 +1,11 @@
+{
+  // Drop-in Waybar module for Custom Omarchy OS
+  // Include in ~/.config/waybar/config.jsonc
+  "custom/omarchy-hud": {
+    "exec": "python3 -m app.omarchy_hud --live",
+    "return-type": "json",
+    "interval": 5,
+    "on-click": "omarchy-menu",
+    "format": "{}"
+  }
+}

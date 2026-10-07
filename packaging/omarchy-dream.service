@@ -1,0 +1,9 @@
+[Unit]
+Description=Omarchy OS Nightly Dream Cycle Continual Learning Consolidation
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env python3 -c "from app.dream_cycle import dream_cycle; print(dream_cycle.consolidate())"
+WorkingDirectory=%h/.local/share/omarchy/ROMS
+NoNewPrivileges=true

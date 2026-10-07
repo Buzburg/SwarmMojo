@@ -1,0 +1,17 @@
+# Smithery.ai MCP Registry Auto-Deployment Manifest for ROMS
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      workspaceRoot:
+        type: string
+        description: Root path of the workspace to protect and index
+        default: "."
+  commandFunction:
+    |-
+    (config) => ({
+      command: 'python',
+      args: ['-m', 'app.server'],
+      env: { ROMS_WORKSPACE: config.workspaceRoot || '.' }
+    })

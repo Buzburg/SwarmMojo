@@ -346,6 +346,93 @@ def get_skill_playbook(skill_name: str) -> str:
 
 
 # ============================================================================
+# [P] PREFRONTAL CORTEX SUBSYSTEMS (Titans/DeltaNet-2, SnapKV, CoW, Shield)
+# ============================================================================
+
+from app.prefrontal_cortex import (
+    HybridNeuralMemory as _HybridNeuralMemory,
+    ContextSieve as _ContextSieve,
+    PolyglotSymdex as _PolyglotSymdex,
+    WorkspaceTimeMachine as _WorkspaceTimeMachine,
+    ExecutionShield as _ExecutionShield,
+    TernaryToolRouter as _TernaryToolRouter,
+    prompt_lookup as _prompt_lookup,
+)
+
+
+@mcp.tool()
+def roms_titans_remember(key: str, value: str, category: str = "architecture") -> str:
+    """Store or cleanly overwrite project facts in Titans + Gated DeltaNet-2 associative neural memory."""
+    import json
+    return json.dumps(_HybridNeuralMemory().remember(key=key, value=value, category=category), indent=2)
+
+
+@mcp.tool()
+def roms_titans_recall(query: str) -> str:
+    """Sub-millisecond associative memory recall from Titans + Gated DeltaNet-2 matrix."""
+    import json
+    return json.dumps(_HybridNeuralMemory().recall(query=query), indent=2)
+
+
+@mcp.tool()
+def roms_titans_erase(key: str) -> str:
+    """Surgically erase obsolete keys via Gated DeltaNet-2 pure erase gate without disturbing orthogonal keys."""
+    import json
+    return json.dumps(_HybridNeuralMemory().erase(key=key), indent=2)
+
+
+@mcp.tool()
+def roms_sieve_compact(raw_text: str, max_lines: int = 35) -> str:
+    """SnapKV Observation-Window Log Sieve: Compacts verbose build/test logs by 90-98% while keeping 100% of tracebacks and file:line pointers."""
+    import json
+    return json.dumps(_ContextSieve().compact(raw_text=raw_text, max_lines=max_lines), indent=2)
+
+
+@mcp.tool()
+def roms_symdex_lookup(query: str, top_k: int = 10, workspace_root: str = ".") -> str:
+    """Sub-millisecond zero-DB symbol & signature lookup across Python, Mojo, Rust, TS/JS, Go, and C/C++."""
+    import json
+    return json.dumps(_PolyglotSymdex().lookup(query=query, top_k=top_k, workspace_root=workspace_root), indent=2)
+
+
+@mcp.tool()
+def roms_snapshot_create(label: str = "Pre-tool checkpoint", workspace_root: str = ".") -> str:
+    """Copy-on-Write Time Machine: Takes a content-addressable SHA-256 checkpoint before risky edits."""
+    import json
+    return json.dumps(_WorkspaceTimeMachine().snapshot(label=label, workspace_root=workspace_root), indent=2)
+
+
+@mcp.tool()
+def roms_snapshot_rewind(snapshot_id: str, workspace_root: str = ".") -> str:
+    """Copy-on-Write Time Machine: Atomically rolls back workspace state without touching .git history."""
+    import json
+    return json.dumps(_WorkspaceTimeMachine().rewind(snapshot_id=snapshot_id, workspace_root=workspace_root), indent=2)
+
+
+@mcp.tool()
+def roms_shield_forecast(action: str, goal: str = "General coding task") -> str:
+    """Pre-Simulation Execution Shield: Blocks destructive commands (rm -rf, DROP TABLE, --force) and halts 3-turn cyclic agent loops."""
+    import json
+    return json.dumps(_ExecutionShield().forecast_action(action=action, goal=goal), indent=2)
+
+
+@mcp.tool()
+def roms_shield_repair_json(raw_llm_output: str) -> str:
+    """Repairs broken JSON tool calls emitted by local 7B-32B models (fences, single quotes, trailing commas, unclosed braces)."""
+    import json
+    return json.dumps(_ExecutionShield().repair_tool_call(raw_llm_output=raw_llm_output), indent=2)
+
+
+@mcp.tool()
+def roms_prompt_lookup(history_csv: str, window: int = 2, limit: int = 4) -> str:
+    """Parameter-free greedy n-gram speculative token drafting (mojond/ROMS runtime)."""
+    import json
+    tokens = [int(x.strip()) for x in history_csv.split(",") if x.strip().lstrip("-").isdigit()]
+    drafted = _prompt_lookup(tokens, window=window, limit=limit)
+    return json.dumps({"drafted_tokens": drafted, "count": len(drafted)}, indent=2)
+
+
+# ============================================================================
 # DYNAMIC CUSTOM TOOLS LOADER (custom_tools/*.py)
 # ============================================================================
 

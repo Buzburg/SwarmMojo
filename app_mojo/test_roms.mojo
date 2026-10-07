@@ -80,9 +80,11 @@ def test_sanitizer() raises:
         raise Error("Sanitizer did not truncate")
 
 from app_mojo.quantized_vec import BinaryVector, binarize_embedding, int8_dot_product
+from app_mojo.hms_simd import Hypervector, deterministic_hypervector, HolographicMemoryBank
+from app_mojo.tsl_protocol import TSLStreamParser, build_tsl_prompt
 
 def test_quantized_vectors() raises:
-    print("[TEST 7/7] Running Native Mojo SIMD 1-Bit & Int8 Quantized Vector Matcher...")
+    print("[TEST 7/9] Running Native Mojo SIMD 1-Bit & Int8 Quantized Vector Matcher...")
     var v1 = List[Float32](capacity=4)
     v1.append(0.5)
     v1.append(-0.2)
@@ -96,6 +98,39 @@ def test_quantized_vectors() raises:
         print("  -> PASSED: 1-Bit SIMD Quantized Vector Matcher similarity =", sim)
     else:
         raise Error("Expected binary similarity near 1.0")
+
+def test_hms_simd_vsa() raises:
+    print("[TEST 8/9] Running Swarmojo 16,384-bit SIMD VSA Kernel...")
+    var hv_subject = deterministic_hypervector("RWKV7_Engine")
+    var hv_relation = deterministic_hypervector("runs_on")
+    var hv_object = deterministic_hypervector("Strix_Halo_128GB")
+
+    # Bind (S ^ R) ^ R = S (self-inverse XOR binding verification)
+    var bound = hv_subject.bind(hv_relation)
+    var recovered = bound.bind(hv_relation)
+    var sim = recovered.cosine_similarity(hv_subject)
+    if sim < 0.999:
+        raise Error("VSA XOR bind self-inverse failed")
+
+    var bank = HolographicMemoryBank(0.15)
+    bank.insert_atom("RWKV7_Engine", hv_subject)
+    bank.insert_atom("Strix_Halo_128GB", hv_object)
+    var found = bank.find_nearest(recovered)
+    if found == "RWKV7_Engine":
+        print("  -> PASSED: 16,384-bit VSA XOR unbinding & Hopfield lookup verified!")
+    else:
+        raise Error("Hopfield memory lookup failed")
+
+def test_tsl_protocol() raises:
+    print("[TEST 9/9] Running Swarmojo TSL Streaming FSM Protocol Parser...")
+    var parser = TSLStreamParser()
+    parser.feed('[OUT:"System online."][ADD:(Omarchy uses MSGL_FFI)]')
+    if parser.output_stream == "System online." and len(parser.bound_triples) == 1:
+        var t = parser.bound_triples[0]
+        if t.subject == "Omarchy" and t.relation == "uses" and t.object == "MSGL_FFI":
+            print("  -> PASSED: TSL Streaming FSM parsed output & knowledge triple!")
+            return
+    raise Error("TSL Streaming FSM failed verification")
 
 def main() raises:
     # All state lives in a temporary directory, even when run in a working checkout.
@@ -114,6 +149,9 @@ def main() raises:
         test_ticket_ops()
         test_sanitizer()
         test_quantized_vectors()
-        print("All seven Mojo checks passed.")
+        test_hms_simd_vsa()
+        test_tsl_protocol()
+        print("All nine Mojo checks passed.")
     finally:
         temp.cleanup()
+

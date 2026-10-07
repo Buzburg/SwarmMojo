@@ -1,0 +1,15 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "maintainers": [
+    "Buzburg"
+  ],
+  "name": "roms",
+  "description": "ROMS (RAG, OKF, MCP, Skills) & Prefrontal Agent Harness: Hybrid SQLite FTS5/vec + 16,384-bit VSA RAG, Titans + DeltaNet-2 Associative Memory, 98.8% SnapKV Log Sieve, 25.61x Mojo 1.1.0 Knapsack Context Packer, CoW Time Machine, 280 Skill Cartridges & Omarchy Dual-Brain Router.",
+  "categories": [
+    "memory",
+    "developer-tools",
+    "context-optimization",
+    "knowledge-management",
+    "security"
+  ]
+}

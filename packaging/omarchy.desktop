@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Omarchy OS Studio
+Comment=Local-first Omarchy RWKV-7 & ROMS Autonomous Harness
+Type=Application
+Exec=omarchy-menu
+Icon=utilities-terminal
+Terminal=true
+Categories=Development;Utility;System;

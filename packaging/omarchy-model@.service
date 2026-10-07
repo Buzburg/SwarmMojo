@@ -1,0 +1,15 @@
+[Unit]
+Description=Omarchy Local Model Inference Service (%i)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/omarchy-serve %i
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+KillMode=control-group
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target
