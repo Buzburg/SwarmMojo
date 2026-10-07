@@ -27,6 +27,67 @@ def get_dependency(name: str) -> str | None:
     return None
 
 
+def _review_report(value: object, snapshots: dict[str, bytes | None]) -> dict:
+    """Bind PTRM's declared coverage and findings to the selected source bytes."""
+    if (type(value) is not dict or type(value.get('schema_version')) is not int
+            or value['schema_version'] != 1 or value.get('mode') != 'advisory_static_rules'):
+        raise ValueError('Unsupported advisory reviewer response')
+    entries, findings = value.get('files'), value.get('findings')
+    if type(entries) is not list or len(entries) != len(snapshots) or type(findings) is not list:
+        raise ValueError('Invalid advisory reviewer file coverage')
+    hashes = {name: None if data is None else hashlib.sha256(data).hexdigest()
+              for name, data in snapshots.items()}
+    reviewed, seen, truncated = {}, set(), False
+    for entry in entries:
+        if type(entry) is not dict or type(entry.get('path')) is not str:
+            raise ValueError('Invalid advisory reviewer file entry')
+        name = entry['path']
+        if name not in snapshots or name in seen:
+            raise ValueError('Advisory reviewer returned unexpected or duplicate files')
+        seen.add(name)
+        if entry.get('status') == 'reviewed':
+            if hashes[name] is None or entry.get('sha256') != hashes[name]:
+                raise ValueError('Advisory review source hash mismatch')
+            if type(entry.get('possibly_truncated')) is not bool:
+                raise ValueError('Advisory review must declare truncation')
+            reviewed[name] = entry
+            truncated |= entry['possibly_truncated']
+        elif entry.get('status') != 'skipped' or not isinstance(entry.get('reason'), str) or not entry['reason']:
+            raise ValueError('Advisory reviewer must explain each skipped file')
+    coverage = {'requested': len(snapshots), 'reviewed': len(reviewed), 'skipped': len(snapshots) - len(reviewed)}
+    supplied = value.get('coverage')
+    if (type(supplied) is not dict or any(type(supplied.get(k)) is not int or supplied[k] != v
+                                         for k, v in coverage.items())):
+        raise ValueError('Advisory review coverage counts disagree with files')
+    counts = dict.fromkeys(reviewed, 0)
+    line_counts = {name: len(snapshots[name].decode('utf-8').splitlines()) for name in reviewed}
+    for finding in findings:
+        if type(finding) is not dict or type(finding.get('path')) is not str or finding['path'] not in reviewed:
+            raise ValueError('Advisory finding refers to an unreviewed file')
+        name = finding['path']
+        if finding.get('source_sha256') != hashes[name] or finding.get('verified') is not False:
+            raise ValueError('Advisory finding has invalid source or verification status')
+        start, end = finding.get('start_line'), finding.get('end_line')
+        if (type(start) is not int or type(end) is not int
+                or not 1 <= start <= end <= line_counts[name]):
+            raise ValueError('Advisory finding is outside the selected source')
+        counts[name] += 1
+        if counts[name] > 200:
+            raise ValueError('Advisory findings exceeded the per-file limit')
+    incomplete = bool(coverage['skipped']) or truncated
+    status = 'not_reviewed' if not reviewed else 'partial' if incomplete else 'reviewed'
+    report = {key: value[key] for key in ('schema_version', 'mode', 'files', 'findings')}
+    report.update({'coverage': coverage, 'coverage_status': 'none' if not reviewed else 'partial' if incomplete else 'complete',
+              'possibly_truncated': truncated, 'status': status, 'source_sha256': hashes,
+              'advisory_only': True, 'authorizes_apply': False,
+              'limitations': 'Coverage counts supported rule scans, not defects detected or proof of safety.'})
+    if incomplete:
+        report['reason'] = f"{coverage['reviewed']} of {coverage['requested']} files scanned; {coverage['skipped']} skipped."
+        if truncated:
+            report['reason'] += ' Findings may be truncated.'
+    return report
+
+
 async def review_files(root: Path, files: list[str]) -> dict:
     configured = get_dependency('ptrm')
     base = {'advisory_only': True, 'authorizes_apply': False}
@@ -39,23 +100,22 @@ async def review_files(root: Path, files: list[str]) -> dict:
     if not 1 <= len(files) <= 64 or len(set(files)) != len(files):
         raise ValueError('Select 1–64 distinct review files')
     snapshots = {name: patch_tasks.read_file(root, patch_tasks.patch_path(name)) for name in files}
+    worker_sha256 = hashlib.sha256(worker.read_bytes()).hexdigest()
     python_library = str(Path(sys.prefix) / 'lib' / f'libpython{sys.version_info.major}.{sys.version_info.minor}.so')
     launch = ('import runpy,sys; sys.path.insert(0,sys.argv.pop(1)); '
               'runpy.run_module("ptrm_reviewer",run_name="__main__")')
     response = await run_process(['/usr/bin/env', 'MOJO_PYTHON_LIBRARY=' + python_library,
         'LD_LIBRARY_PATH=' + str(Path(python_library).parent), 'PYTHONHOME=' + sys.prefix,
-        sys.executable, '-c', launch, str(dependency), 'review', '--root', str(root),
+        sys.executable, '-B', '-c', launch, str(dependency), 'review', '--root', str(root),
         '--worker', str(worker), *files], 30)
     if any(patch_tasks.read_file(root, name) != content for name, content in snapshots.items()):
         raise ValueError('Reviewed source changed during analysis')
+    if hashlib.sha256(worker.read_bytes()).hexdigest() != worker_sha256:
+        raise ValueError('Reviewer worker changed during analysis')
     if response.returncode:
         return {**base, 'status': 'failed', 'reason': 'PTRM exited unsuccessfully', 'diagnostics': response.output[-2000:]}
-    value = json.loads(response.output)
-    if type(value) is not dict:
-        raise ValueError('Invalid advisory reviewer response')
-    return {**value, **base, 'status': 'reviewed', 'source_sha256': {
-        name: None if data is None else hashlib.sha256(data).hexdigest() for name, data in snapshots.items()},
-        'worker_sha256': hashlib.sha256(worker.read_bytes()).hexdigest()}
+    report = _review_report(json.loads(response.output), snapshots)
+    return {**report, 'worker_sha256': worker_sha256}
 
 
 async def review_task(task_id: str, collector: Collector | None = None) -> dict:
