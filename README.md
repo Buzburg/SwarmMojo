@@ -105,6 +105,7 @@ Startup initializes the database, indexes supported files in `knowledge/`, loads
 | Search knowledge | `search_knowledge_base`, `search_grounded_context` |
 | Add or refresh documents | `add_knowledge_document`, `reload_knowledge`, `list_knowledge_documents` |
 | Retain and recall project lessons | `memory_retain`, `memory_recall`, `memory_get`, `memory_prepare_context` |
+| Propose a regression check after a failure | `memory_propose_correction` or `python swarmmojo.py correction --help` |
 | Record or revise lesson evidence | `memory_record_verification`, `memory_correct`, `memory_retract`, `memory_forget` |
 | Get an advisory decision | `roms_decide`, `roms_noul`, `roms_score` |
 | Find tools and skills | `search_tools`, `list_skills` |
@@ -141,9 +142,13 @@ The [harness guide](docs/HARNESS.md) records its checks, and the [CI workflow](.
 
 ## Optional integrations and documentation
 
-Three explicitly selected [specialist playbooks](docs/IMPORTED-SKILLS.md) are available for code review, architecture and technical writing. They are pinned to reviewed upstream source and retain their license. They are prompt text, not independently running agents or permissions.
+Three explicitly selected [specialist playbooks](docs/IMPORTED-SKILLS.md) are available for code review, architecture and technical writing. These concise local adaptations record their upstream source and retain its license. They are prompt text, not independently running agents or permissions.
 
 The [upstream evaluation](docs/UPSTREAM-EVALUATION.md) distinguishes what is included from promising adapters, overlapping systems and unresolved project names.
+
+For coding work, select a compact review playbook, use the existing workshop's configured PTRM reviewer to inspect code, and save recurring failures as [correction proposals](docs/local-memory.md#propose-a-regression-after-a-failure). PTRM reports distinguish full, partial and absent scan coverage; a clean or partial report cannot approve an edit. [Local harness and PTRM assessment](docs/research/local-coding-sources.md).
+
+The model gateway tracks complete response termination so an interrupted stream cannot be recorded as a completed protocol exchange. Ordinary broker chat rejects truncated answers. These checks do not establish answer correctness or successful task execution.
 
 The Linux/Omarchy workshop adds staged changes, registered validation and operator-approved promotion. It requires its own configured runtime and confinement components; those execution features are not established by the portable preparation command or a positive decision score.
 

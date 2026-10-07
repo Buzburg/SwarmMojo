@@ -28,3 +28,7 @@ jobs:
       - run: python -m pytest tests/test_release_safety.py tests/test_memory.py tests/test_corrections.py tests/test_corrections_interfaces.py tests/test_context.py tests/test_gateway_privacy.py tests/test_doctor.py tests/test_workbench_package.py tests/test_os_model.py tests/test_os_workshop.py tests/test_voice_audio.py tests/test_voice_chat.py tests/test_voice_stt.py tests/test_voice_tts.py tests/test_voice_workshop.py -q
         env:
           HF_HUB_OFFLINE: '1'
+      - name: Verify review coverage, completion and approval freshness
+        run: python -m pytest tests/test_ptrm_reports.py tests/test_completion_status.py tests/test_broker_chat.py tests/test_gateway_prompt.py tests/test_approval_freshness.py -q
+        env:
+          HF_HUB_OFFLINE: '1'
