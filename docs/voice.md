@@ -4,7 +4,11 @@ The experimental voice client connects Moonshine Tiny Streaming speech recogniti
 
 Installed on the Omarchy WSL test machine on 6 October 2026. Eight common-word synthetic recognition checks, actual Goose arithmetic, playback, one-second microphone capture and cancellation/reuse passed. The original “Goose voice is ready” fixture is consistently recognized as “whose voice is ready”; its strict test remains failed. The evidence therefore distinguishes functional success from complete quality acceptance.
 
-In the combined run, median warm first generated audio was 0.44s, median generation/audio-duration ratio was 1.16, the short model-answer/playback turn took 11.0s, and this voice process peaked near 1.23GB RSS. These are three warm speech samples and one model turn, excluding the separate model/gateway memory. Sustained realtime speech and human microphone intelligibility are not certified. Detailed reports are in the workspace's `review-artifacts/voice` directory.
+In the initial combined run, median warm first generated audio was 0.44s, median generation/audio-duration ratio was 1.16, the short model-answer/playback turn took 11.0s, and this voice process peaked near 1.23GB RSS. These are three warm speech samples and one model turn, excluding the separate model/gateway memory. Sustained realtime speech and human microphone intelligibility are not certified. Detailed reports are in the workspace's `review-artifacts/voice` directory.
+
+Subsequent prompt-cache tuning reduced median time from text submission to first generated audio from 7.33s to 3.09s in a three-reply comparison. First requests and questions requiring different memory context remain slower. See the [measured scope and limitations](voice-performance.md).
+
+The final installed default also uses deterministic responses. Its final three spoken replies all passed: first audio at 8.90s for the uncached question, then 2.62s and 2.49s for warm questions. Keep the voice window open to retain the loaded speech models. New context can still require a slower model pass.
 
 See [verification results and reproduction](voice-verification.md) for exact scope, passing checks and the retained failure.
 

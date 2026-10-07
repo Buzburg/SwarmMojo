@@ -2,6 +2,8 @@
 
 The installed Omarchy WSL voice client passed its functional checks. It remains experimental: the strict brand-name recognition check fails, and sustained faster-than-realtime synthesis is not established.
 
+Later the same day, [prompt-cache tuning](voice-performance.md) reduced median first generated audio from 7.33s to 3.09s in a three-reply comparison. The initial qualification measurements below are retained as historical evidence.
+
 ## Actual installed runtime
 
 Pocket TTS 3.3.0, September English weights without voice cloning, fixed CC0 Marius voice; Moonshine Voice 0.1.5, explicit Tiny Streaming; CPU-only Torch 2.8.0. The runtime is Linux x86-64/Python 3.12.14, separate from ROMS. Its wheel and model identities are pinned in `config/voice-runtime.json`.

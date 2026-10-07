@@ -60,7 +60,8 @@ def test_client_disconnect_closes_actual_upstream_socket_and_allows_next_request
                     response = {'prompt': 'fixture'}
                 elif path == '/tokenize':
                     response = {'tokens': [1]}
-                elif body.get('messages', [{}])[-1].get('content') == 'quick':
+                elif next((item.get('content') for item in reversed(body.get('messages', []))
+                           if item.get('role') == 'user'), None) == 'quick':
                     assert closed.is_set(), 'The cancelled upstream connection remained open'
                     response = {'model': 'fixture', 'choices': [{'message': {'content': 'ready'}, 'finish_reason': 'stop'}]}
                 else:

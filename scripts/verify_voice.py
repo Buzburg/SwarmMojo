@@ -145,14 +145,22 @@ def _chat(speaker: PocketSpeaker) -> dict[str, Any]:
         raise RuntimeError('An authenticated local chat environment is required')
     cancel = threading.Event()
     started = time.perf_counter()
-    first_text = first_audio = None
+    first_visible_text = first_text = first_audio = None
     answer = []
     parts = stream_answer([{'role': 'user', 'content':
                            'What is six times seven? Answer in one short sentence.'}], key, cancel)
 
+    def timed_parts():
+        nonlocal first_visible_text
+        for part in parts:
+            # Measure answer text before speech filtering and sentence buffering.
+            if first_visible_text is None and part.strip():
+                first_visible_text = time.perf_counter() - started
+            yield part
+
     def spoken_chunks():
         nonlocal first_text, first_audio
-        for sentence in sentence_chunks(parts):
+        for sentence in sentence_chunks(timed_parts()):
             if first_text is None:
                 first_text = time.perf_counter() - started
             answer.append(sentence)
@@ -172,6 +180,7 @@ def _chat(speaker: PocketSpeaker) -> dict[str, Any]:
     if not _has_forty_two(visible) or seconds <= 0:
         raise RuntimeError('Local Goose arithmetic or speech check failed')
     return {'expected_number_present': True, 'answer_characters': len(visible),
+            'first_visible_text_seconds': first_visible_text,
             'first_speakable_text_seconds': first_text, 'first_generated_audio_seconds': first_audio,
             'complete_playback_seconds': time.perf_counter() - started, 'audio_seconds': seconds}
 

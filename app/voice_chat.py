@@ -83,7 +83,7 @@ def _payload(messages: list[dict[str, str]], api_key: str) -> bytes:
         raise VoiceChatError("Voice history exceeds the 4 KiB limit.")
     return json.dumps({
         "messages": [{"role": "system", "content": _SYSTEM}, *messages],
-        "max_tokens": 256, "temperature": 0.3, "stream": True,
+        "max_tokens": 256, "temperature": 0, "stream": True,
     }).encode("utf-8")
 
 

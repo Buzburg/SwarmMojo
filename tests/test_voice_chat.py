@@ -178,6 +178,7 @@ def test_real_http_uses_auth_fixed_chat_route_and_constrained_prompt(monkeypatch
     assert observed["auth"] == "Bearer fixture-secret"
     body = observed["body"]
     assert body["stream"] is True and body["max_tokens"] == 256
+    assert body["temperature"] == 0
     assert body["messages"][0]["role"] == "system"
     assert "Never claim" in body["messages"][0]["content"]
     assert "tools" not in body and "tool_choice" not in body

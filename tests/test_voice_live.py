@@ -61,3 +61,61 @@ def test_quality_failure_never_becomes_strict_success(tmp_path, monkeypatch,
     assert calls == ['synthesis'] * 4 + ['cancellation', 'chat', 'closed']
     assert ('brand_roundtrip' in report['quality_failures']) is (not brand_ok)
     assert ('common_word_roundtrips' in report['quality_failures']) is (not common_ok)
+
+
+@pytest.mark.parametrize('playback_fails', [False, True], ids=['complete', 'playback-error'])
+def test_chat_times_first_visible_delta_before_sentence_buffer_and_closes_streams(monkeypatch, playback_fails):
+    from app import voice_audio, voice_chat
+
+    clock = [0.0]
+    state = {'chat_closed': False, 'audio_closed': False}
+    monkeypatch.setenv('ROMS_GATEWAY_API_KEY', 'fixture-key')
+    monkeypatch.setattr(verify_voice.time, 'perf_counter', lambda: clock[0])
+
+    def answer(messages, api_key, cancel):
+        assert api_key == 'fixture-key'
+        state['cancel'] = cancel
+        try:
+            clock[0] = 1.0
+            yield ' '  # Whitespace is not a visible answer.
+            clock[0] = 2.0
+            yield '4'
+            clock[0] = 4.0
+            yield '2. ' if playback_fails else '2'
+            clock[0] = 6.0  # An unpunctuated answer is held until EOF.
+        finally:
+            state['chat_closed'] = True
+
+    def audio(text, cancel):
+        assert text == ('42.' if playback_fails else '42') and cancel is state['cancel']
+        try:
+            clock[0] = 6.25
+            yield object()
+        finally:
+            state['audio_closed'] = True
+
+    def play(chunks, sample_rate, cancel):
+        assert sample_rate == 24000
+        for chunk in chunks:
+            if playback_fails:
+                assert not state['chat_closed']
+                raise RuntimeError('fixture playback failure')
+        clock[0] = 7.25
+        return 1.0
+
+    monkeypatch.setattr(voice_chat, 'stream_answer', answer)
+    monkeypatch.setattr(voice_audio, 'play', play)
+    speaker = SimpleNamespace(iter_audio=audio, sample_rate=24000)
+    if playback_fails:
+        with pytest.raises(RuntimeError, match='fixture playback failure'):
+            verify_voice._chat(speaker)
+    else:
+        report = verify_voice._chat(speaker)
+        assert report['first_visible_text_seconds'] == 2.0
+        assert report['first_speakable_text_seconds'] == 6.0
+        assert report['first_generated_audio_seconds'] == 6.25
+        assert report['complete_playback_seconds'] == 7.25
+        assert report['answer_characters'] == 2
+        assert '42' not in report.values()
+    assert state['chat_closed'] and state['audio_closed']
+    assert state['cancel'].is_set()

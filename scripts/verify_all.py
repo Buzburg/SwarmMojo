@@ -41,7 +41,7 @@ def main() -> None:
     prefix = Path(os.getenv('ROMS_PYTHON_PREFIX', str(root / '.pixi/envs/default')))
     binary = Path(os.getenv('OMARCHY_BROKER_BINARY', str(prefix / 'bin/omarchy-broker')))
     suites = ['release_safety', 'memory', 'context', 'retrieval_quality', 'ingestion_quality',
-              'tools_quality', 'throttle', 'broker_actions', 'broker_protocol', 'broker_requests', 'broker_scheduler', 'goose_response', 'request_lifecycle', 'gateway_disconnect', 'gateway_privacy', 'doctor', 'workbench_package', 'os_operator', 'os_model', 'os_workshop', 'project_repair', 'voice_audio', 'voice_chat', 'voice_stt', 'voice_tts', 'voice_workshop', 'document_identity', 'source_library', 'build_readiness', 'validation_policy', 'model_inputs', 'runtime_patch']
+              'tools_quality', 'throttle', 'broker_actions', 'broker_protocol', 'broker_requests', 'broker_scheduler', 'goose_response', 'request_lifecycle', 'gateway_disconnect', 'gateway_privacy', 'gateway_prompt', 'doctor', 'workbench_package', 'os_operator', 'os_model', 'os_workshop', 'project_repair', 'voice_audio', 'voice_chat', 'voice_stt', 'voice_tts', 'voice_workshop', 'document_identity', 'source_library', 'build_readiness', 'validation_policy', 'model_inputs', 'runtime_patch']
     checks = [
         ('ROMS offline regressions', [sys.executable, '-m', 'pytest',
             *[f'tests/test_{name}.py' for name in suites], '-q', '--tb=short']),
