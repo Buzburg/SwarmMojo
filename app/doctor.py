@@ -33,11 +33,11 @@ def read_status() -> dict[str, Any]:
     with socket.socket(family) as client:
         client.settimeout(TIMEOUT)
         client.connect(SOCKET_PATH)
-        client.settimeout(max(0.001, deadline - time.monotonic()))
+        client.settimeout(min(TIMEOUT, max(0.001, deadline - time.monotonic())))
         client.sendall(b'STATUS\n')
         data = bytearray()
         while b'\n' not in data:
-            remaining = deadline - time.monotonic()
+            remaining = min(TIMEOUT, deadline - time.monotonic())
             if remaining <= 0:
                 raise TimeoutError('Status deadline exceeded')
             client.settimeout(remaining)

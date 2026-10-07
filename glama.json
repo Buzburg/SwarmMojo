@@ -4,7 +4,7 @@
     "Buzburg"
   ],
   "name": "SwarmMojo",
-  "description": "Portable agent harness combining decision support, indexed knowledge, MCP and selected skills to prepare bounded context and reviewable next steps.",
+  "description": "Full-fledged local-first AI agent harness combining ROMS (RAG, Open Knowledge Files, MCP, Skills), Decision AI, correction memory, and reviewable workflow preparation.",
   "categories": [
     "memory",
     "developer-tools",
