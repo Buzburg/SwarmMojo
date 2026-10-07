@@ -433,6 +433,59 @@ def roms_prompt_lookup(history_csv: str, window: int = 2, limit: int = 4) -> str
 
 
 # ============================================================================
+# [J] SYSTEM-1 DECISION ENGINE (Jev / Laya + RWKV-7 Goose O(1) + BERTopic)
+# ============================================================================
+
+from app.decisions import ROMSDecisionEngine as _ROMSDecisionEngine
+
+
+@mcp.tool()
+def roms_decide(state: str, question: str, options_json: str, threshold: float = 0.45, min_margin: float = 0.08) -> str:
+    """Jev/Laya System-1 Decision Engine: Single-pass calibrated `choice` over 2..26 options with RWKV-7 O(1) state forking, forward/reverse position debiasing, Shannon concentration, and BERTopic open-set abstention discovery."""
+    import json
+    try:
+        opts = json.loads(options_json)
+    except Exception:
+        opts = [x.strip() for x in options_json.split(",") if x.strip()]
+    res = _ROMSDecisionEngine(threshold=threshold, min_margin=min_margin).decide_choice(
+        state=state, question=question, options=opts
+    )
+    return json.dumps(res, indent=2)
+
+
+@mcp.tool()
+def roms_noul(state: str, question: str, threshold: float = 0.45, min_margin: float = 0.08) -> str:
+    """Jev/Laya System-1 Binary Verification Gate (`noul`): Single-pass `yes`/`no` judgment against supplied evidence with calibrated probability and abstention."""
+    import json
+    res = _ROMSDecisionEngine(threshold=threshold, min_margin=min_margin).decide_noul(
+        state=state, question=question
+    )
+    return json.dumps(res, indent=2)
+
+
+@mcp.tool()
+def roms_score(state: str, question: str, rubric_csv: str = "Poor,Fair,Good,Excellent", threshold: float = 0.35, min_margin: float = 0.05) -> str:
+    """Jev/Laya System-1 Rubric Scorer (`score`): Single-pass ordered rubric evaluation (2..10 levels) returning expected value E[S] and normalized [0,1] score."""
+    import json
+    rubric = [x.strip() for x in rubric_csv.split(",") if x.strip()]
+    res = _ROMSDecisionEngine(threshold=threshold, min_margin=min_margin).decide_score(
+        state=state, question=question, rubric=rubric
+    )
+    return json.dumps(res, indent=2)
+
+
+@mcp.tool()
+def roms_bertopic_discover(document: str = "") -> str:
+    """BERTopic (`c-TF-IDF` + Semantic Centroids) Open-Set Topic Discovery: Clusters unseen/abstained queries and synthesizes new decision options on the fly."""
+    import json
+    engine = _ROMSDecisionEngine()
+    if document.strip():
+        added = engine.bertopic.add_document(document.strip())
+        return json.dumps({"assigned_topic": added, "catalog": engine.bertopic.summary()}, indent=2)
+    return json.dumps(engine.bertopic.summary(), indent=2)
+
+
+# ============================================================================
 # DYNAMIC CUSTOM TOOLS LOADER (custom_tools/*.py)
 # ============================================================================
 

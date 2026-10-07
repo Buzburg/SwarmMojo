@@ -66,6 +66,7 @@ The architecture and performance figures below describe the wider project and it
 | **10. 280 Skill & Persona Cartridges** | **Agency Role Registry** + Impeccable Design + ECC | Dynamically routes tasks to 280 specialized engineering/design/security SOPs exposed via `skills://{name}` MCP resources | **Zero-prompt** SOP injection |
 | **11. Dual-Brain Reflex/Oracle Router** | **RWKV-7 Goose (2.9B)** + **MSGL Deep Reasoner** | Routes `< 50 ms` O(1) state-space reflex edits to RWKV-7 and multi-hop architectural invariants to the MSGL/Dark Reasoner Oracle | **O(1)** reflex state memory |
 | **12. Nightly SFT Dream Cycle & Omarchy HUD** | **Continual SFT Consolidator** + **Waybar/Hyprland** | Distills verified daytime trajectories & Hindsight reflections into LoRA/state-tuning JSONL overnight + live Waybar status bar HUD | **100% local** continual learning |
+| **13. System-1 Decision Engine (Jev/Laya Clone)** | **RWKV-7 O(1) State** + **BERTopic `c-TF-IDF`** + **Mojo** | Single-pass calibrated judgments (`choice`, `noul` yes/no, `score` 0..9) across 1..12 questions with forward/reverse position debiasing, Shannon concentration, abstention, and automatic BERTopic open-set option discovery | **`< 5 ms`** (`4.6 KB` $O(1)$ state fork) |
 
 ---
 
@@ -91,9 +92,9 @@ The architecture and performance figures below describe the wider project and it
    │  │ • PY/MOJO/RS/TS/GO/CPP    │  │   • Git-Safe Atomic Undo  │  │ • JSON Fixer │  │
    │  └───────────────────────────┘  └───────────────────────────┘  └──────────────┘  │
    │  ┌──────────────────────────────────────┐  ┌──────────────────────────────────┐  │
-   │  │ ROMS Knapsack & 1-Bit BinaryVector   │  │ mojond PrefixIndex & Drafting    │  │
-   │  │ • 25.61x Native Mojo 1.1.0 Speedup   │  │ • 3.22x Speculative N-Gram       │  │
-   │  │ • Failed-Attempt Warning Reserved    │  │ • TSL <think>/<call> Streaming   │  │
+   │  │ Jev/Laya System-1 Decision Engine    │  │ ROMS Knapsack & Prefix Drafting  │  │
+   │  │ • choice / noul / score (1..12 Qs)   │  │ • 25.61x Native Mojo 1.1.0       │  │
+   │  │ • RWKV-7 4.6KB State Fork + BERTopic │  │ • 3.22x Speculative N-Gram       │  │
    │  └──────────────────────────────────────┘  └──────────────────────────────────┘  │
    │  ┌──────────────────────────────────────┐  ┌──────────────────────────────────┐  │
    │  │ SQLite FTS5 + sqlite-vec + OKF + ECC │  │ Omarchy AI OS Daemon & 280 Roles │  │
@@ -128,7 +129,7 @@ Across **600 randomized Python-vs-Mojo parity tests** (`400` 0/1 knapsack + `200
 python -m venv .venv
 .venv\Scripts\python -m pip install -r requirements.txt
 ```
-*(Note: The Prefrontal Cortex CLI `python -m app.prefrontal_cortex` has **zero external dependencies** and runs on stock Python 3.11+ immediately.)*
+*(Note: The Prefrontal Cortex & System-1 Decision CLI `python roms.py ...` has **zero external dependencies** and runs on stock Python 3.11+ immediately.)*
 
 ### 2. Connect to Claude Code / Cursor / Windsurf
 ```bash
@@ -149,7 +150,12 @@ claude mcp add roms -- python -m app.server
 }
 ```
 
-Once connected, your agent gains the full **ROMS + Prefrontal** toolset:
+Once connected, your agent gains the full **ROMS + Prefrontal + Jev/Laya Decision** toolset:
+- **System-1 Decision Engine (`app/decisions.py` + `app_mojo/decisions.mojo`):**
+  - `roms_decide` — Single-pass calibrated `choice` ($2..26$ options) using RWKV-7 $O(1)$ state forking (`4.6 KB`), forward/reversed position-bias cancellation, probability margin, Shannon concentration, and abstention
+  - `roms_noul` — Single-pass binary verification gate (`yes` / `no`) against supplied evidence
+  - `roms_score` — Ordered rubric evaluation ($2..10$ levels) returning expected value $\mathbb{E}[S] = \sum_i i \cdot p_i$ and normalized `[0, 1]` score
+  - `roms_bertopic_discover` — Open-set **BERTopic (`c-TF-IDF` + Semantic Centroids)** clusterer that automatically groups abstained queries and synthesizes new decision options on the fly
 - **Prefrontal Working Memory & Safety (`app/prefrontal_cortex.py`):**
   - `roms_titans_remember` / `roms_titans_recall` / `roms_titans_erase` — Sub-millisecond Titans + Gated DeltaNet-2 associative memory with exact key overwrite & surgical erase
   - `roms_sieve_compact` — SnapKV log sieve that compacts verbose terminal/test logs by 90–98%
@@ -166,37 +172,43 @@ Once connected, your agent gains the full **ROMS + Prefrontal** toolset:
 
 ---
 
-## 🚀 Prefrontal CLI & Omarchy OS Quickstart
+## 🚀 Prefrontal, Jev/Laya Decisions & Omarchy OS CLI Quickstart
 
 ```bash
-# 1. Memorize & cleanly overwrite project facts (Titans + Gated DeltaNet-2)
-python -m app.prefrontal_cortex remember --key "db_engine" --value "sqlite_vec_hybrid_rrf"
-python -m app.prefrontal_cortex recall --query "db_engine"
-python -m app.prefrontal_cortex erase --key "db_engine"
+# 1. System-1 Decisions (Jev/Laya Clone: choice, noul, score, & BERTopic Open-Set Discovery)
+python roms.py decide --state "User wants to rollback broken edits via SHA-256 snapshot" --question "Which tool?" --options '{"rewind": "Atomic SHA-256 snapshot rollback", "lint": "Format CSS"}'
+python roms.py noul --state "All 32 pytest unit tests passed and verified." --question "Did the unit tests pass?"
+python roms.py score --state "Migration completed cleanly with verified integrity." --question "Rate migration quality" --rubric "Poor,Fair,Good,Excellent"
+python roms.py topics --add "Unseen quantum photonic waveguide calibration drift"
 
-# 2. Compact noisy pytest/compiler output via SnapKV Context Sieve
-pytest | python -m app.prefrontal_cortex sieve --max-lines 25
+# 2. Memorize & cleanly overwrite project facts (Titans + Gated DeltaNet-2)
+python roms.py remember --key "db_engine" --value "sqlite_vec_hybrid_rrf"
+python roms.py recall --query "db_engine"
+python roms.py erase --key "db_engine"
 
-# 3. Index codebase symbols & run sub-millisecond lookups
-python -m app.prefrontal_cortex index --path .
-python -m app.prefrontal_cortex lookup --query "HybridNeuralMemory"
+# 3. Compact noisy pytest/compiler output via SnapKV Context Sieve
+pytest | python roms.py sieve --max-lines 25
 
-# 4. Take a Git-safe Copy-on-Write workspace snapshot & atomic rewind
-python -m app.prefrontal_cortex snapshot --label "Before auth refactor"
-python -m app.prefrontal_cortex rewind --id "snap_001"
+# 4. Index codebase symbols & run sub-millisecond lookups
+python roms.py index --path .
+python roms.py lookup --query "HybridNeuralMemory"
 
-# 5. Run Pre-Simulation Shield Forecast & Local LLM Tool-Call Repair
-python -m app.prefrontal_cortex forecast --action "pytest tests/" --goal "verify unit tests"
-python -m app.prefrontal_cortex repair --raw "```json {'name': 'lookup', 'arguments': {'query': 'main', 'top_k': '5',}} ```"
+# 5. Take a Git-safe Copy-on-Write workspace snapshot & atomic rewind
+python roms.py snapshot --label "Before auth refactor"
+python roms.py rewind --id "snap_001"
 
-# 6. Optimal 0/1 Knapsack Context Packing & Speculative Prompt Lookup
-python -m app.prefrontal_cortex pack --costs "50,40,30" --values "100,60,50" --budget 70 --required 2
-python -m app.prefrontal_cortex draft --tokens "1,2,3,4,5,2,3" --ngram 2 --budget 2
+# 6. Run Pre-Simulation Shield Forecast & Local LLM Tool-Call Repair
+python roms.py forecast --action "pytest tests/" --goal "verify unit tests"
+python roms.py repair --raw "```json {'name': 'lookup', 'arguments': {'query': 'main', 'top_k': '5',}} ```"
 
-# 7. Generate Interactive Dark-Mode HTML Telemetry Dashboard
-python -m app.prefrontal_cortex dashboard --out roms_dashboard.html
+# 7. Optimal 0/1 Knapsack Context Packing & Speculative Prompt Lookup
+python roms.py pack --costs "50,40,30" --values "100,60,50" --budget 70 --required 2
+python roms.py draft --tokens "1,2,3,4,5,2,3" --ngram 2 --budget 2
 
-# 8. Emit Live Waybar HUD JSON for Custom Omarchy OS (Hyprland)
+# 8. Generate Interactive Dark-Mode HTML Telemetry Dashboard
+python roms.py dashboard --out roms_dashboard.html
+
+# 9. Emit Live Waybar HUD JSON for Custom Omarchy OS (Hyprland)
 python -m app.omarchy_hud --waybar
 ```
 
@@ -220,8 +232,8 @@ $env:ROMS_UPSTREAM_LLM_URL = "http://127.0.0.1:11434/v1"
 ## 🧪 Verification & Test Suites
 
 ```powershell
-# Run all Prefrontal, Holographic VSA, Dual-Brain, Dream Cycle & Security suites (26 tests)
-python -m pytest tests/test_prefrontal_integration.py tests/test_repo_enhancements.py tests/test_harness_repos_integrations.py tests/test_moi_integrations.py tests/test_amazing_os_upgrades.py -v
+# Run all System-1 Decisions (Jev/Laya), Prefrontal, Holographic VSA, Dual-Brain, Dream Cycle & Security suites (32 tests)
+python -m pytest tests/test_decisions_jev_laya.py tests/test_prefrontal_integration.py tests/test_repo_enhancements.py tests/test_harness_repos_integrations.py tests/test_moi_integrations.py tests/test_amazing_os_upgrades.py -v
 
 # Run core release-safety, lesson memory, and knapsack context selection suites
 python -m pytest tests/test_release_safety.py tests/test_memory.py tests/test_context.py -q

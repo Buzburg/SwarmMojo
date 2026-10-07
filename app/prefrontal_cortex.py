@@ -1348,6 +1348,29 @@ def main(argv=None) -> int:
     p_dash = sub.add_parser("dashboard")
     p_dash.add_argument("--out", default="roms_dashboard.html")
 
+    p_dec = sub.add_parser("decide")
+    p_dec.add_argument("--state", required=True)
+    p_dec.add_argument("--question", required=True)
+    p_dec.add_argument("--options", required=True, help="JSON dict or comma-separated options")
+    p_dec.add_argument("--threshold", type=float, default=0.45)
+    p_dec.add_argument("--margin", type=float, default=0.08)
+
+    p_noul = sub.add_parser("noul")
+    p_noul.add_argument("--state", required=True)
+    p_noul.add_argument("--question", required=True)
+    p_noul.add_argument("--threshold", type=float, default=0.45)
+    p_noul.add_argument("--margin", type=float, default=0.08)
+
+    p_score = sub.add_parser("score")
+    p_score.add_argument("--state", required=True)
+    p_score.add_argument("--question", required=True)
+    p_score.add_argument("--rubric", default="Poor,Fair,Good,Excellent")
+    p_score.add_argument("--threshold", type=float, default=0.35)
+    p_score.add_argument("--margin", type=float, default=0.05)
+
+    p_top = sub.add_parser("topics")
+    p_top.add_argument("--add", default="", help="Optional document to cluster into BERTopic")
+
     args = parser.parse_args(argv)
     if args.cmd == "remember":
         print(json.dumps(HybridNeuralMemory().remember(args.key, args.value, args.category), indent=2))
@@ -1381,6 +1404,37 @@ def main(argv=None) -> int:
     elif args.cmd == "dashboard":
         out = generate_roms_dashboard(output_path=args.out)
         print(json.dumps({"dashboard_path": out}, indent=2))
+    elif args.cmd == "decide":
+        from app.decisions import ROMSDecisionEngine
+        try:
+            opts = json.loads(args.options)
+        except Exception:
+            opts = [x.strip() for x in args.options.split(",") if x.strip()]
+        res = ROMSDecisionEngine(threshold=args.threshold, min_margin=args.margin).decide_choice(
+            state=args.state, question=args.question, options=opts
+        )
+        print(json.dumps(res, indent=2))
+    elif args.cmd == "noul":
+        from app.decisions import ROMSDecisionEngine
+        res = ROMSDecisionEngine(threshold=args.threshold, min_margin=args.margin).decide_noul(
+            state=args.state, question=args.question
+        )
+        print(json.dumps(res, indent=2))
+    elif args.cmd == "score":
+        from app.decisions import ROMSDecisionEngine
+        rubric = [x.strip() for x in args.rubric.split(",") if x.strip()]
+        res = ROMSDecisionEngine(threshold=args.threshold, min_margin=args.margin).decide_score(
+            state=args.state, question=args.question, rubric=rubric
+        )
+        print(json.dumps(res, indent=2))
+    elif args.cmd == "topics":
+        from app.decisions import ROMSDecisionEngine
+        eng = ROMSDecisionEngine()
+        if args.add.strip():
+            added = eng.bertopic.add_document(args.add.strip())
+            print(json.dumps({"assigned_topic": added, "catalog": eng.bertopic.summary()}, indent=2))
+        else:
+            print(json.dumps(eng.bertopic.summary(), indent=2))
     else:
         parser.print_help()
     return 0

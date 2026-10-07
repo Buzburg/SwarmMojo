@@ -3,6 +3,7 @@
 from std.collections import List
 from std.python import Python, PythonObject
 from runtime_mojond_roms import select_context, prompt_lookup, kv_bytes
+from decisions import decide, rank_options
 
 
 def pack_context(
@@ -49,3 +50,39 @@ def prompt_lookup_native(
     for i in range(len(drafted)):
         result.append(drafted[i])
     return result
+
+
+def decide_native(
+    logits: PythonObject,
+    temperature: PythonObject,
+    threshold: PythonObject,
+    min_margin: PythonObject
+) raises -> PythonObject:
+    """Native Mojo System-1 calibrated decision head (Jev/Laya compatible)."""
+    var n = len(logits)
+    var native_logits = List[Float64](capacity=n)
+    var allowed = List[Bool](capacity=n)
+    for i in range(n):
+        native_logits.append(Float64(py=logits[i]))
+        allowed.append(True)
+    var d = decide(
+        native_logits,
+        allowed,
+        Float64(py=temperature),
+        Float64(py=threshold),
+        Float64(py=min_margin)
+    )
+    var builtins = Python.import_module("builtins")
+    var out = builtins.dict()
+    var probs = builtins.list()
+    for i in range(len(d.probabilities)):
+        probs.append(d.probabilities[i])
+    out["index"] = d.index
+    out["probabilities"] = probs
+    out["confidence"] = d.confidence
+    out["margin"] = d.margin
+    out["concentration"] = d.concentration
+    out["expected_score"] = d.expected_score
+    out["abstain"] = d.abstain
+    return out
+
