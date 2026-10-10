@@ -33,4 +33,5 @@ Development Commands:
 - triad: python swarmmojo.py triad
 - mojo-memory: python swarmmojo.py mojo-memory
 - studio: python swarmmojo.py studio
+- design: python swarmmojo.py design
 - meta: python swarmmojo.py meta

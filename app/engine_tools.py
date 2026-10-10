@@ -253,4 +253,55 @@ def register_engine_tools(server: FastMCP) -> None:
         spec = studio.craft_banner_spec(platform=platform, headline=headline, subtext=subtext, style=style)
         return json.dumps(spec, indent=2)
 
+    @server.tool()
+    def design_build_landing_page(
+        project_name: str,
+        headline: str,
+        subheadline: str,
+        features_json: str = "[]",
+        metrics_json: str = "[]",
+        theme_primary: str = "#6366F1",
+    ) -> str:
+        """Generates a complete, responsive dark-mode landing page with Impeccable craft tokens."""
+        from app.engines.design import DesignAgentEngine
+        engine = DesignAgentEngine()
+        try:
+            feats = json.loads(features_json)
+        except Exception:
+            feats = None
+        try:
+            mets = json.loads(metrics_json)
+        except Exception:
+            mets = None
+        res = engine.build_landing_page(
+            project_name=project_name,
+            headline=headline,
+            subheadline=subheadline,
+            features=feats,
+            metrics=mets,
+            theme_primary=theme_primary,
+        )
+        return json.dumps(res, indent=2)
+
+    @server.tool()
+    def design_build_dashboard(
+        dashboard_title: str,
+        stats_json: str = "[]",
+        activity_json: str = "[]",
+    ) -> str:
+        """Generates an enterprise Filament/Shadcn-style GUI dashboard layout."""
+        from app.engines.design import DesignAgentEngine
+        engine = DesignAgentEngine()
+        try:
+            stats = json.loads(stats_json)
+        except Exception:
+            stats = [{"label": "Active Agents", "value": "12", "delta": "+20%"}]
+        try:
+            activity = json.loads(activity_json)
+        except Exception:
+            activity = [{"agent": "Atlas", "action": "Task DAG dispatched", "status": "ok", "time": "Just now"}]
+        res = engine.build_admin_dashboard(dashboard_title=dashboard_title, stats=stats, recent_activity=activity)
+        return json.dumps(res, indent=2)
+
+
 

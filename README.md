@@ -45,6 +45,25 @@ SwarmMojo incorporates 10 high-speed specialized engines with Python bridges in 
 | **Triad-Engine** | Pareto reliability, duration, and token cost multi-objective ranking | `python swarmmojo.py triad` | `triad_pareto_rank` |
 | **Mojo-Memory** | 512-dim phase vector associative memory with sub-10ms recall | `python swarmmojo.py mojo-memory` | `mojomemory_store`, `mojomemory_query` |
 | **Studio-Engine** | Multimodal cinematic video, ComfyUI execution graphs, storyboards & banner craft | `python swarmmojo.py studio` | `studio_compile_prompt`, `studio_create_storyboard`, `studio_export_comfyui_graph`, `studio_craft_banner` |
+| **Design-Engine** | High-craft UI/GUI landing pages, Filament admin dashboards & component systems | `python swarmmojo.py design` | `design_build_landing_page`, `design_build_dashboard` |
+
+## Design Agent Engine: Impeccable UI, GUI & Website Builder
+
+SwarmMojo incorporates a dedicated Design & GUI runtime synthesizing **Impeccable**, **UI-UX Pro Max**, **AgentSite**, **Filament 4.x**, **UI Builder / Shadcn**, and **OSW Studio**:
+
+### 1. Impeccable Craft Floor & Design Tokens (`DesignTokens`)
+- **Accessibility & Contrast**: Built-in WCAG AAA text contrast ($\ge 7:1$ body, $\ge 4.5:1$ secondary), tinting secondary text directly from background surfaces rather than flat grays.
+- **Typographic Measure**: Standardized line lengths ($65\text{--}75\text{ch}$ measure), balanced headings, $-0.04\text{em}$ tracking floor, and modern font stacks (`Inter`, `Plus Jakarta Sans`, `JetBrains Mono`).
+- **Depth Without Halos**: Soft directional elevation shadows with gentle blur offsets, completely avoiding zero-offset colored halos.
+
+### 2. Full-Page Website Builder (`build_landing_page`)
+- Produces complete, responsive, dark-mode landing pages with glassmorphism sticky navigation, radiant radial glow hero banners, metrics strips, and interactive feature grids.
+- Automatically persists rendered HTML & modern CSS tokens directly to `.mojo_design/index.html`.
+
+### 3. Enterprise GUI & Admin Dashboards (`build_admin_dashboard`)
+- Implements Filament/Shadcn-grade GUI dashboards with sidebar navigation, metric delta counters, and tabular agent activity feeds.
+- Outputs clean, zero-dependency HTML/CSS dashboards to `.mojo_design/dashboard.html`.
+
 
 ## Studio Agent Engine: Cinematic Video, Photography & UI/Visual Craft
 

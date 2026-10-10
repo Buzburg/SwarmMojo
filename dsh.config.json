@@ -32,6 +32,7 @@
     "triad": "python swarmmojo.py triad",
     "mojo-memory": "python swarmmojo.py mojo-memory",
     "studio": "python swarmmojo.py studio",
+    "design": "python swarmmojo.py design",
     "meta": "python swarmmojo.py meta"
   },
   "sandbox": {
@@ -101,6 +102,11 @@
       "name": "studio-director",
       "enabled": true,
       "description": "Directs cinematic visual prompts, storyboards, ComfyUI graphs, and UI banners"
+    },
+    {
+      "name": "design-architect",
+      "enabled": true,
+      "description": "Builds dark-mode landing pages, Filament admin dashboards, and UI component systems"
     },
     {
       "name": "meta-orchestrator",

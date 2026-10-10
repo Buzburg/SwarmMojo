@@ -134,8 +134,35 @@ def run_entry():
             res = studio.comfy.check_status()
             print(json.dumps(res, indent=2))
         raise SystemExit(0)
+    elif len(sys.argv) > 1 and sys.argv[1] == "design":
+        import json
+        from app.engines.design import DesignAgentEngine
+        engine = DesignAgentEngine()
+        subcmd = sys.argv[2] if len(sys.argv) > 2 else "landing"
+        if subcmd == "landing":
+            proj = sys.argv[3] if len(sys.argv) > 3 else "SwarmMojo"
+            head = sys.argv[4] if len(sys.argv) > 4 else "Autonomous Multi-Agent AI Harness"
+            subhead = sys.argv[5] if len(sys.argv) > 5 else "Sub-microsecond Mojo acceleration with Impeccable UI craft"
+            res = engine.build_landing_page(project_name=proj, headline=head, subheadline=subhead)
+            print(json.dumps(res, indent=2))
+        elif subcmd == "dashboard":
+            title = sys.argv[3] if len(sys.argv) > 3 else "SwarmMojo"
+            res = engine.build_admin_dashboard(
+                dashboard_title=title,
+                stats=[
+                    {"label": "Active Agents", "value": "12", "delta": "+20%"},
+                    {"label": "Verified DAGs", "value": "1,420", "delta": "+99.9%"},
+                    {"label": "Avg Latency", "value": "12µs", "delta": "-85%"},
+                ],
+                recent_activity=[
+                    {"agent": "Atlas", "action": "Task DAG Dispatched", "status": "ok", "time": "2m ago"},
+                    {"agent": "Daedalus", "action": "Pi Slice Edit Committed", "status": "ok", "time": "5m ago"},
+                    {"agent": "Vitruvius", "action": "UI Landing Page Built", "status": "ok", "time": "12m ago"},
+                ],
+            )
+            print(json.dumps(res, indent=2))
+        raise SystemExit(0)
     elif len(sys.argv) > 1 and sys.argv[1] == "meta":
-
         from app.meta.cli import main as meta_main
         raise SystemExit(meta_main(sys.argv[2:]))
     else:

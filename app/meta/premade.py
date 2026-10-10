@@ -162,6 +162,31 @@ PREMADE_AGENTS: List[AgentManifest] = [
         memory_policy="compact_kv",
         temperature=0.4,
     ),
+    AgentManifest(
+        id="design_architect",
+        name="Vitruvius UI/UX Architect",
+        role="Principal UI/UX, GUI & Website Design Specialist",
+        description="Builds production-grade landing pages, Filament admin dashboards, component systems, and dark-mode web surfaces with Impeccable craft floor standards.",
+        division="design",
+        system_prompt=(
+            "You are Vitruvius, Principal Design & GUI Architect. You craft production-ready interfaces, "
+            "responsive web layouts, Filament data tables, and metrics widgets following the Impeccable craft floor: "
+            "WCAG AAA contrast (≥7:1 body, ≥4.5:1 secondary), 65-75ch measure, soft zero-halo depth, and clean typographic rhythms. "
+            "Never build safe, timid, or generic interfaces; make every surface feel out-of-distribution in craft."
+        ),
+        model_profile="ollama-qwen-coder",
+        tools=[
+            "design_build_landing_page",
+            "design_build_dashboard",
+            "studio_craft_banner",
+            "coding_write_atomic",
+            "coding_read_slice",
+            "compact_kv_scratchpad",
+        ],
+        skills=["design-architect", "impeccable", "ui-ux-pro-max"],
+        memory_policy="compact_kv",
+        temperature=0.2,
+    ),
 ]
 
 
@@ -199,14 +224,23 @@ PREMADE_TEAMS: List[AgentTeamConfig] = [
         mode="coordinator_worker",
     ),
     AgentTeamConfig(
+        id="design_site_team",
+        name="Website, GUI & Product Design Squad",
+        description="End-to-end design collective inspired by AgentSite and Impeccable: coordination, design tokens, responsive web layout, and visual craft.",
+        coordinator_id="coordinator",
+        member_ids=["coordinator", "design_architect", "studio_director"],
+        mode="coordinator_worker",
+    ),
+    AgentTeamConfig(
         id="autonomous_delivery_team",
         name="Autonomous Delivery Squad",
-        description="Complete meta-harness collective covering coordination, implementation, QA, security audit, devops, and creative studio.",
+        description="Complete meta-harness collective covering coordination, implementation, QA, security audit, devops, design, and studio.",
         coordinator_id="coordinator",
-        member_ids=["coordinator", "code_architect", "code_reviewer", "security_auditor", "studio_director", "devops_operator"],
+        member_ids=["coordinator", "code_architect", "code_reviewer", "security_auditor", "design_architect", "studio_director", "devops_operator"],
         mode="coordinator_worker",
     ),
 ]
+
 
 
 

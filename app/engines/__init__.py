@@ -30,6 +30,7 @@ from .cortex import CortexEngine, ExecutionShield
 from .triad import TriadEngine, TriadMetrics
 from .mojo_memory import MojoMemoryEngine
 from .studio import StudioAgentEngine, StudioPromptCompiler, StoryboardDirector, ComfyUIBridge
+from .design import DesignAgentEngine, DesignTokens, UIComponentRegistry
 
 __all__ = [
     "SymdexIndex",
@@ -62,5 +63,9 @@ __all__ = [
     "StudioPromptCompiler",
     "StoryboardDirector",
     "ComfyUIBridge",
+    "DesignAgentEngine",
+    "DesignTokens",
+    "UIComponentRegistry",
 ]
+
 
