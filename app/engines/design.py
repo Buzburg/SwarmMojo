@@ -740,3 +740,501 @@ td {{
             "dashboard_title": dashboard_title,
             "html_length": len(dash_html),
         }
+
+    def build_herald_hud(
+        self,
+        system_title: str = "SwarmMojo Herald OS",
+        agents_roster: Optional[List[Dict[str, Any]]] = None,
+        live_dag_milestones: Optional[List[Dict[str, str]]] = None,
+    ) -> Dict[str, Any]:
+        """Generates an ultra-sleek, deep-blue glassmorphism operating desktop HUD inspired by Herald-OS and herdr-hud."""
+        roster = agents_roster or [
+            {"id": "atlas", "name": "Atlas", "role": "Meta Coordinator", "status": "active", "load": "12%", "model": "deepseek-r1", "avatar": "⚡"},
+            {"id": "daedalus", "name": "Daedalus", "role": "Prime/Pi Architect", "status": "busy", "load": "78%", "model": "qwen-coder", "avatar": "🛠️"},
+            {"id": "vitruvius", "name": "Vitruvius", "role": "UI/UX Designer", "status": "idle", "load": "4%", "model": "qwen-coder", "avatar": "🎨"},
+            {"id": "lumiere", "name": "Lumiere", "role": "Studio Director", "status": "rendering", "load": "94%", "model": "flux-dev", "avatar": "🎬"},
+            {"id": "orwell", "name": "Orwell", "role": "Ghost Scribe", "status": "active", "load": "32%", "model": "qwen-coder", "avatar": "✍️"},
+            {"id": "aegis", "name": "Aegis", "role": "Security Auditor", "status": "monitoring", "load": "8%", "model": "llama3", "avatar": "🛡️"},
+        ]
+
+        milestones = live_dag_milestones or [
+            {"id": "m1", "title": "DAG Ingestion & Triage", "engine": "fastgate", "latency": "8µs", "state": "complete"},
+            {"id": "m2", "title": "Prime Recursive Subagent Fork", "engine": "prime-recursion", "latency": "14ms", "state": "running"},
+            {"id": "m3", "title": "Mojo Angular Drift Evaluation", "engine": "mojo-drift", "latency": "42µs", "state": "pending"},
+            {"id": "m4", "title": "StateFresh OCC File Write Lease", "engine": "statefresh", "latency": "6µs", "state": "pending"},
+        ]
+
+        roster_cards = []
+        for a in roster:
+            status_cls = a.get("status", "idle")
+            roster_cards.append(f"""
+        <div class="hud-agent-card {status_cls}">
+          <div class="agent-avatar">{a.get('avatar', '🤖')}</div>
+          <div class="agent-info">
+            <div class="agent-name-row">
+              <span class="agent-name">{a.get('name')}</span>
+              <span class="agent-badge {status_cls}">{status_cls}</span>
+            </div>
+            <span class="agent-role">{a.get('role')}</span>
+            <div class="agent-meta">
+              <span class="meta-tag">{a.get('model')}</span>
+              <span class="meta-load">Load: {a.get('load')}</span>
+            </div>
+          </div>
+        </div>
+""")
+
+        dag_items = []
+        for m in milestones:
+            st = m.get("state", "pending")
+            dag_items.append(f"""
+        <div class="dag-step {st}">
+          <div class="step-indicator"></div>
+          <div class="step-content">
+            <div class="step-header">
+              <span class="step-title">{m.get('title')}</span>
+              <span class="step-engine">{m.get('engine')} ({m.get('latency')})</span>
+            </div>
+            <span class="step-state">{st.upper()}</span>
+          </div>
+        </div>
+""")
+
+        hud_html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{system_title} — Autonomous Operations HUD</title>
+  <style>
+:root {{
+  --bg-deep: #070B14;
+  --bg-glass: rgba(13, 21, 38, 0.72);
+  --border-glass: rgba(99, 102, 241, 0.22);
+  --border-glow: rgba(99, 102, 241, 0.5);
+  --accent-cyan: #06B6D4;
+  --accent-indigo: #6366F1;
+  --accent-emerald: #10B981;
+  --text-main: #F8FAFC;
+  --text-dim: #94A3B8;
+}}
+
+* {{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}}
+
+body {{
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-deep);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.18) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+  color: var(--text-main);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}}
+
+/* Top Menu Bar (Herald OS style) */
+.hud-menubar {{
+  height: 44px;
+  background: rgba(7, 11, 20, 0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-glass);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  font-size: 0.85rem;
+  z-index: 100;
+}}
+
+.menubar-left {{
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}}
+
+.system-brand {{
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}}
+
+.system-brand span {{
+  color: var(--accent-cyan);
+}}
+
+.menubar-right {{
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  color: var(--text-dim);
+}}
+
+.live-indicator {{
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--accent-emerald);
+  font-weight: 600;
+  font-size: 0.8rem;
+}}
+
+.pulse-dot {{
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--accent-emerald);
+  box-shadow: 0 0 10px var(--accent-emerald);
+  animation: pulse 2s infinite;
+}}
+
+@keyframes pulse {{
+  0% {{ opacity: 1; transform: scale(1); }}
+  50% {{ opacity: 0.4; transform: scale(0.85); }}
+  100% {{ opacity: 1; transform: scale(1); }}
+}}
+
+/* Main Desktop Workspace */
+.hud-workspace {{
+  flex: 1;
+  display: grid;
+  grid-template-columns: 340px 1fr 380px;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  overflow: hidden;
+}}
+
+/* Glassmorphism Panel */
+.glass-panel {{
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}}
+
+.panel-header {{
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-glass);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}}
+
+.panel-title {{
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}}
+
+.panel-body {{
+  flex: 1;
+  padding: 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}}
+
+/* Left Column: Agent Swarm Roster */
+.hud-agent-card {{
+  background: rgba(17, 27, 49, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 0.85rem;
+  display: flex;
+  gap: 0.85rem;
+  transition: all 0.2s ease;
+}}
+
+.hud-agent-card:hover {{
+  border-color: var(--border-glow);
+  transform: translateY(-2px);
+  background: rgba(23, 36, 66, 0.8);
+}}
+
+.agent-avatar {{
+  font-size: 1.5rem;
+  background: rgba(99, 102, 241, 0.15);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}}
+
+.agent-info {{
+  flex: 1;
+}}
+
+.agent-name-row {{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}}
+
+.agent-name {{
+  font-weight: 700;
+  font-size: 0.95rem;
+}}
+
+.agent-role {{
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  display: block;
+  margin-bottom: 0.4rem;
+}}
+
+.agent-meta {{
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}}
+
+.meta-tag {{
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}}
+
+.agent-badge {{
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+}}
+
+.agent-badge.active, .agent-badge.running {{
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--accent-emerald);
+}}
+
+.agent-badge.busy, .agent-badge.rendering {{
+  background: rgba(6, 182, 212, 0.2);
+  color: var(--accent-cyan);
+}}
+
+.agent-badge.idle {{
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text-dim);
+}}
+
+/* Center Console: Causal Loop Simulation & Visual Output */
+.center-viewport {{
+  display: grid;
+  grid-template-rows: 240px 1fr;
+  gap: 1.25rem;
+}}
+
+.telemetry-grid {{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}}
+
+.telemetry-card {{
+  background: rgba(17, 27, 49, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}}
+
+.telemetry-val {{
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}}
+
+.telemetry-val.cyan {{ color: var(--accent-cyan); }}
+.telemetry-val.emerald {{ color: var(--accent-emerald); }}
+.telemetry-val.indigo {{ color: var(--accent-indigo); }}
+
+.telemetry-lbl {{
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}}
+
+.live-terminal {{
+  background: #04070F;
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  padding: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: #38BDF8;
+  line-height: 1.5;
+  overflow-y: auto;
+}}
+
+/* Right Panel: Live DAG Execution Milestones */
+.dag-step {{
+  display: flex;
+  gap: 0.85rem;
+  position: relative;
+}}
+
+.step-indicator {{
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-top: 4px;
+  background: var(--text-dim);
+}}
+
+.dag-step.complete .step-indicator {{
+  background: var(--accent-emerald);
+  box-shadow: 0 0 8px var(--accent-emerald);
+}}
+
+.dag-step.running .step-indicator {{
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px var(--accent-cyan);
+  animation: pulse 1.5s infinite;
+}}
+
+.step-content {{
+  flex: 1;
+  background: rgba(17, 27, 49, 0.4);
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}}
+
+.step-header {{
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}}
+
+.step-title {{
+  font-weight: 700;
+  font-size: 0.85rem;
+}}
+
+.step-engine {{
+  font-size: 0.75rem;
+  color: var(--accent-cyan);
+}}
+
+.step-state {{
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}}
+  </style>
+</head>
+<body>
+  <div class="hud-menubar">
+    <div class="menubar-left">
+      <div class="system-brand">◆ SWARM<span>MOJO</span> // HERALD-OS</div>
+      <div>Session: 0x8F94-AEON</div>
+      <div>Kernel: Native Mojo v25.1</div>
+    </div>
+    <div class="menubar-right">
+      <div class="live-indicator"><div class="pulse-dot"></div> ORCHESTRATOR ONLINE</div>
+      <div>MEM: 412 MB / 800 TOKENS</div>
+      <div>LATENCY: 12 µs</div>
+    </div>
+  </div>
+
+  <div class="hud-workspace">
+    <!-- Left Panel: Agent Swarm Roster -->
+    <div class="glass-panel">
+      <div class="panel-header">
+        <span class="panel-title">👥 SPECIALIST ROSTER</span>
+        <span style="font-size: 0.8rem; color: var(--text-dim);">{len(roster)} Agents Active</span>
+      </div>
+      <div class="panel-body">
+        {''.join(roster_cards)}
+      </div>
+    </div>
+
+    <!-- Center Viewport: Telemetry & Interactive Terminal -->
+    <div class="center-viewport">
+      <div class="glass-panel" style="padding: 1.25rem;">
+        <div class="telemetry-grid">
+          <div class="telemetry-card">
+            <span class="telemetry-lbl">SUB-10µs SYMBOL LOOKUPS</span>
+            <span class="telemetry-val cyan">142,800</span>
+            <span class="telemetry-lbl">Symdex In-Memory Speed</span>
+          </div>
+          <div class="telemetry-card">
+            <span class="telemetry-lbl">PARALLEL CONCURRENCY</span>
+            <span class="telemetry-val emerald">99.98%</span>
+            <span class="telemetry-lbl">StateFresh OCC Collision-Free</span>
+          </div>
+          <div class="telemetry-card">
+            <span class="telemetry-lbl">ANGULAR TRAJECTORY DRIFT</span>
+            <span class="telemetry-val indigo">4.2°</span>
+            <span class="telemetry-lbl">Target Threshold &lt; 65°</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-panel">
+        <div class="panel-header">
+          <span class="panel-title">⚡ REAL-TIME HARNESS PIPELINE</span>
+          <span style="font-size: 0.8rem; color: var(--accent-cyan);">TriggerTangle Offline Rehearsal</span>
+        </div>
+        <div class="panel-body">
+          <div class="live-terminal">
+[00:00:01.004] [AtlasCoordinator] Objective received: Multi-agent studio &amp; coding convergence.
+[00:00:01.018] [FastgateTriage] 256-dim phase vector router mapped tools in 18 µs.
+[00:00:01.042] [DaedalusArchitect] Pi exact substring edit committed with Rewind snapshot #snap-482.
+[00:00:01.065] [VitruviusDesign] Herald OS glassmorphism theme compiled with Impeccable contrast floor.
+[00:00:01.092] [LumiereStudio] ComfyUI Flux graph exported for 16:9 4K render.
+[00:00:01.115] [OrwellScribe] Ghost Protocol passed: 0 banned clichés, sentence variance = 8.4.
+[00:00:01.128] [MojoDrift] Angular trajectory: 4.2° (SAFE &lt; 65°). Status: VERIFIED.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Live DAG Execution Milestones -->
+    <div class="glass-panel">
+      <div class="panel-header">
+        <span class="panel-title">🕸️ ACTIVE TASK DAG</span>
+        <span style="font-size: 0.8rem; color: var(--accent-emerald);">Verified WorkflowProof</span>
+      </div>
+      <div class="panel-body">
+        {''.join(dag_items)}
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+"""
+
+        out_file = self.output_dir / "herald_hud.html"
+        out_file.write_text(hud_html, encoding="utf-8")
+
+        return {
+            "status": "ready",
+            "file": str(out_file),
+            "system_title": system_title,
+            "total_agents": len(roster),
+            "total_milestones": len(milestones),
+            "html_length": len(hud_html),
+        }
+

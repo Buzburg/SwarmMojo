@@ -161,6 +161,10 @@ def run_entry():
                 ],
             )
             print(json.dumps(res, indent=2))
+        elif subcmd == "hud":
+            title = sys.argv[3] if len(sys.argv) > 3 else "SwarmMojo Herald OS"
+            res = engine.build_herald_hud(system_title=title)
+            print(json.dumps(res, indent=2))
         raise SystemExit(0)
     elif len(sys.argv) > 1 and sys.argv[1] == "writer":
         import json

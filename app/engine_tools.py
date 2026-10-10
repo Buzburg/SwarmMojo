@@ -328,6 +328,31 @@ def register_engine_tools(server: FastMCP) -> None:
             chaps = [{"title": "Chapter 1", "summary": chapters_json, "words": 2500}]
         return json.dumps(writer.plan_book(title=title, genre=genre, chapters_data=chaps), indent=2)
 
+    @server.tool()
+    def design_build_herald_hud(
+        system_title: str = "SwarmMojo Herald OS",
+        roster_json: str = "[]",
+        milestones_json: str = "[]",
+    ) -> str:
+        """Generates an ultra-sleek, deep-blue glassmorphism operating desktop HUD inspired by Herald-OS and herdr-hud."""
+        from app.engines.design import DesignAgentEngine
+        engine = DesignAgentEngine()
+        try:
+            roster = json.loads(roster_json) if roster_json and roster_json != "[]" else None
+        except Exception:
+            roster = None
+        try:
+            milestones = json.loads(milestones_json) if milestones_json and milestones_json != "[]" else None
+        except Exception:
+            milestones = None
+        res = engine.build_herald_hud(
+            system_title=system_title,
+            agents_roster=roster,
+            live_dag_milestones=milestones,
+        )
+        return json.dumps(res, indent=2)
+
+
 
 
 

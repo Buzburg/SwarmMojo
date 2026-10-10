@@ -109,3 +109,20 @@ def test_design_premade_agent_and_team():
     team = teams_map["design_site_team"]
     assert "design_architect" in team.member_ids
     assert "studio_director" in team.member_ids
+
+
+def test_design_engine_build_herald_hud(tmp_path: Path):
+    engine = DesignAgentEngine(workspace_root=str(tmp_path))
+    res = engine.build_herald_hud(system_title="Herald OS Orbit")
+    assert res["status"] == "ready"
+    assert res["system_title"] == "Herald OS Orbit"
+    assert res["total_agents"] == 6
+    assert res["total_milestones"] == 4
+    hud_file = tmp_path / ".mojo_design" / "herald_hud.html"
+    assert hud_file.exists()
+    content = hud_file.read_text(encoding="utf-8")
+    assert "HERALD-OS" in content
+    assert "SPECIALIST ROSTER" in content
+    assert "Atlas" in content
+    assert "TriggerTangle Offline Rehearsal" in content
+
