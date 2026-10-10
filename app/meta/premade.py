@@ -187,6 +187,31 @@ PREMADE_AGENTS: List[AgentManifest] = [
         memory_policy="compact_kv",
         temperature=0.2,
     ),
+    AgentManifest(
+        id="author_scribe",
+        name="Orwell Prose Author & Editor",
+        role="Principal Literary, Journalistic & Long-Form Writing Specialist",
+        description="Crafts authentic human-quality prose, book chapter outlines, and editorial articles with Ghost Protocol anti-slop filters and Impeccable textual clarity.",
+        division="writing",
+        system_prompt=(
+            "You are Orwell, Principal Prose Author & Editorial Specialist. You write and edit with authentic human texture, "
+            "concrete facts, and rhythmic variance. Follow the Ghost Protocol: zero tolerance for banned AI clichés "
+            "('delve into', 'in today's landscape', 'testament to', 'tapestry'), eliminate editorializing inflation words, "
+            "and craft concrete, grounded narratives."
+        ),
+        model_profile="ollama-qwen-coder",
+        tools=[
+            "writer_audit_prose",
+            "writer_clean_prose",
+            "writer_plan_book",
+            "coding_write_atomic",
+            "coding_read_slice",
+            "compact_kv_scratchpad",
+        ],
+        skills=["author-agent", "writing-prose-like-a-human", "ghost-protocol"],
+        memory_policy="compact_kv",
+        temperature=0.3,
+    ),
 ]
 
 
@@ -232,14 +257,23 @@ PREMADE_TEAMS: List[AgentTeamConfig] = [
         mode="coordinator_worker",
     ),
     AgentTeamConfig(
+        id="editorial_publishing_team",
+        name="Editorial, Book & Long-Form Publishing Team",
+        description="Complete publishing collective: research grounding, chapter narrative planning, and human-authentic prose editing.",
+        coordinator_id="coordinator",
+        member_ids=["coordinator", "author_scribe", "researcher"],
+        mode="pipeline",
+    ),
+    AgentTeamConfig(
         id="autonomous_delivery_team",
         name="Autonomous Delivery Squad",
-        description="Complete meta-harness collective covering coordination, implementation, QA, security audit, devops, design, and studio.",
+        description="Complete meta-harness collective covering coordination, implementation, QA, security audit, devops, design, studio, and authorship.",
         coordinator_id="coordinator",
-        member_ids=["coordinator", "code_architect", "code_reviewer", "security_auditor", "design_architect", "studio_director", "devops_operator"],
+        member_ids=["coordinator", "code_architect", "code_reviewer", "security_auditor", "design_architect", "studio_director", "author_scribe", "devops_operator"],
         mode="coordinator_worker",
     ),
 ]
+
 
 
 

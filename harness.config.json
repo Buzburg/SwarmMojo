@@ -38,6 +38,7 @@
     "mojo-memory": "python swarmmojo.py mojo-memory",
     "studio": "python swarmmojo.py studio",
     "design": "python swarmmojo.py design",
+    "writer": "python swarmmojo.py writer",
     "meta": "python swarmmojo.py meta"
   },
   "rules": [
@@ -176,6 +177,11 @@
       "name": "design-architect",
       "description": "Builds dark-mode landing pages, Filament admin dashboards, and UI component systems",
       "prompt": "Craft production-ready websites and GUI dashboards following Impeccable craft floor standards and design tokens"
+    },
+    {
+      "name": "author-scribe",
+      "description": "Ghost Protocol literary authoring, 200+ banned AI cliché filters, and narrative book chapter planning",
+      "prompt": "Write authentic human-textured prose, audit AI slop, and plan long-form book chapters with concrete specifics"
     },
     {
       "name": "meta-orchestrator",

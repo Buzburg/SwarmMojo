@@ -26,6 +26,7 @@ Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills)
 - **mojo-memory**: `python swarmmojo.py mojo-memory`
 - **studio**: `python swarmmojo.py studio`
 - **design**: `python swarmmojo.py design`
+- **writer**: `python swarmmojo.py writer`
 - **meta**: `python swarmmojo.py meta`
 
 ## Core Guidelines & Constraints
@@ -53,4 +54,5 @@ Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills)
 - **drift-guard**: Real-time angular trajectory tracking and drift guardrails
 - **studio-director**: Directs cinematic visual prompts, storyboards, ComfyUI graphs, and UI banners
 - **design-architect**: Builds dark-mode landing pages, Filament admin dashboards, and UI component systems
+- **author-scribe**: Ghost Protocol literary authoring, 200+ banned AI cliché filters, and narrative book chapter planning
 - **meta-orchestrator**: Orchestrates multi-agent teams across heterogeneous local models

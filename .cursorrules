@@ -34,4 +34,5 @@ Development Commands:
 - mojo-memory: python swarmmojo.py mojo-memory
 - studio: python swarmmojo.py studio
 - design: python swarmmojo.py design
+- writer: python swarmmojo.py writer
 - meta: python swarmmojo.py meta

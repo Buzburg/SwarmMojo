@@ -31,6 +31,7 @@ from .triad import TriadEngine, TriadMetrics
 from .mojo_memory import MojoMemoryEngine
 from .studio import StudioAgentEngine, StudioPromptCompiler, StoryboardDirector, ComfyUIBridge
 from .design import DesignAgentEngine, DesignTokens, UIComponentRegistry
+from .writer import WriterAgentEngine, ProseHumanizer, BookOutlinePlanner
 
 __all__ = [
     "SymdexIndex",
@@ -66,6 +67,10 @@ __all__ = [
     "DesignAgentEngine",
     "DesignTokens",
     "UIComponentRegistry",
+    "WriterAgentEngine",
+    "ProseHumanizer",
+    "BookOutlinePlanner",
 ]
+
 
 

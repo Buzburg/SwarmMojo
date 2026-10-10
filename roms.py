@@ -162,6 +162,32 @@ def run_entry():
             )
             print(json.dumps(res, indent=2))
         raise SystemExit(0)
+    elif len(sys.argv) > 1 and sys.argv[1] == "writer":
+        import json
+        from app.engines.writer import WriterAgentEngine
+        writer = WriterAgentEngine()
+        subcmd = sys.argv[2] if len(sys.argv) > 2 else "audit"
+        if subcmd == "audit":
+            text = sys.argv[3] if len(sys.argv) > 3 else "In today's digital landscape, it is crucial to delve into AI."
+            res = writer.audit_prose(text)
+            print(json.dumps(res, indent=2))
+        elif subcmd == "clean":
+            text = sys.argv[3] if len(sys.argv) > 3 else "Furthermore, the bridge stands as a testament to engineering."
+            res = writer.clean_prose(text)
+            print(json.dumps(res, indent=2))
+        elif subcmd == "plan":
+            title = sys.argv[3] if len(sys.argv) > 3 else "The Singularity Protocol"
+            genre = sys.argv[4] if len(sys.argv) > 4 else "hard sci-fi"
+            res = writer.plan_book(
+                title=title,
+                genre=genre,
+                chapters_data=[
+                    {"title": "The First Signal", "summary": "Discovery of the anomalous vector stream", "words": 3000},
+                    {"title": "Recursive Convergence", "summary": "Autonomous subagents initiate replication", "words": 3500},
+                ],
+            )
+            print(json.dumps(res, indent=2))
+        raise SystemExit(0)
     elif len(sys.argv) > 1 and sys.argv[1] == "meta":
         from app.meta.cli import main as meta_main
         raise SystemExit(meta_main(sys.argv[2:]))

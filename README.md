@@ -46,6 +46,24 @@ SwarmMojo incorporates 10 high-speed specialized engines with Python bridges in 
 | **Mojo-Memory** | 512-dim phase vector associative memory with sub-10ms recall | `python swarmmojo.py mojo-memory` | `mojomemory_store`, `mojomemory_query` |
 | **Studio-Engine** | Multimodal cinematic video, ComfyUI execution graphs, storyboards & banner craft | `python swarmmojo.py studio` | `studio_compile_prompt`, `studio_create_storyboard`, `studio_export_comfyui_graph`, `studio_craft_banner` |
 | **Design-Engine** | High-craft UI/GUI landing pages, Filament admin dashboards & component systems | `python swarmmojo.py design` | `design_build_landing_page`, `design_build_dashboard` |
+| **Writer-Engine** | Authentic prose authoring, Ghost Protocol anti-slop filters & multi-chapter book planner | `python swarmmojo.py writer` | `writer_audit_prose`, `writer_clean_prose`, `writer_plan_book` |
+
+## Writer Agent Engine: Authentic Prose & Ghost Protocol Authoring
+
+SwarmMojo features an authentic authoring suite inspired by **AuthorAgent**, **writing-agent**, **writing-prose-like-a-human-for-agents**, **prose**, and **kimi-writer**:
+
+### 1. Ghost Protocol Anti-Slop Audit (`ProseHumanizer.audit_text`)
+- **200+ Zero-Tolerance Phrase Blacklist**: Scans and flags statistically overrepresented AI phrases (`in today's digital landscape`, `delve into`, `testament to`, `rich tapestry`, `moreover`, `having said that`, `watershed moment`).
+- **Inflation Word Detection**: Identifies stock editorial adjectives (`pivotal`, `crucial`, `vital`, `groundbreaking`, `multifaceted`) that inflate importance without presenting concrete facts.
+- **Cadence & Rhythm Variance**: Measures sentence length variance to eliminate robotic, uniform LLM paragraph structures.
+
+### 2. Programmatic Humanizer (`ProseHumanizer.humanize`)
+- Subtraction-over-addition principle: Programmatically cleans synthetic filler and cleans sentence transitions without injecting hallucinated content.
+
+### 3. Multi-Chapter Long-Form Book Planner (`BookOutlinePlanner`)
+- Breaks novels and non-fiction books into structured chapter DAGs with target word budgets, POV characters, and narrative conflict drivers.
+- Exports persistent outline plans directly into `.mojo_writer/`.
+
 
 ## Design Agent Engine: Impeccable UI, GUI & Website Builder
 

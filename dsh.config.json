@@ -33,6 +33,7 @@
     "mojo-memory": "python swarmmojo.py mojo-memory",
     "studio": "python swarmmojo.py studio",
     "design": "python swarmmojo.py design",
+    "writer": "python swarmmojo.py writer",
     "meta": "python swarmmojo.py meta"
   },
   "sandbox": {
@@ -107,6 +108,11 @@
       "name": "design-architect",
       "enabled": true,
       "description": "Builds dark-mode landing pages, Filament admin dashboards, and UI component systems"
+    },
+    {
+      "name": "author-scribe",
+      "enabled": true,
+      "description": "Ghost Protocol literary authoring, 200+ banned AI cliché filters, and narrative book chapter planning"
     },
     {
       "name": "meta-orchestrator",

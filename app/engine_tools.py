@@ -303,5 +303,31 @@ def register_engine_tools(server: FastMCP) -> None:
         res = engine.build_admin_dashboard(dashboard_title=dashboard_title, stats=stats, recent_activity=activity)
         return json.dumps(res, indent=2)
 
+    @server.tool()
+    def writer_audit_prose(text: str) -> str:
+        """Audits prose for 200+ banned AI phrases, inflation words, and cadence uniformity."""
+        from app.engines.writer import WriterAgentEngine
+        writer = WriterAgentEngine()
+        return json.dumps(writer.audit_prose(text), indent=2)
+
+    @server.tool()
+    def writer_clean_prose(text: str) -> str:
+        """Programmatically strips zero-tolerance AI clichés and restores authentic human texture."""
+        from app.engines.writer import WriterAgentEngine
+        writer = WriterAgentEngine()
+        return json.dumps(writer.clean_prose(text), indent=2)
+
+    @server.tool()
+    def writer_plan_book(title: str, genre: str, chapters_json: str) -> str:
+        """Plans a multi-chapter book or novel with word budgets, POV, and conflicts."""
+        from app.engines.writer import WriterAgentEngine
+        writer = WriterAgentEngine()
+        try:
+            chaps = json.loads(chapters_json)
+        except Exception:
+            chaps = [{"title": "Chapter 1", "summary": chapters_json, "words": 2500}]
+        return json.dumps(writer.plan_book(title=title, genre=genre, chapters_data=chaps), indent=2)
+
+
 
 
