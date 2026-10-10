@@ -36,6 +36,7 @@
     "cortex": "python swarmmojo.py cortex",
     "triad": "python swarmmojo.py triad",
     "mojo-memory": "python swarmmojo.py mojo-memory",
+    "studio": "python swarmmojo.py studio",
     "meta": "python swarmmojo.py meta"
   },
   "rules": [
@@ -164,6 +165,11 @@
       "name": "drift-guard",
       "description": "Real-time angular trajectory tracking and drift guardrails",
       "prompt": "Monitor agent actions against anchor task goals and prevent semantic drift"
+    },
+    {
+      "name": "studio-director",
+      "description": "Directs cinematic visual prompts, storyboards, ComfyUI graphs, and UI banners",
+      "prompt": "Compile cinematic camera rigs, multi-shot sequences, and ComfyUI workflows for high-fidelity video and images"
     },
     {
       "name": "meta-orchestrator",

@@ -29,6 +29,7 @@ from .workflowproof import WorkflowStep, WorkflowProofEngine
 from .cortex import CortexEngine, ExecutionShield
 from .triad import TriadEngine, TriadMetrics
 from .mojo_memory import MojoMemoryEngine
+from .studio import StudioAgentEngine, StudioPromptCompiler, StoryboardDirector, ComfyUIBridge
 
 __all__ = [
     "SymdexIndex",
@@ -57,4 +58,9 @@ __all__ = [
     "TriadEngine",
     "TriadMetrics",
     "MojoMemoryEngine",
+    "StudioAgentEngine",
+    "StudioPromptCompiler",
+    "StoryboardDirector",
+    "ComfyUIBridge",
 ]
+

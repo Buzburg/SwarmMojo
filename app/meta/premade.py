@@ -139,6 +139,29 @@ PREMADE_AGENTS: List[AgentManifest] = [
         memory_policy="titans",
         temperature=0.2,
     ),
+    AgentManifest(
+        id="studio_director",
+        name="Lumiere Studio Director",
+        role="Multimodal Video Director, Visual Artist & UI Craft Specialist",
+        description="Directs cinematic AI video, high-resolution photography, ComfyUI node graphs, multi-shot storyboards, and pixel-perfect UI/UX assets.",
+        division="design",
+        system_prompt=(
+            "You are Lumiere, Principal Studio Director. You master cinematic camera rigs (70mm Grand Format, 8K Cine, Anamorphic lenses, "
+            "Rembrandt lighting), multi-shot storyboard sequencing, ComfyUI execution graphs, and pixel-perfect banner/UI craft. "
+            "Never generate timid, generic prompts; compile authoritative optics, focal lengths, aperture depths, and camera motions."
+        ),
+        model_profile="ollama-qwen-coder",
+        tools=[
+            "studio_compile_prompt",
+            "studio_create_storyboard",
+            "studio_export_comfyui_graph",
+            "studio_craft_banner",
+            "compact_kv_scratchpad",
+        ],
+        skills=["studio-director", "ui-ux-pro-max", "banner-design"],
+        memory_policy="compact_kv",
+        temperature=0.4,
+    ),
 ]
 
 
@@ -168,14 +191,23 @@ PREMADE_TEAMS: List[AgentTeamConfig] = [
         mode="pipeline",
     ),
     AgentTeamConfig(
+        id="studio_production_team",
+        name="Multimodal Studio & Creative Production Team",
+        description="End-to-end creative studio collective: directorial storyboards, ComfyUI graphs, banner design, and multimodal production.",
+        coordinator_id="coordinator",
+        member_ids=["coordinator", "studio_director", "researcher"],
+        mode="coordinator_worker",
+    ),
+    AgentTeamConfig(
         id="autonomous_delivery_team",
         name="Autonomous Delivery Squad",
-        description="Complete meta-harness collective covering coordination, implementation, QA, security audit, and devops.",
+        description="Complete meta-harness collective covering coordination, implementation, QA, security audit, devops, and creative studio.",
         coordinator_id="coordinator",
-        member_ids=["coordinator", "code_architect", "code_reviewer", "security_auditor", "devops_operator"],
+        member_ids=["coordinator", "code_architect", "code_reviewer", "security_auditor", "studio_director", "devops_operator"],
         mode="coordinator_worker",
     ),
 ]
+
 
 
 def get_premade_agents_dict() -> Dict[str, AgentManifest]:

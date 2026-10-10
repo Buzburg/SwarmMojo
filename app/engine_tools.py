@@ -192,3 +192,65 @@ def register_engine_tools(server: FastMCP) -> None:
         mem = MojoMemoryEngine()
         return json.dumps(mem.search_lessons(query, limit=limit), indent=2)
 
+    @server.tool()
+    def studio_compile_prompt(
+        subject: str,
+        camera: str = "full_frame_cine",
+        lens: str = "classic_anamorphic",
+        focal_length_mm: int = 35,
+        aperture: str = "f/1.8",
+        lighting: str = "golden_hour",
+        motion: str = "slow tracking shot",
+    ) -> str:
+        """Compiles an authoritative cinematic visual prompt with camera, lens, lighting, and motion rigs."""
+        from app.engines.studio import StudioPromptCompiler
+        compiled = StudioPromptCompiler.compile_cinematic_prompt(
+            subject=subject,
+            camera=camera,
+            lens=lens,
+            focal_length_mm=focal_length_mm,
+            aperture=aperture,
+            lighting=lighting,
+            motion=motion,
+        )
+        return json.dumps(compiled, indent=2)
+
+    @server.tool()
+    def studio_create_storyboard(title: str, shots_json: str) -> str:
+        """Generates a multi-shot cinematic storyboard sequence with camera movement and duration pacing."""
+        from app.engines.studio import StudioAgentEngine
+        studio = StudioAgentEngine()
+        try:
+            shots_list = json.loads(shots_json)
+        except Exception:
+            shots_list = [{"description": shots_json, "duration": 4.0}]
+        board = studio.create_storyboard(title=title, shots_spec=shots_list)
+        return json.dumps(board, indent=2)
+
+    @server.tool()
+    def studio_export_comfyui_graph(
+        prompt: str,
+        negative_prompt: str = "",
+        aspect_ratio: str = "16:9",
+        steps: int = 25,
+    ) -> str:
+        """Exports a production-ready ComfyUI API execution graph for Flux Dev / SDXL."""
+        from app.engines.studio import StudioAgentEngine
+        studio = StudioAgentEngine()
+        graph = studio.export_comfyui_workflow(
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            aspect_ratio=aspect_ratio,
+            steps=steps,
+        )
+        return json.dumps(graph, indent=2)
+
+    @server.tool()
+    def studio_craft_banner(platform: str, headline: str, subtext: str, style: str = "bold_typography_glassmorphism") -> str:
+        """Crafts pixel-perfect banner specs with safe-zone buffers for social and web."""
+        from app.engines.studio import StudioAgentEngine
+        studio = StudioAgentEngine()
+        spec = studio.craft_banner_spec(platform=platform, headline=headline, subtext=subtext, style=style)
+        return json.dumps(spec, indent=2)
+
+

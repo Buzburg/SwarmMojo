@@ -32,4 +32,5 @@ Development Commands:
 - cortex: python swarmmojo.py cortex
 - triad: python swarmmojo.py triad
 - mojo-memory: python swarmmojo.py mojo-memory
+- studio: python swarmmojo.py studio
 - meta: python swarmmojo.py meta

@@ -34,6 +34,7 @@
 - `python swarmmojo.py cortex` (cortex)
 - `python swarmmojo.py triad` (triad)
 - `python swarmmojo.py mojo-memory` (mojo-memory)
+- `python swarmmojo.py studio` (studio)
 - `python swarmmojo.py meta` (meta)
 
 ## Guardrails

@@ -24,6 +24,7 @@ Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills)
 - **cortex**: `python swarmmojo.py cortex`
 - **triad**: `python swarmmojo.py triad`
 - **mojo-memory**: `python swarmmojo.py mojo-memory`
+- **studio**: `python swarmmojo.py studio`
 - **meta**: `python swarmmojo.py meta`
 
 ## Core Guidelines & Constraints
@@ -49,4 +50,5 @@ Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills)
 - **pi-coding-toolkit**: Exact unambiguous line slicing, substring editing, and atomic writing
 - **prime-recursion**: Recursive subagent delegation in single, parallel, and chain modes
 - **drift-guard**: Real-time angular trajectory tracking and drift guardrails
+- **studio-director**: Directs cinematic visual prompts, storyboards, ComfyUI graphs, and UI banners
 - **meta-orchestrator**: Orchestrates multi-agent teams across heterogeneous local models

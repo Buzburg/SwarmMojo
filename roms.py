@@ -112,7 +112,30 @@ def run_entry():
         stats = mem.stats()
         print(json.dumps(stats, indent=2))
         raise SystemExit(0)
+    elif len(sys.argv) > 1 and sys.argv[1] == "studio":
+        import json
+        from app.engines.studio import StudioAgentEngine
+        studio = StudioAgentEngine()
+        subcmd = sys.argv[2] if len(sys.argv) > 2 else "prompt"
+        if subcmd == "prompt":
+            subject = sys.argv[3] if len(sys.argv) > 3 else "Cinematic cyberpunk cityscape in rain"
+            res = studio.generate_shot_prompt(subject=subject)
+            print(json.dumps(res, indent=2))
+        elif subcmd == "comfyui":
+            prompt = sys.argv[3] if len(sys.argv) > 3 else "Cinematic scene"
+            res = studio.export_comfyui_workflow(prompt=prompt)
+            print(json.dumps(res, indent=2))
+        elif subcmd == "banner":
+            headline = sys.argv[3] if len(sys.argv) > 3 else "Next-Gen AI Agent Platform"
+            subtext = sys.argv[4] if len(sys.argv) > 4 else "Autonomous Multimodal Execution"
+            res = studio.craft_banner_spec(platform="website_hero", headline=headline, subtext=subtext)
+            print(json.dumps(res, indent=2))
+        elif subcmd == "status":
+            res = studio.comfy.check_status()
+            print(json.dumps(res, indent=2))
+        raise SystemExit(0)
     elif len(sys.argv) > 1 and sys.argv[1] == "meta":
+
         from app.meta.cli import main as meta_main
         raise SystemExit(meta_main(sys.argv[2:]))
     else:

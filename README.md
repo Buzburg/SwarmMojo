@@ -44,8 +44,30 @@ SwarmMojo incorporates 10 high-speed specialized engines with Python bridges in 
 | **Prefrontal Cortex** | Execution shield hazard scoring, regex filters & cyclic loop intercept | `python swarmmojo.py cortex` | `cortex_shield_action` |
 | **Triad-Engine** | Pareto reliability, duration, and token cost multi-objective ranking | `python swarmmojo.py triad` | `triad_pareto_rank` |
 | **Mojo-Memory** | 512-dim phase vector associative memory with sub-10ms recall | `python swarmmojo.py mojo-memory` | `mojomemory_store`, `mojomemory_query` |
+| **Studio-Engine** | Multimodal cinematic video, ComfyUI execution graphs, storyboards & banner craft | `python swarmmojo.py studio` | `studio_compile_prompt`, `studio_create_storyboard`, `studio_export_comfyui_graph`, `studio_craft_banner` |
 
-## Supercharged Coding Agent (Pi Agent Tools + Prime Agent Recursion)
+## Studio Agent Engine: Cinematic Video, Photography & UI/Visual Craft
+
+SwarmMojo incorporates a studio runtime inspired by **OpenMontage**, **ComfyUI**, **Open-Higgsfield-AI**, **ui-ux-pro-max-skill**, and **impeccable**:
+
+### 1. Cinematic Camera, Lens & Optics Rig (`StudioPromptCompiler`)
+- **Directorial Optics Presets**: Grand Format 70mm Film (IMAX grain), Modular 8K Digital (Arri Alexa 65 look), Super 35, Classic 16mm Vintage, Anamorphic 2x (oval bokeh & horizontal streak flares), Tilt-Shift selective focus, and Extreme Macro.
+- **Atmospheric Lighting**: Golden hour 3200K, Rembrandt key/fill contrast, Cyberpunk dual-rim neon, Volumetric misty shafts, and commercial softboxes.
+- **Movement Vectors**: Smooth crane sweeps, slow tracking push-ins, handheld organic drift, and Dutch angle rotations.
+
+### 2. Multi-Shot Storyboard Sequencing (`StoryboardDirector`)
+- Breaks creative concepts into timed shot lists with duration, camera setup, lighting mood, motion vector, and sound design.
+- Compiles sequence JSON specifications and exports them to `.mojo_studio/` for render pipeline feeding.
+
+### 3. ComfyUI Node Graph Generator (`ComfyUIBridge`)
+- Programmatically generates production-ready API graphs for **Flux Dev / SDXL** text-to-image and **SVD / Kling / Wan** image-to-video pipelines.
+- Auto-scales dimensions to match exact aspect ratios (`16:9`, `9:16`, `1:1`, `2.39:1 Cinemascope`, `4:5`) while respecting optimal VRAM latent constraints.
+- Local ComfyUI health check and system status probing (`http://127.0.0.1:8188`).
+
+### 4. UI/UX Banner & Visual Asset Craft
+- Impeccable platform safe-zone templates: YouTube banners, Twitter/X headers, LinkedIn covers, responsive website hero sections, and Instagram portrait cards.
+- Design tokens: typography hierarchy, high-contrast palette pairings, and container buffer validation.
+
 
 SwarmMojo features a dedicated coding agent runtime synthesizing the best patterns from **Pi Agent**, **Prime Agent**, and **LoopForge / DeepCode**:
 
