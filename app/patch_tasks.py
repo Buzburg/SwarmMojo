@@ -2,7 +2,10 @@
 import asyncio
 from contextlib import contextmanager
 from datetime import datetime, timezone
-import fcntl
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 import hashlib
 import json
 import os
@@ -73,18 +76,35 @@ def patch_path(value: str) -> str:
 
 def read_file(root: Path, relative: str) -> bytes | None:
     """No-follow descriptor walk; None represents an absent leaf, never a symlink."""
-    directory = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    if os.name == 'nt' or os.O_RDONLY not in getattr(os, 'supports_dir_fd', set()):
+        target = (root / relative).resolve()
+        try:
+            root_resolved = root.resolve()
+            if not str(target).startswith(str(root_resolved)):
+                return None
+            if not target.is_file() or target.is_symlink():
+                return None
+            if target.stat().st_size > MAX_FILE:
+                raise ValueError('Patch input must be a regular file up to 1 MiB')
+            content = target.read_bytes()
+            if len(content) > MAX_FILE:
+                raise ValueError('Patch input must be a regular file up to 1 MiB')
+            return content
+        except FileNotFoundError:
+            return None
+
+    directory = os.open(root, os.O_RDONLY | getattr(os, 'O_DIRECTORY', 0) | getattr(os, 'O_NOFOLLOW', 0))
     parts = PurePosixPath(relative).parts
     try:
         for component in parts[:-1]:
             try:
-                child = os.open(component, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=directory)
+                child = os.open(component, os.O_RDONLY | getattr(os, 'O_DIRECTORY', 0) | getattr(os, 'O_NOFOLLOW', 0), dir_fd=directory)
             except FileNotFoundError:
                 return None
             os.close(directory)
             directory = child
         try:
-            fd = os.open(parts[-1], os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+            fd = os.open(parts[-1], os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_NONBLOCK', 0), dir_fd=directory)
         except FileNotFoundError:
             return None
     finally:
@@ -153,14 +173,19 @@ def task_directory(task_id: str) -> Path:
 @contextmanager
 def task_lock(control: Path):
     with (control / '.lock').open('a') as stream:
-        try:
-            fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            raise RuntimeError('Task is already being modified') from None
+        if fcntl:
+            try:
+                fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                raise RuntimeError('Task is already being modified') from None
         try:
             yield
         finally:
-            fcntl.flock(stream, fcntl.LOCK_UN)
+            if fcntl:
+                try:
+                    fcntl.flock(stream, fcntl.LOCK_UN)
+                except Exception:
+                    pass
 
 
 def transition(control: Path, task: dict, state: str, **details) -> None:

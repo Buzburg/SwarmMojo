@@ -1,7 +1,10 @@
 """Operator-authorized, journaled file promotion and conflict-preserving rollback."""
 from contextlib import contextmanager
 import difflib
-import fcntl
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -266,10 +269,11 @@ async def promote(task_id: str, token: str, *, rollback: bool = False) -> dict:
         if project['source'] != task['source']:
             raise Conflict('Project registration changed')
         with (tasks.STORE / 'projects' / (patch['project_id'] + '.lock')).open('a') as lock:
-            try:
-                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            except BlockingIOError:
-                raise Conflict('Another task is changing this project') from None
+            if fcntl:
+                try:
+                    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    raise Conflict('Another task is changing this project') from None
             root = open_root(Path(task['source']))
             try:
                 info = os.fstat(root)

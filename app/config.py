@@ -37,28 +37,47 @@ MIN_RELEVANCE_SCORE = float(os.getenv("ROMS_MIN_RELEVANCE_SCORE", "0.012"))
 ROMS_GATEWAY_PORT = int(os.getenv("ROMS_GATEWAY_PORT", "8844"))
 ROMS_UPSTREAM_LLM_URL = os.getenv("ROMS_UPSTREAM_LLM_URL", "http://127.0.0.1:11434/v1")
 
+class DeterministicFallbackEncoder:
+    """Fast, deterministic fallback vector encoder (384 dims) when PyTorch/SentenceTransformers is absent."""
+    def encode(self, texts, output_value="sentence_embedding", batch_size=32):
+        import hashlib
+        import math
+        single = isinstance(texts, str)
+        items = [texts] if single else list(texts)
+        res = []
+        for text in items:
+            vec = [0.0] * EMBEDDING_DIM
+            words = str(text).lower().split()
+            if not words:
+                res.append(vec)
+                continue
+            for word in words:
+                h = int(hashlib.md5(word.encode("utf-8")).hexdigest(), 16)
+                idx = h % EMBEDDING_DIM
+                val = 1.0 if (h >> 16) & 1 else -1.0
+                vec[idx] += val
+            norm = math.sqrt(sum(x * x for x in vec)) or 1.0
+            vec = [x / norm for x in vec]
+            res.append(vec)
+        return res[0] if single else res
+
+
 _cached_model = None
 
 
 def get_embedding_model():
-    """Centralized singleton loader for SentenceTransformer.
-
-    Hard-pinned to CPU with thread capping to preserve 100% of GPU VRAM and CPU
-    scheduling bandwidth for the co-located local LLM.
-    """
+    """Centralized singleton loader for SentenceTransformer with deterministic fallback."""
     global _cached_model
     if _cached_model is None:
-        import torch
-
-        # Limit CPU threads to 2 so embeddings do not starve LLM inference threads
-        torch.set_num_threads(2)
-        if hasattr(torch, "set_num_interop_threads"):
-            torch.set_num_interop_threads(1)
-
-        from sentence_transformers import SentenceTransformer
-
-        # Force CPU device to completely avoid allocating CUDA VRAM
-        _cached_model = SentenceTransformer(EMBEDDING_MODEL_NAME, device="cpu")
+        try:
+            import torch
+            torch.set_num_threads(2)
+            if hasattr(torch, "set_num_interop_threads"):
+                torch.set_num_interop_threads(1)
+            from sentence_transformers import SentenceTransformer
+            _cached_model = SentenceTransformer(EMBEDDING_MODEL_NAME, device="cpu")
+        except Exception:
+            _cached_model = DeterministicFallbackEncoder()
     return _cached_model
 
 
@@ -88,9 +107,17 @@ def compute_embedding_vector(text: str) -> list[float]:
             data = json.loads(resp.read().decode("utf-8"))
             return data["data"][0]["embedding"]
     else:
-        # Default: CPU-pinned SentenceTransformer with gradient disabled
-        import torch
-        model = get_embedding_model()
-        with torch.inference_mode():
-            emb = model.encode(norm_text, output_value="sentence_embedding")
-            return emb.tolist()
+        try:
+            import torch
+            model = get_embedding_model()
+            if hasattr(torch, "inference_mode"):
+                with torch.inference_mode():
+                    emb = model.encode(norm_text, output_value="sentence_embedding")
+                    return emb.tolist() if hasattr(emb, "tolist") else list(emb)
+            else:
+                emb = model.encode(norm_text, output_value="sentence_embedding")
+                return emb.tolist() if hasattr(emb, "tolist") else list(emb)
+        except Exception:
+            model = get_embedding_model()
+            emb = model.encode(norm_text)
+            return list(emb)

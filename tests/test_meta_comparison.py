@@ -46,6 +46,11 @@ def test_native_mojo_kernels_exist():
         ("fastgate_core.mojo", "route_tools"),
         ("workflow_core.mojo", "ConstitutionalGovernor"),
         ("assistant_core.mojo", "calculate_pcm16_energy"),
+        ("coding_core.mojo", "find_unique_substring"),
+        ("statefresh_core.mojo", "validate_and_commit_cas"),
+        ("workflowproof_core.mojo", "verify_step_transition"),
+        ("triad_core.mojo", "dominates"),
+        ("localdoc_core.mojo", "score_bm25_term"),
     ]
 
     for fname, expected_sym in expected_kernels:

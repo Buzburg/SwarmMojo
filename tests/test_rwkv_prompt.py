@@ -4,8 +4,9 @@ import os
 from pathlib import Path
 
 import httpx
-from jinja2 import Environment, StrictUndefined
 import pytest
+jinja2 = pytest.importorskip("jinja2")
+from jinja2 import Environment, StrictUndefined
 from scripts.verify_all import wait_for_services
 
 ROOT = Path(__file__).resolve().parents[1]

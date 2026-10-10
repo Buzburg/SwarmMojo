@@ -6,7 +6,10 @@ no RNG state; stochastic sampling and state fusion are deliberately unsupported.
 from __future__ import annotations
 
 import ctypes as c
-import fcntl
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 import hashlib
 import hmac
 import json
@@ -33,7 +36,7 @@ def canonical(value: object) -> bytes:
 
 
 def read_private(path: Path, limit: int) -> bytes:
-    with os.fdopen(os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK), 'rb') as stream:
+    with os.fdopen(os.open(path, os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_NONBLOCK', 0)), 'rb') as stream:
         import stat
         info = os.fstat(stream.fileno())
         if not stat.S_ISREG(info.st_mode) or info.st_size > limit:
@@ -63,8 +66,9 @@ class CheckpointStore:
         return path
 
     def save(self, name: str, session: Session) -> dict:
-        with os.fdopen(os.open(self.root / '.lock', os.O_WRONLY | os.O_CREAT | os.O_NOFOLLOW, 0o600), 'w') as lock:
-            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        with os.fdopen(os.open(self.root / '.lock', os.O_WRONLY | os.O_CREAT | getattr(os, 'O_NOFOLLOW', 0), 0o600), 'w') as lock:
+            if fcntl:
+                fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
             with getattr(session, 'lock', nullcontext()):
                 return self._save_locked(name, session)
 

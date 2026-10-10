@@ -1,7 +1,10 @@
 """Durable at-most-once dispatch for the broker's registered validation action."""
 from collections.abc import Awaitable, Callable, Iterator
 from contextlib import contextmanager
-import fcntl
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 import json
 import os
 from pathlib import Path
@@ -21,14 +24,20 @@ MAX_RECORD_BYTES = 2 * protocol.MAX_FRAME + 4096
 
 def owned(info: os.stat_result, *, directory: bool = False, private: bool = True) -> None:
     expected = stat.S_ISDIR if directory else stat.S_ISREG
-    if (not expected(info.st_mode) or info.st_uid != os.getuid()
-            or info.st_mode & (0o077 if private else 0o022)
-            or (not directory and info.st_nlink != 1)):
+    uid = getattr(os, 'getuid', None)
+    if (not expected(info.st_mode) or (uid is not None and info.st_uid != uid)
+            or (os.name != 'nt' and (info.st_mode & (0o077 if private else 0o022)))
+            or (not directory and os.name != 'nt' and info.st_nlink != 1)):
         raise ValueError('Unsafe request journal ownership or permissions')
 
 
 @contextmanager
 def journal() -> Iterator[Path]:
+    if os.name == 'nt' or os.O_RDONLY not in getattr(os, 'supports_dir_fd', set()):
+        STORE.mkdir(parents=True, exist_ok=True)
+        yield STORE
+        return
+
     parent = open_root(STORE.parent)
     try:
         owned(os.fstat(parent), directory=True, private=False)
@@ -37,7 +46,7 @@ def journal() -> Iterator[Path]:
         except FileExistsError:
             pass  # The existing leaf is verified without following links below.
         os.fsync(parent)
-        directory = os.open(STORE.name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=parent)
+        directory = os.open(STORE.name, os.O_RDONLY | getattr(os, 'O_DIRECTORY', 0) | getattr(os, 'O_NOFOLLOW', 0), dir_fd=parent)
     finally:
         os.close(parent)
     try:
@@ -49,13 +58,19 @@ def journal() -> Iterator[Path]:
 
 @contextmanager
 def locked(root: Path) -> Iterator[None]:
-    fd = os.open(root / '.lock', os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600)
+    lock_file = root / '.lock'
+    if os.name == 'nt' or not hasattr(os, 'O_NOFOLLOW'):
+        with lock_file.open('a') as stream:
+            yield
+        return
+    fd = os.open(lock_file, os.O_RDWR | os.O_CREAT | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_NONBLOCK', 0), 0o600)
     try:
         owned(os.fstat(fd))
         deadline = time.monotonic() + 1
         while True:
             try:
-                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                if fcntl:
+                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 break
             except BlockingIOError:
                 if time.monotonic() >= deadline:
@@ -68,7 +83,7 @@ def locked(root: Path) -> Iterator[None]:
 
 def read_record(path: Path) -> dict | None:
     try:
-        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        fd = os.open(path, os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_NONBLOCK', 0))
     except FileNotFoundError:
         return None
     with os.fdopen(fd, 'rb') as stream:

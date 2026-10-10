@@ -190,10 +190,22 @@ def ingest_document_file(filepath: Path | str, db_path: Path | str | None = None
 
     # Finish all model work and validate every vector before touching the old index.
     if EMBEDDING_PROVIDER == "local":
-        import torch
-
-        model = get_embedding_model()
-        with torch.inference_mode():
+        try:
+            import torch
+            model = get_embedding_model()
+            if hasattr(torch, "inference_mode"):
+                with torch.inference_mode():
+                    batch_embeddings = np.asarray(
+                        model.encode(chunks, output_value="sentence_embedding", batch_size=32),
+                        dtype=np.float32,
+                    )
+            else:
+                batch_embeddings = np.asarray(
+                    model.encode(chunks, output_value="sentence_embedding", batch_size=32),
+                    dtype=np.float32,
+                )
+        except Exception:
+            model = get_embedding_model()
             batch_embeddings = np.asarray(
                 model.encode(chunks, output_value="sentence_embedding", batch_size=32),
                 dtype=np.float32,

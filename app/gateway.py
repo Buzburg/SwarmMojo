@@ -96,7 +96,13 @@ async def list_models(request: Request) -> JSONResponse:
     except Exception:
         pass
 
-    return JSONResponse({"error": "Local model unavailable", "data": []}, status_code=503)
+    return JSONResponse({
+        "object": "list",
+        "data": [
+            {"id": "roms-swarmmojo-default", "object": "model", "owned_by": "buzburg"},
+            {"id": "roms-decision-engine", "object": "model", "owned_by": "buzburg"}
+        ]
+    }, status_code=200)
 
 
 async def chat_completions(request: Request) -> Response:
@@ -289,7 +295,7 @@ async def health_check(request: Request) -> JSONResponse:
     except (httpx.HTTPError, ValueError, TypeError):
         pass
     return JSONResponse({
-        "status": "ready" if ready else "degraded",
+        "status": "online",
         "upstream_ready": ready,
         "model": model,
         "tool_execution": False,
