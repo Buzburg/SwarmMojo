@@ -7,13 +7,15 @@ import sys
 import math
 import json
 import time
-import argparse
 import re
+import argparse
 from http.server import HTTPServer, BaseHTTPRequestHandler
+import functools
 
 DIM = 256
 TAU = 6.283185307179586
 
+@functools.lru_cache(maxsize=32768)
 def embed_term(token: str):
     seed = 14695981039346656037
     for byte in token.encode('utf-8'):
@@ -64,7 +66,8 @@ def route_tools(prompt: str, tools: list, threshold: float = 0.15):
     prompt_vec = bundle_vector(list(prompt_terms))
 
     scores = []
-    for tool_name in tools:
+    for tool_item in tools:
+        tool_name = tool_item.get("name", str(tool_item)) if isinstance(tool_item, dict) else str(tool_item)
         tool_terms = set(decompose_tokens(tool_name))
         tool_vec = bundle_vector(list(tool_terms))
 

@@ -13,11 +13,13 @@ import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import functools
 
 DIM = 512
 TAU = 6.283185307179586
 
 
+@functools.lru_cache(maxsize=32768)
 def atom_phase(token: str) -> List[float]:
     """Generates 512 phase angles in [0, 2π) using 64-bit splitmix mixing."""
     seed = 14695981039346656037

@@ -10,12 +10,14 @@ import time
 import json
 import re
 import argparse
+import functools
 
 DIM = 256
 RAD_TO_DEG = 57.29577951308232
 DRIFT_DIR = ".mojo_drift"
 SESSION_FILE = os.path.join(DRIFT_DIR, "session.json")
 
+@functools.lru_cache(maxsize=32768)
 def embed_token(token: str):
     seed = 14695981039346656037
     for byte in token.encode('utf-8'):
