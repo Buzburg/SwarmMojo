@@ -21,6 +21,12 @@ def run_entry():
     elif len(sys.argv) > 1 and sys.argv[1] == "mcp":
         from app.server import start_server
         start_server()
+    elif len(sys.argv) > 1 and sys.argv[1] == "polyharness":
+        from app.polyharness import main as polyharness_main
+        raise SystemExit(polyharness_main(sys.argv[2:]))
+    elif len(sys.argv) > 1 and sys.argv[1] in ("aeon", "swarm", "swarm-mojo"):
+        from aeon.cli import main as aeon_main
+        raise SystemExit(aeon_main(sys.argv[2:]))
     else:
         raise SystemExit(prefrontal_main(sys.argv[1:]))
 

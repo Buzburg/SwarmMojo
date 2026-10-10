@@ -1,0 +1,83 @@
+[harness]
+model = "qwen27"
+max_steps = 16
+max_llm_calls = 6
+max_context_bytes = 48000
+max_output_tokens = 2048
+timeout_seconds = 120
+recipe_ttl_seconds = 604800
+
+[decisions]
+enabled = true
+# Off avoids a judgment that would not affect execution. Shadow is for calibration.
+# Auto may select only known read-only plans after target-model evaluation.
+routing = "off"
+threshold = 0.98
+margin = 0.30
+max_calls = 24
+cache_seconds = 120
+
+[tmt]
+# Optional PyTorch ByteRTU checkpoint produced by aeon tmt-train.
+# Adds advisory recurrent-state features; never grants tool permissions.
+checkpoint = ""
+max_bytes = 512
+
+[hardware]
+kind = "ryzen-ai-max"
+unified_memory_gib = 128
+reserve_memory_gib = 24
+
+[jev]
+enabled = false
+endpoint = "https://api.typesafe.ai/v1/systemone"
+key_env = "TYPESAFE_API_KEY"
+threshold = 0.95
+
+[models.qwen27]
+model_path = "Qwen/Qwen3.8-27B"
+endpoint = "http://127.0.0.1:30000"
+transport = "native"
+parameters_b = 27
+weight_bits = 16
+context_length = 8192
+launch_args = ["--attention-backend", "triton", "--disable-cuda-graph", "--mem-fraction-static", "0.70", "--max-running-requests", "1"]
+
+[models.qwen_flash]
+model_path = "Qwen/Qwen3.8-Flash-Next"
+endpoint = "http://127.0.0.1:30001"
+transport = "native"
+parameters_b = 180
+weight_bits = 16
+context_length = 8192
+launch_args = ["--attention-backend", "triton", "--disable-cuda-graph", "--max-running-requests", "1"]
+note = "Default BF16 weights do not fit. Configure a ROCm-compatible quantized checkpoint or a remote server."
+
+[models.rwkv7]
+model_path = ""
+endpoint = "http://127.0.0.1:30002"
+transport = "chat"
+parameters_b = 7.2
+weight_bits = 16
+context_length = 8192
+launch_args = ["--attention-backend", "triton", "--dtype", "float16", "--disable-radix-cache", "--disable-cuda-graph", "--max-total-tokens", "16384", "--max-running-requests", "1"]
+note = "Set an exact fla-format Goose checkpoint and install RWKV SGLang port. AMD gfx1151 requires validation. Chat transport avoids assuming JSON grammar support in the port."
+
+[models.spark]
+model_path = "XHToken/Spark-X2.5-4B"
+endpoint = "http://127.0.0.1:30003"
+transport = "native"
+parameters_b = 4
+weight_bits = 16
+context_length = 8192
+launch_args = ["--attention-backend", "triton", "--disable-cuda-graph", "--mem-fraction-static", "0.70", "--max-running-requests", "1"]
+
+[models.k2]
+model_path = "IFM/K2-Horizon-MoVA-36B-A4B"
+endpoint = "http://127.0.0.1:30004"
+transport = "native"
+parameters_b = 36
+weight_bits = 16
+context_length = 8192
+launch_args = ["--attention-backend", "triton", "--disable-cuda-graph", "--mem-fraction-static", "0.70", "--max-running-requests", "1"]
+note = "Requires SGLang Xllm MoVA support; validate kernels on gfx1151."

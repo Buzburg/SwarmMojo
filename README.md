@@ -1,20 +1,26 @@
 # SwarmMojo
 
-**An agent harness for decisions, knowledge and reusable workflows.**
+**A unified, local-first AI agent harness combining decision intelligence, specialist reviews, workflow rehearsal, and universal agent configuration.**
 
-SwarmMojo combines a Decision Maker, retrieval, open knowledge files, MCP tools and skills to prepare work for review. It brings the goal, relevant sources and selected instructions into a bounded request, then returns an advisory decision and a proposed next step. Your model and execution permissions remain separate.
+SwarmMojo brings together three core pillars:
+1. **ROMS Engine**: Decision AI, RAG retrieval, Open Knowledge Files (OKF), SQLite-Vec, MCP tools, and skills to prepare bounded, reviewable actions.
+2. **Swarm Mojo (Aeon)**: Source-grounded specialist reviews, TriggerTangle workflow rehearsal, bounded execution, and optional mSGL inference adapters.
+3. **PolyHarness**: Universal transpiler and package manager for AI agent configurations (compiling to `CLAUDE.md`, `AGENTS.md`, `dsh.config.json`, `.cursorrules`, scoped `.cursor/rules/*.mdc`, `.claude/rules/*.md`, MCP registries, and deterministic pre-commit guardrails).
 
-The portable Python path is used on Windows and Linux. Omarchy is an optional integration; it is not required to use SwarmMojo. macOS has not been verified.
+The portable Python path is used on Windows and Linux. Omarchy is an optional integration; it is not required to use SwarmMojo.
 
-## Five parts
+## Core Pillars & Capabilities
 
-| Part | Purpose |
-| --- | --- |
-| **Decision Maker** | Rank supplied options, return structured results and abstain when configured thresholds are not met. The current backend uses heuristics; its scores are not calibrated probabilities of correctness. |
-| **RAG** | Find relevant document passages through keyword and vector search, with source references and bounded context. |
-| **OKF** | Import local knowledge files, preserve document metadata and update their search indexes. |
-| **MCP** | Let a compatible agent call registered tools and read resources through one local server. |
-| **Skills** | Supply reusable Markdown playbooks. Generated drafts need review before activation. |
+| Pillar | Sub-system | Purpose |
+| --- | --- | --- |
+| **ROMS Core** | **Decision Maker** | Rank supplied options, return structured results and abstain when thresholds are not met. |
+| **ROMS Core** | **RAG & OKF** | Multi-format local document ingestion, hybrid vector + FTS5 BM25 retrieval, and bounded context preparation. |
+| **ROMS Core** | **MCP & Skills** | Local MCP tools server and reusable Markdown skill playbooks. |
+| **Swarm Mojo** | **Aeon Specialist Reviews** | Source-grounded multi-specialist reviews with bounded deliberation and explicit operator approval tickets. |
+| **Swarm Mojo** | **Workflow Rehearsal** | TriggerTangle offline causal loop simulator to test automations and prevent trigger deadlocks. |
+| **PolyHarness** | **Multi-Target Transpiler** | Single-source-of-truth configuration (`harness.config.json`) compiling to Claude Code, Cursor, DeepSeek, and AGY. |
+| **PolyHarness** | **Progressive Disclosure** | Scoped rule generator emitting `.cursor/rules/*.mdc` and `.claude/rules/*.md` to prevent context saturation. |
+| **PolyHarness** | **Deterministic Guardrails** | Generates `.githooks/pre-commit` and `safe-exec.sh` to block destructive actions and leaks at the shell/git level. |
 
 The workflow is **request → knowledge and skills → decision → proposed next step → operator approval → separately configured execution**. The preparation API implements the first four steps. It does not execute the proposal or approve itself. See the [component map](docs/components.md).
 

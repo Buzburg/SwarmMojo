@@ -1,0 +1,11 @@
+{
+  "name": "TriggerTangle Harness",
+  "version": "0.3.0",
+  "source": "https://github.com/Buzburg/trigger-tangle/tree/v0.3.0",
+  "release": "https://github.com/Buzburg/trigger-tangle/releases/tag/v0.3.0",
+  "commit": "205f7fb2f2473e611432c131c341016746180f0e",
+  "file": "trigger-tangle-harness.mjs",
+  "sha256": "abd32d7551954857205dbf80de24056558164b2cba02d387f994757ee244f34f",
+  "license": "MIT",
+  "modifications": "None. Exact verified release artifact."
+}

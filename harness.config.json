@@ -1,0 +1,86 @@
+{
+  "name": "SwarmMojo",
+  "version": "1.0.0",
+  "description": "Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills), Swarm Mojo (Aeon specialist reviews, workflow rehearsal, mSGL), and PolyHarness (universal configuration & deterministic guardrails).",
+  "stack": {
+    "primary": "python",
+    "secondary": "mojo",
+    "framework": "fastmcp",
+    "package_manager": "uv"
+  },
+  "guidelines": [
+    "Always run tests before completing changes (pytest)",
+    "Preserve existing comments and docstrings",
+    "Write concise commit messages following Conventional Commits",
+    "Never commit API keys, tokens, or plain secrets",
+    "Keep specialist reviews and decision maker checks bounded and reproducible"
+  ],
+  "commands": {
+    "test": "pytest",
+    "harness": "python swarmmojo.py harness",
+    "aeon": "python swarmmojo.py aeon",
+    "polyharness": "python swarmmojo.py polyharness build"
+  },
+  "rules": [
+    {
+      "name": "roms-core",
+      "description": "Guidelines for ROMS engine, decision maker, and broker components",
+      "globs": ["app/**/*.py"],
+      "guidelines": [
+        "Follow explicit typing and avoid untracked mutations",
+        "Keep decision boundaries deterministic and bounded",
+        "Use safe path validation for all file access"
+      ]
+    },
+    {
+      "name": "aeon-swarm",
+      "description": "Guidelines for Aeon specialist reviews and workflow rehearsal",
+      "globs": ["aeon/**/*.py", "swarm_mojo/**/*.py"],
+      "guidelines": [
+        "Ensure workflow rehearsals via TriggerTangle remain offline and advisory",
+        "Maintain explicit user approvals before mutating workspace state",
+        "Keep SGLang and mSGL inference adapters optional and decoupled"
+      ]
+    },
+    {
+      "name": "polyharness-compiler",
+      "description": "Guidelines for the PolyHarness transpiler engine",
+      "globs": ["polyharness/src/**/*.js"],
+      "guidelines": [
+        "Maintain zero external runtime dependencies in ESM",
+        "Ensure all target formats (Claude, Cursor, DSH, AGENTS) remain synchronized"
+      ]
+    }
+  ],
+  "safety": {
+    "destructive_commands_deny": [
+      "rm -rf /",
+      "git push --force",
+      "drop database"
+    ],
+    "protected_paths": [
+      ".env",
+      ".git",
+      "secrets/"
+    ]
+  },
+  "mcp_servers": {
+    "swarmmojo": {
+      "command": "python",
+      "args": ["swarmmojo.py", "mcp"],
+      "env": {}
+    }
+  },
+  "skills": [
+    {
+      "name": "swarm-rehearsal",
+      "description": "Rehearse automation workflows and causal loops",
+      "prompt": "Rehearse workflows before execution and verify trigger boundaries"
+    },
+    {
+      "name": "polyharness-builder",
+      "description": "Transpiles agent harness configs to all target formats",
+      "prompt": "Compile harness.config.json into CLAUDE.md, AGENTS.md, dsh.config.json, .cursorrules"
+    }
+  ]
+}

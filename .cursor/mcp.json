@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "swarmmojo": {
+      "command": "python",
+      "args": [
+        "swarmmojo.py",
+        "mcp"
+      ],
+      "env": {}
+    }
+  }
+}

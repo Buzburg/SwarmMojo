@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "SwarmMojo"
+version = "1.0.0"
+description = "Full-fledged local-first AI agent harness combining ROMS, Swarm Mojo (Aeon specialist reviews, workflow rehearsal, mSGL), and PolyHarness."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp[cli]>=1.3.0",
+    "fastmcp>=0.4.0",
+    "python-frontmatter>=1.1.0",
+    "sqlite-vec>=0.1.3",
+    "pydantic>=2.0.0",
+    "psutil>=5.9.0",
+    "numpy",
+    "httpx>=0.27",
+    "starlette>=0.37",
+    "uvicorn>=0.30"
+]
+
+[project.optional-dependencies]
+ml = [
+    "sentence-transformers>=3.0.0",
+    "torch>=2.5"
+]
+test = [
+    "pytest>=8.0.0"
+]
+
+[project.scripts]
+swarmmojo = "swarmmojo:main"
+swarm-mojo = "aeon.cli:main"
+aeon = "aeon.cli:main"
+polyharness = "app.polyharness:main"
+
+[tool.setuptools]
+license-files = ["LICENSE", "NOTICE"]
+
+[tool.setuptools.packages.find]
+include = ["app*", "aeon*", "swarm_mojo*"]
+
+[tool.setuptools.package-data]
+aeon = [
+    "defaults.toml",
+    "assistant.html",
+    "vendor/triggertangle/*.mjs",
+    "vendor/triggertangle/LICENSE",
+    "vendor/triggertangle/PROVENANCE.json"
+]
+app = [
+    "workbench/*"
+]

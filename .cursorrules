@@ -1,0 +1,18 @@
+# .cursorrules — Cursor AI Rules
+<!-- Generated automatically by polyharness v0.1.0 — DO NOT EDIT DIRECTLY -->
+
+You are working on: SwarmMojo
+Project Description: Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills), Swarm Mojo (Aeon specialist reviews, workflow rehearsal, mSGL), and PolyHarness (universal configuration & deterministic guardrails).
+
+Guidelines:
+- Always run tests before completing changes (pytest)
+- Preserve existing comments and docstrings
+- Write concise commit messages following Conventional Commits
+- Never commit API keys, tokens, or plain secrets
+- Keep specialist reviews and decision maker checks bounded and reproducible
+
+Development Commands:
+- test: pytest
+- harness: python swarmmojo.py harness
+- aeon: python swarmmojo.py aeon
+- polyharness: python swarmmojo.py polyharness build

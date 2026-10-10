@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Swarm Mojo · Local assistant</title>
+<style>
+:root{color-scheme:dark;font:16px system-ui;background:#111619;color:#e4ece8}*{box-sizing:border-box}body{margin:0}header{padding:24px 32px;border-bottom:1px solid #334039;display:flex;justify-content:space-between;gap:20px}h1{font-size:24px;margin:0}p{line-height:1.6}small,.muted{color:#a7b8ad}main{display:grid;grid-template-columns:240px minmax(300px,1fr) 350px;gap:24px;padding:24px;max-width:1600px;margin:auto}section,aside{min-width:0}h2{font-size:16px}button,select,textarea,input{font:inherit;color:inherit;background:#202c26;border:1px solid #526459;border-radius:8px;padding:10px}button{cursor:pointer}button:hover{background:#314439}button:disabled{opacity:.5;cursor:wait}button.primary{background:#b6ecc7;color:#142219}textarea{width:100%;resize:vertical;min-height:88px}input,select{max-width:100%}label{display:block;margin:12px 0 6px}article,.panel{border:1px solid #334039;border-radius:12px;padding:16px;margin-bottom:14px}article.user{background:#1e2c24}article.assistant{background:#192023}.content{white-space:pre-wrap;overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;max-height:330px;overflow:auto}details{margin-top:12px}summary{cursor:pointer}.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}#status{position:sticky;top:0;background:#111619;padding:12px;border-bottom:1px solid #334039;z-index:1}#status.error{color:#ffb8a5}#history{min-height:200px}#conversations button{display:block;width:100%;text-align:left;margin-bottom:8px}.badge{display:inline-block;padding:3px 8px;border-radius:10px;background:#30473a;font-size:12px}.approval{border:1px solid #d2ad64;padding:12px;border-radius:8px}a{color:#b6ecc7}button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid #c3f5cd;outline-offset:3px}@media(max-width:1050px){main{grid-template-columns:180px minmax(0,1fr)}aside:last-child{grid-column:1/-1}}@media(max-width:620px){main{display:block;padding:14px}header{padding:18px}#conversations{max-height:150px;overflow:auto}}
+#workspace{overflow-wrap:anywhere}
+.review-inputs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}.review-inputs input,.review-inputs select{width:100%}#codeReview{margin-top:24px}#reviewResults summary,#reviewResults h3{overflow-wrap:anywhere}#reviewResults h3{font-size:16px;margin-top:0}select:focus-visible{outline:2px solid #c3f5cd;outline-offset:3px}@media(max-width:620px){.review-inputs{grid-template-columns:1fr}}
+</style>
+<header><div><h1>Swarm Mojo</h1><small>Memory → plan → action → evidence</small></div><div id="mode"></div></header>
+<div id="status" role="status" aria-live="polite">Connecting…</div>
+<main><aside><h2>Conversations</h2><button id="new">New conversation</button><div id="conversations" class="row"></div><p class="muted" id="workspace"></p></aside>
+<section><h2 id="title">Your local assistant</h2><div id="history"><p>Start a conversation. Exact local tasks work without a model.</p></div>
+<form id="chat"><label for="message">Message</label><textarea id="message" required placeholder="Try: list files then git status"></textarea><div class="row"><button type="button" id="previewPlan">Preview plan</button><button class="primary">Send</button></div></form><div id="planPreview" aria-live="polite"></div>
+<section class="panel" id="codeReview" aria-labelledby="reviewHeading"><h2 id="reviewHeading">Code review</h2><span class="badge">Offline preparation</span><p class="muted" id="reviewHelp">Map local source files and prepare evidence for specialist reviewers. No model is called, no findings are generated, and no actions are authorized.</p>
+<div class="review-inputs"><div><label for="reviewPath">Source folder</label><input id="reviewPath" value="." maxlength="2000" spellcheck="false" aria-describedby="reviewPathHelp"><small id="reviewPathHelp">Relative to your workspace. Use . for its root.</small></div><div><label for="reviewMode">Evidence budget</label><select id="reviewMode" aria-describedby="reviewModeHelp"><option value="low">Low · 3 roles</option><option value="medium">Medium · 3 roles</option><option value="high">High · 4 roles</option><option value="max">Max · 5 roles</option></select><small id="reviewModeHelp">Larger budgets include more source context.</small></div></div>
+<label for="reviewGoal">Review goal</label><textarea id="reviewGoal" maxlength="8000" rows="3" placeholder="For example: check how failed requests are handled." aria-describedby="reviewHelp"></textarea>
+<div class="row"><button type="button" id="mapRepository">Map repository</button><button type="button" id="prepareReview" class="primary">Prepare review</button><button type="button" id="downloadReview" disabled>Download JSON</button></div>
+<p id="reviewStatus" class="muted" role="status" aria-live="polite">Choose a folder to inspect. A review goal is needed only to prepare reviewers.</p><div id="reviewResults" aria-labelledby="reviewHeading"></div></section></section>
+<aside><section class="panel"><h2>Memory & corrections</h2><p class="muted">Search this conversation, save a note, or correct an earlier entry. Matches are recorded text, not verified facts.</p>
+<form id="memorySearch"><label for="memoryQuery">Search older memory</label><input id="memoryQuery" maxlength="2000" required placeholder="Search words"><div class="row"><button>Search memory</button></div></form>
+<p id="memoryScope" class="muted" role="status"></p><div id="memoryResults"></div><div id="memorySource" aria-live="polite"></div>
+<label for="note">Note</label><textarea id="note"></textarea><label for="replace">Correct entry ID (optional)</label><input id="replace" type="number" min="1"><div class="row"><button id="saveNote">Save memory</button><button id="newNote">New note</button></div><div id="notes"></div></section>
+<section class="panel"><h2>Reviewed workflows</h2><p class="muted">Reusable tool plans with checks before and after each step. Fixture tests and your review are required before reuse.</p><div id="workflows"></div>
+<details><summary>Create a file workflow</summary>
+<label for="workflowName">Workflow name</label><input id="workflowName" placeholder="create-notes">
+<label for="workflowPath">New file path</label><input id="workflowPath" placeholder="notes.txt">
+<label for="workflowText">File contents</label><textarea id="workflowText"></textarea>
+<button id="createWorkflow">Save draft</button></details>
+<details><summary>Propose a workflow</summary><label for="plan">Workflow JSON</label><textarea id="plan" rows="8"></textarea><label for="source">Successful task ID (optional)</label><input id="source"><button id="propose">Save proposal</button></details><details><summary>Advanced regression fixtures</summary><label for="fixtures">Regression fixtures (JSON)</label><textarea id="fixtures" rows="3">[{"files":{},"expect":"complete"}]</textarea><p class="muted">Tests use disposable files. Only local file tools are supported.</p></details><p id="workflowResult" class="muted"></p></section></aside></main>
+<script nonce="__TOKEN__">
+const token = '__TOKEN__';
+let cid = '', state = null, busy = false, refreshId = 0, memoryId = 0, sourceId = 0;
+let reviewRevision = 0, reviewResult = null, reviewInputKey = '';
+const $ = id => document.getElementById(id);
+function el(tag, text, cls) {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  if (cls) node.className = cls;
+  return node;
+}
+function status(text, error = false) {
+  $('status').textContent = text;
+  $('status').className = error ? 'error' : '';
+}
+async function api(path, body) {
+  const response = await fetch(path, {
+    method: body ? 'POST' : 'GET',
+    headers: {'X-Aeon-Token': token, ...(body ? {'Content-Type': 'application/json'} : {})},
+    ...(body ? {body: JSON.stringify(body)} : {})
+  });
+  const value = await response.json();
+  if (!response.ok) throw Error(value.error || 'Request failed');
+  return value;
+}
+function lock(value) {
+  busy = value;
+  document.querySelectorAll('button').forEach(button => button.disabled = value);
+  $('downloadReview').disabled = value || !reviewResult || reviewInputKey !== reviewKey();
+}
+async function job(path, body) {
+  if (busy) return;
+  lock(true); status('Working…');
+  try {
+    const task = await api(path, body);
+    let result;
+    for (;;) {
+      const response = await api('/api/job?id=' + task.job);
+      if (response.done) { result = response.result; break; }
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    if (path === '/api/swarm') {
+      status('Source collection finished. No model called or actions authorized.');
+      return result;
+    }
+    if (result?.conversation) { cid = result.conversation; $('replace').value = ''; $('note').value = ''; $('planPreview').replaceChildren(); }
+    if (result?.fixtures) $('fixtures').value = JSON.stringify(result.fixtures, null, 2);
+    if (path === '/api/workflow') {
+      $('workflowResult').textContent = result?.note || (result?.ok === false ? 'Regression failed. Inspect the results before reviewing.' : 'Workflow updated.');
+    }
+    await refresh();
+    status(path === '/api/plan' ? 'Preview ready. No actions executed.' : result?.status ? result.status + ': ' + result.answer : 'Saved');
+    return result;
+  } catch (error) {
+    status(error.message, true);
+  } finally {
+    lock(false);
+  }
+}
+function details(title, value) {
+  const node = el('details');
+  node.append(el('summary', title), el('pre', JSON.stringify(value, null, 2)));
+  return node;
+}
+function button(text, fn) {
+  const node = el('button', text); node.onclick = fn; return node;
+}
+function reviewKey() {
+  return JSON.stringify([$('reviewPath').value, $('reviewGoal').value, $('reviewMode').value]);
+}
+function invalidateReview() {
+  reviewRevision++;
+  reviewResult = null;
+  $('reviewResults').replaceChildren();
+  $('downloadReview').disabled = true;
+  $('reviewStatus').textContent = 'Inputs changed. Collect fresh evidence before using or downloading a result.';
+}
+function renderReview(result) {
+  const target = $('reviewResults');
+  target.replaceChildren();
+  if (result.status === 'stale' || result.stale_sources?.length) {
+    $('reviewStatus').textContent = 'Sources changed during preparation. Evidence was discarded; run again for a fresh snapshot.';
+    target.append(details('Changed or unavailable sources', result.stale_sources || []));
+    return false;
+  }
+  const prepared = result.schema === 'swarm-mojo.specialist-review/v1';
+  const evidence = prepared ? result.evidence : result;
+  const coverage = evidence.coverage;
+  const summary = result.status === 'incomplete' ? 'Preparation incomplete. Inspect the errors and narrow the source folder.'
+    : prepared ? 'Review packet prepared. No model review has run.' : 'Repository map ready. Python definitions and imports are source observations.';
+  $('reviewStatus').textContent = summary;
+  target.append(el('p', `${coverage.files_included} of ${coverage.files_read} read files included · ${coverage.symbols} Python symbols · ${coverage.imports} imports.`),
+    el('p', coverage.partial ? 'Partial coverage. Some source content or definitions are omitted; this is not a complete repository assessment.' : 'All source files observed within this scan are included.', 'muted'),
+    el('p', 'Snapshot from this run; files can change afterward. No actions are authorized.', 'muted'));
+  if (!evidence.files.length) target.append(el('p', 'No source files were included. Choose a folder containing supported text files.'));
+  if (coverage.errors?.length) target.append(details('Source errors', coverage.errors));
+  target.append(details('Coverage and scan limits', coverage));
+  const files = el('details');
+  files.append(el('summary', 'Source files and Python symbols'));
+  for (const file of evidence.files) {
+    const item = el('details');
+    item.append(el('summary', file.path), el('p', 'SHA-256: ' + file.sha256, 'content muted'));
+    if (file.ast_skipped) item.append(el('p', 'Python definitions unavailable: ' + file.ast_skipped.replaceAll('_', ' ')));
+    if (file.source_truncated) item.append(el('p', 'Source text was truncated.'));
+    if (file.symbols.length) item.append(el('pre', file.symbols.map(symbol => `${symbol.name} · ${symbol.kind} · line ${symbol.line}`).join('\n')));
+    else if (!file.ast_skipped) item.append(el('p', 'No Python definitions observed.'));
+    if (file.imports.length) item.append(details('Observed imports', file.imports));
+    if (file.excerpt) {
+      const excerpt = el('details');
+      excerpt.append(el('summary', 'Source excerpt' + (file.excerpt.truncated ? ' · truncated' : '') + (file.excerpt.redacted ? ' · redacted' : '')),
+        el('pre', file.excerpt.text));
+      item.append(excerpt);
+    }
+    files.append(item);
+  }
+  target.append(files);
+  for (const review of result.reviews || []) {
+    const card = el('article');
+    card.append(el('h3', review.role + (review.status === 'prepared' ? ' · Prepared' : ' · ' + review.status)),
+      el('p', review.instructions || review.error || 'No prepared instructions are available.', 'content'));
+    target.append(card);
+  }
+  if (result.notes?.length) target.append(details('Preparation notes', result.notes));
+  return true;
+}
+async function collectReview(operation) {
+  if (busy) return;
+  const path = $('reviewPath').value.trim(), goal = $('reviewGoal').value.trim();
+  if (!path || (operation === 'prepare' && !goal)) {
+    invalidateReview();
+    $('reviewStatus').textContent = !path ? 'Enter a source folder relative to your workspace.' : 'Enter a review goal before preparing reviewers.';
+    (!path ? $('reviewPath') : $('reviewGoal')).focus();
+    return;
+  }
+  const revision = ++reviewRevision, inputKey = reviewKey();
+  reviewResult = null;
+  $('reviewResults').replaceChildren();
+  $('reviewResults').setAttribute('aria-busy', 'true');
+  $('reviewStatus').textContent = 'Collecting a bounded source snapshot… No model will be called.';
+  try {
+    const result = await job('/api/swarm', {operation, path, ...(operation === 'prepare' ? {goal, mode: $('reviewMode').value} : {})});
+    if (revision !== reviewRevision || inputKey !== reviewKey()) {
+      $('reviewStatus').textContent = 'Inputs changed while collecting evidence. The earlier result was discarded; run again.';
+      return;
+    }
+    if (!result) {
+      $('reviewStatus').textContent = 'Could not collect evidence. ' + $('status').textContent;
+      return;
+    }
+    if (renderReview(result)) { reviewResult = result; reviewInputKey = inputKey; }
+  } catch (error) {
+    $('reviewResults').replaceChildren();
+    $('reviewStatus').textContent = 'Could not display evidence: ' + error.message;
+  } finally {
+    $('reviewResults').setAttribute('aria-busy', 'false');
+    $('downloadReview').disabled = busy || !reviewResult || reviewInputKey !== reviewKey();
+  }
+}
+for (const id of ['reviewPath', 'reviewGoal', 'reviewMode']) $(id).addEventListener('input', invalidateReview);
+$('mapRepository').onclick = () => collectReview('map');
+$('prepareReview').onclick = () => collectReview('prepare');
+$('downloadReview').onclick = () => {
+  if (!reviewResult || reviewInputKey !== reviewKey()) return invalidateReview();
+  const url = URL.createObjectURL(new Blob([JSON.stringify(reviewResult, null, 2) + '\n'], {type: 'application/json'}));
+  const link = el('a');
+  link.href = url;
+  link.download = reviewResult.evidence ? 'swarm-mojo-review-packet.json' : 'swarm-mojo-source-map.json';
+  document.body.append(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+function renderTask(article, entry, task) {
+  article.append(el('span', task.session.status, 'badge'));
+  const events = task.audit.nodes.map(node => node.event);
+  const context = events.find(event => event.kind === 'conversation_context')?.context;
+  if (context?.entries?.length) {
+    const memory = el('details');
+    memory.append(el('summary', 'Memory selected for this task'),
+      el('p', 'Historical snapshot, not permission or proof. Offline tasks may complete without using a model.', 'muted'));
+    for (const source of context.entries) {
+      memory.append(el('p', '#' + source.id + ' · ' + source.role + '\n' + source.text, 'content'),
+        button('Inspect source #' + source.id, () => inspectMemory(source.id)));
+    }
+    article.append(memory);
+  }
+  const checks = events.filter(event => event.kind.startsWith('workflow_') || event.kind === 'requirements');
+  if (checks.length) article.append(details('Plan & checks', checks));
+  const results = events.filter(event => event.kind === 'tool');
+  for (const event of results) {
+    const result = event.result;
+    if (result.text !== undefined) article.append(el('p', result.text, 'content'));
+    else if (Array.isArray(result.entries)) article.append(el('p', result.entries.map(item => typeof item === 'string' ? item : item.path || item.name || JSON.stringify(item)).join('\n') || 'No files found.', 'content'));
+  }
+  article.append(details('Tool details', results), details('Evidence history', task.audit));
+  if (task.session.status === 'complete' && results.length && results.every(event => ['read_file', 'write_file'].includes(event.action.tool))) {
+    article.append(button('Learn this file workflow', () => job('/api/workflow', {
+      operation: 'learn', session: entry.session, name: 'learned-' + entry.session
+    })));
+  }
+  if (task.session.pending) {
+    const pending = task.session.pending;
+    const approval = el('div', undefined, 'approval');
+    approval.append(el('p', 'Review this exact action before approving.'),
+      el('pre', JSON.stringify({action: pending.action, observed_target: pending.binding}, null, 2)),
+      button('Approve this action', () => job('/api/approve', {
+        conversation: cid, session: entry.session, ticket: pending.ticket
+      })));
+    article.append(approval);
+  }
+}
+async function refresh() {
+  const requestId = ++refreshId, requestedCid = cid;
+  const next = await api('/api/state' + (requestedCid ? '?conversation=' + encodeURIComponent(requestedCid) : ''));
+  if (requestId !== refreshId || requestedCid !== cid) return;
+  state = next;
+  ++memoryId; ++sourceId;
+  $('memoryResults').replaceChildren(); $('memorySource').replaceChildren();
+  $('memoryScope').textContent = '';
+  $('mode').textContent = state.offline ? 'Offline · no model calls' : 'Native SGLang';
+  $('workspace').textContent = state.workspace;
+  $('conversations').replaceChildren();
+  for (const conversation of state.conversations) {
+    $('conversations').append(button(conversation.title, async () => {
+      try { cid = conversation.id; $('replace').value = ''; $('note').value = ''; $('planPreview').replaceChildren(); await refresh(); } catch (error) { status(error.message, true); }
+    }));
+  }
+  $('title').textContent = state.conversations.find(conversation => conversation.id === cid)?.title || 'Your local assistant';
+  $('history').replaceChildren(); $('notes').replaceChildren();
+  if (!cid) $('history').append(el('p', 'Start a conversation. Try “list files” without a model.'));
+  const replaced = new Set(state.entries.map(entry => entry.replaces).filter(Boolean));
+  const latest = new Map(state.entries.filter(entry => entry.session).map(entry => [entry.session, entry.id]));
+  for (const entry of state.entries) {
+    const article = el('article', undefined, entry.role);
+    article.append(el('small', entry.role + ' · #' + entry.id + (replaced.has(entry.id) ? ' · superseded' : '')),
+      el('p', entry.text, 'content'));
+    if (entry.session && latest.get(entry.session) === entry.id) {
+      renderTask(article, entry, state.sessions[entry.session]);
+    }
+    $('history').append(article);
+    if (['note', 'correction'].includes(entry.role)) {
+      $('notes').append(el('p', '#' + entry.id + ' ' + entry.text + (replaced.has(entry.id) ? ' (superseded)' : '')));
+    }
+  }
+  $('workflows').replaceChildren();
+  for (const workflow of state.workflows) {
+    const block = el('div', undefined, 'panel');
+    block.append(el('strong', workflow.name), el('p', workflow.reviewed ? 'Reviewed' : 'Proposal'), details('Inspect plan', workflow.plan));
+    const row = el('div', undefined, 'row');
+    row.append(button('Test fixtures', () => {
+      try { job('/api/workflow', {operation: 'test', id: workflow.id, fixtures: JSON.parse($('fixtures').value)}); }
+      catch (error) { status(error.message, true); }
+    }));
+    if (workflow.regression?.ok && !workflow.reviewed) row.append(button('Approve workflow', () => job('/api/workflow', {operation: 'approve', id: workflow.id})));
+    if (workflow.reviewed) row.append(button('Run', () => cid
+      ? job('/api/workflow', {operation: 'run', id: workflow.id, conversation: cid})
+      : status('Create a conversation first', true)));
+    if (workflow.reviewed) row.append(button('Use in message', () => {
+      $('message').value = 'run workflow "' + workflow.name + '"'; $('planPreview').replaceChildren(); $('message').focus();
+    }));
+    block.append(row);
+    if (workflow.regression) block.append(details('Regression results', workflow.regression));
+    $('workflows').append(block);
+  }
+  lock(busy);
+}
+async function searchMemory() {
+  if (busy) return;
+  if (!cid) return status('Create a conversation first', true);
+  const requestedCid = cid, requestId = ++memoryId;
+  ++sourceId;
+  $('memorySource').replaceChildren(); $('memoryResults').replaceChildren();
+  $('memoryScope').textContent = 'Searching…';
+  try {
+    const result = await api('/api/memory?conversation=' + encodeURIComponent(requestedCid) + '&query=' + encodeURIComponent($('memoryQuery').value));
+    if (requestId !== memoryId || requestedCid !== cid) return;
+    $('memoryScope').textContent = (result.mode === 'fts5_full_history' ? 'All stored history searched.' : 'Limited search: latest 1,000 current entries.') + ' Up to 10 matches; superseded entries excluded.';
+    if (!result.entries.length) $('memoryResults').append(el('p', 'No matching current entries.'));
+    for (const entry of result.entries) {
+      const block = el('article');
+      block.append(el('small', '#' + entry.id + ' · ' + entry.role), el('p', entry.text, 'content'),
+        button('Inspect #' + entry.id, () => inspectMemory(entry.id)));
+      $('memoryResults').append(block);
+    }
+    lock(busy);
+  } catch (error) {
+    if (requestId === memoryId && requestedCid === cid) $('memoryScope').textContent = error.message;
+  }
+}
+async function inspectMemory(id) {
+  const requestedCid = cid, requestId = ++sourceId;
+  try {
+    const entry = await api('/api/entry?conversation=' + encodeURIComponent(requestedCid) + '&entry=' + id);
+    if (requestId !== sourceId || requestedCid !== cid) return;
+    const block = el('article');
+    block.append(el('strong', 'Source #' + entry.id + (entry.superseded_by ? ' · superseded' : ' · current revision')),
+      el('p', entry.text, 'content'), el('small', entry.role + (entry.session ? ' · task ' + entry.session : '')));
+    if (entry.replaces) block.append(button('Previous revision #' + entry.replaces, () => inspectMemory(entry.replaces)));
+    if (entry.superseded_by) block.append(button('Next revision #' + entry.superseded_by, () => inspectMemory(entry.superseded_by)));
+    else block.append(button('Correct this entry', () => {
+      $('replace').value = entry.id; $('note').value = entry.text; $('note').focus();
+      status('Edit the replacement text, then save memory. The original stays in history.');
+    }));
+    $('memorySource').replaceChildren(block);
+    $('memorySource').scrollIntoView({block: 'nearest', behavior: 'smooth'});
+    lock(busy);
+  } catch (error) {
+    if (requestId === sourceId && requestedCid === cid) status(error.message, true);
+  }
+}
+$('memorySearch').onsubmit = event => { event.preventDefault(); searchMemory(); };
+$('message').oninput = () => $('planPreview').replaceChildren();
+$('previewPlan').onclick = async () => {
+  const text = $('message').value;
+  const plan = await job('/api/plan', {text});
+  if (!plan || text !== $('message').value) return;
+  const block = el('article');
+  block.append(el('strong', plan.source === 'model_required' ? 'This task needs model planning' : plan.tool_steps + ' local tool steps · no model needed'),
+    el('p', plan.note));
+  if (!plan.within_step_budget) block.append(el('p', 'This plan exceeds the tool-step budget. Split it before running.'));
+  if (plan.requires_approval) block.append(el('p', 'Changes require approval of the exact action and target.'));
+  if (plan.actions.length) block.append(details('Planned actions', plan.actions));
+  if (plan.workflow) block.append(details('Workflow conditions', plan.workflow));
+  $('planPreview').replaceChildren(block);
+};
+$('newNote').onclick = () => { $('replace').value = ''; $('note').value = ''; $('note').focus(); };
+$('new').onclick = () => job('/api/conversation', {title: 'Conversation ' + new Date().toLocaleString()});
+$('chat').onsubmit = async event => {
+  event.preventDefault();
+  if (!cid) {
+    const created = await job('/api/conversation', {title: $('message').value.slice(0, 100)});
+    if (!created) return;
+  }
+  const result = await job('/api/chat', {conversation: cid, text: $('message').value});
+  if (result) { $('message').value = ''; $('planPreview').replaceChildren(); }
+};
+$('saveNote').onclick = async () => {
+  if (!cid) return status('Create a conversation first', true);
+  const result = await job('/api/note', {
+  conversation: cid, text: $('note').value, ...($('replace').value ? {replaces: Number($('replace').value)} : {})
+  });
+  if (result) { $('note').value = ''; $('replace').value = ''; if ($('memoryQuery').value) await searchMemory(); }
+};
+$('propose').onclick = () => {
+  try { job('/api/workflow', {operation: 'propose', plan: JSON.parse($('plan').value), source_session: $('source').value}); }
+  catch (error) { status(error.message, true); }
+};
+$('createWorkflow').onclick = () => {
+  const path = $('workflowPath').value, content = $('workflowText').value;
+  const before = {id: 'absent', description: 'New file must not exist', check: {type: 'file_absent', path}};
+  const after = {id: 'contents', description: 'File must contain the requested text', check: {type: 'file_contains', path, text: content}};
+  $('fixtures').value = JSON.stringify([{files: {}, expect: 'complete'}, {files: {[path]: 'existing file'}, expect: 'blocked'}], null, 2);
+  job('/api/workflow', {operation: 'propose', plan: {
+    name: $('workflowName').value, description: 'Create ' + path,
+    steps: [{action: {tool: 'write_file', args: {path, content, expected_sha256: 'missing'}}, before, after}], completion: after
+  }});
+};
+refresh().then(() => status('Ready. Conversation history is context, never permission.')).catch(error => status(error.message, true));
+</script></html>

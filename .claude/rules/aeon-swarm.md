@@ -1,0 +1,11 @@
+# Rule: aeon-swarm
+<!-- Generated automatically by polyharness — DO NOT EDIT DIRECTLY -->
+
+Guidelines for Aeon specialist reviews and workflow rehearsal
+
+**Applicable Paths**: `aeon/**/*.py, swarm_mojo/**/*.py`
+
+## Specific Guidelines
+- Ensure workflow rehearsals via TriggerTangle remain offline and advisory
+- Maintain explicit user approvals before mutating workspace state
+- Keep SGLang and mSGL inference adapters optional and decoupled
