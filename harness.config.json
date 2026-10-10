@@ -30,6 +30,12 @@
     "compact-kv": "python swarmmojo.py compact-kv",
     "rewind": "python swarmmojo.py rewind",
     "path-carry": "python swarmmojo.py path-carry",
+    "drift": "python swarmmojo.py drift",
+    "statefresh": "python swarmmojo.py statefresh",
+    "workflowproof": "python swarmmojo.py workflowproof",
+    "cortex": "python swarmmojo.py cortex",
+    "triad": "python swarmmojo.py triad",
+    "mojo-memory": "python swarmmojo.py mojo-memory",
     "meta": "python swarmmojo.py meta"
   },
   "rules": [
@@ -45,13 +51,16 @@
     },
     {
       "name": "specialized-engines",
-      "description": "Guidelines for high-speed local agent engines (Symdex, Titans, ToolCall, Sieve, Horizon, Fastgate, Compact-KV, Rewind, PathCarry, LocalDocSearch)",
+      "description": "Guidelines for high-speed local agent engines (Symdex, Titans, ToolCall, Sieve, Horizon, Fastgate, Compact-KV, Rewind, PathCarry, LocalDocSearch, Drift, StateFresh, WorkflowProof, Cortex, Triad, MojoMemory)",
       "globs": ["app/engines/**/*.py", "app_mojo/**/*.mojo"],
       "guidelines": [
         "Maintain sub-millisecond execution for in-memory operations and phase vector triage",
         "Enforce cross-platform path safety and reserved-name audit via PathCarry",
         "Keep structured working memory preambles bounded (<800 tokens) via Compact-KV",
-        "Maintain native Mojo acceleration in app_mojo/ alongside Python bridges in app/engines/"
+        "Maintain native Mojo acceleration in app_mojo/ alongside Python bridges in app/engines/",
+        "Enforce angular drift guardrails (warn >=65°, block >=80°) via MojoDrift",
+        "Protect workspace mutations from concurrent stale writes via StateFresh OCC",
+        "Verify sequential workflows and cache proofs cryptographically via WorkflowProof"
       ]
     },
     {
@@ -75,12 +84,14 @@
     },
     {
       "name": "meta-harness",
-      "description": "Guidelines for SwarmMojo MetaHarness multi-agent and multi-model execution",
+      "description": "Guidelines for SwarmMojo MetaHarness and Coding Agent (Pi Tools + Prime Recursion)",
       "globs": ["app/meta/**/*.py"],
       "guidelines": [
         "Support heterogeneous local and remote models (Ollama, LM Studio, vLLM, SGLang, mock)",
         "Enforce bounded memory preambles and safe sandbox execution with Rewind checkpoints",
-        "Maintain progressive task delegation between coordinators and specialist agents"
+        "Maintain progressive task delegation between coordinators and specialist agents",
+        "Use Pi exact unique match editing (edit_file_exact) with strict whitespace matching",
+        "Use Prime recursive subagent delegation with strict max_depth limits and context isolation"
       ]
     }
   ],
@@ -138,6 +149,21 @@
       "name": "rewind-snapshotter",
       "description": "Content-addressed workspace snapshotting and microsecond rollback",
       "prompt": "Create a checkpoint with Rewind before risky file modifications"
+    },
+    {
+      "name": "pi-coding-toolkit",
+      "description": "Exact unambiguous line slicing, substring editing, and atomic writing",
+      "prompt": "Use Pi coding tools for precise edits with zero whitespace drift"
+    },
+    {
+      "name": "prime-recursion",
+      "description": "Recursive subagent delegation in single, parallel, and chain modes",
+      "prompt": "Delegate complex tasks recursively with depth control and pipeline piping"
+    },
+    {
+      "name": "drift-guard",
+      "description": "Real-time angular trajectory tracking and drift guardrails",
+      "prompt": "Monitor agent actions against anchor task goals and prevent semantic drift"
     },
     {
       "name": "meta-orchestrator",

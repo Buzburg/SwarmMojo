@@ -38,6 +38,32 @@ SwarmMojo incorporates 10 high-speed specialized engines with Python bridges in 
 | **Agent-Rewind** | Content-addressed workspace snapshotting and microsecond rollback | `python swarmmojo.py rewind` | `rewind_snapshot_workspace`, `rewind_rollback_workspace` |
 | **Path-Carry** | Filename safety, cross-platform reserved-name & path audit | `python swarmmojo.py path-carry` | `path_carry_audit` |
 | **LocalDoc-Search** | Line-level local document chunking & search | `python -m app.engines.localdoc_search` | Integrated via RAG & OKF |
+| **Mojo-Drift** | 256-dim angular trajectory tracking & drift guardrail (warn >=65°, block >=80°) | `python swarmmojo.py drift` | `drift_evaluate_action` |
+| **StateFresh** | Optimistic concurrency control, version leases & stale-write rejection | `python swarmmojo.py statefresh` | `statefresh_check_and_stage` |
+| **WorkflowProof** | Step input/output SHA-256 fingerprinting & verified proof-of-work caching | `python swarmmojo.py workflowproof` | `workflowproof_verify_step` |
+| **Prefrontal Cortex** | Execution shield hazard scoring, regex filters & cyclic loop intercept | `python swarmmojo.py cortex` | `cortex_shield_action` |
+| **Triad-Engine** | Pareto reliability, duration, and token cost multi-objective ranking | `python swarmmojo.py triad` | `triad_pareto_rank` |
+| **Mojo-Memory** | 512-dim phase vector associative memory with sub-10ms recall | `python swarmmojo.py mojo-memory` | `mojomemory_store`, `mojomemory_query` |
+
+## Supercharged Coding Agent (Pi Agent Tools + Prime Agent Recursion)
+
+SwarmMojo features a dedicated coding agent runtime synthesizing the best patterns from **Pi Agent**, **Prime Agent**, and **LoopForge / DeepCode**:
+
+### 1. Pi Agent Coding Structure (`PiCodingToolkit`)
+- **Exact Substring Editing (`edit_file_exact`)**: Replaces target blocks only if they match uniquely. Strictly checks occurrence counts to prevent multi-location mutations, accompanied by automatic pre-edit Rewind snapshots and StateFresh OCC version checks.
+- **Line-Numbered Slicing (`read_file_slice`)**: 1-indexed, line-numbered views avoiding full-file context dumps.
+- **Atomic Writing (`write_file_atomic`)**: Creates or writes files atomically with PathCarry directory audits.
+- **Fast Symbol Discovery (`symdex_callgraph`, `find_files`, `grep_content`)**: Sub-20 µs caller/callee and definition indexing via Symdex.
+
+### 2. Prime Agent Recursion (`PrimeRecursionEngine`)
+- **Three Delegation Modes**:
+  - `single`: Focuses a single specialized subagent on an isolated subtask.
+  - `parallel`: Dispatches multiple independent tasks simultaneously and aggregates results.
+  - `chain`: Sequential pipeline with automatic `{previous}` token piping from preceding subagent outputs.
+- **Strict Recursion Limits (`max_depth`)**: Halts runaway recursion trees before exceeding configurable depth thresholds.
+- **Context Window Isolation**: Subagents run with isolated scratchpads; only distilled findings return to the parent context.
+- **Mojo-Drift Active Guardrails**: Re-evaluates each subagent task against the parent goal, blocking actions with >=80° angular drift.
+
 
 ## MetaHarness: Multi-Agent & Heterogeneous Multi-Model Orchestration
 

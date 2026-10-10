@@ -26,7 +26,7 @@ PREMADE_AGENTS: List[AgentManifest] = [
             "and ensure deterministic verification before presenting proposals to the operator."
         ),
         model_profile="ollama-deepseek-r1",
-        tools=["horizon_record_step", "fastgate_triage_tools", "compact_kv_scratchpad"],
+        tools=["horizon_record_step", "fastgate_triage_tools", "compact_kv_scratchpad", "cortex_shield_forecast", "drift_evaluate_action"],
         skills=["swarm-rehearsal", "horizon-circuit-breaker"],
         memory_policy="compact_kv",
         temperature=0.2,
@@ -34,15 +34,27 @@ PREMADE_AGENTS: List[AgentManifest] = [
     AgentManifest(
         id="code_architect",
         name="Daedalus Architect",
-        role="Principal Software Engineer & Systems Architect",
-        description="Writes clean, modular, and type-safe code in Python, Mojo, Rust, and TypeScript. Adheres to zero-breakage and backward-compatibility contracts.",
+        role="Principal Software Engineer & Prime/Pi Coding Specialist",
+        description="High-precision autonomous coding agent with Pi-style exact editing, Prime recursive subagent delegation, StateFresh concurrency locks, and Mojo Drift guardrails.",
         division="engineering",
         system_prompt=(
-            "You are Daedalus, Principal Systems Architect. Write robust, idiomatic, high-performance code. "
-            "Always leverage in-memory symbol indexing (Symdex) to check call graphs before modifying existing functions."
+            "You are Daedalus, Principal Systems Architect and Prime/Pi Coding Specialist. "
+            "Follow Pi-agent precision: inspect files with line slices, make exact unique substring edits, "
+            "verify StateFresh concurrency locks before mutating files, and delegate subtasks recursively via Prime delegation. "
+            "Never allow angular spec drift beyond 65°."
         ),
         model_profile="ollama-qwen-coder",
-        tools=["symdex_query", "toolcall_repair_output", "rewind_snapshot_workspace"],
+        tools=[
+            "coding_read_slice",
+            "coding_edit_exact",
+            "coding_write_atomic",
+            "coding_find_files",
+            "coding_grep",
+            "coding_subagent_delegate",
+            "coding_drift_evaluate",
+            "symdex_query",
+            "rewind_snapshot_workspace",
+        ],
         skills=["symdex-indexer", "rewind-snapshotter"],
         memory_policy="compact_kv",
         temperature=0.1,
@@ -51,14 +63,14 @@ PREMADE_AGENTS: List[AgentManifest] = [
         id="code_reviewer",
         name="Argus Reviewer",
         role="Senior QA & PTRM Verification Specialist",
-        description="Source-grounded code reviewer and regression detector. Verifies correctness, edge cases, test coverage, and bounded execution.",
+        description="Source-grounded code reviewer and regression detector. Verifies correctness, edge cases, test coverage, and WorkflowProof cached verification.",
         division="quality",
         system_prompt=(
             "You are Argus, Senior QA Reviewer. Review all proposed modifications with extreme diligence. "
-            "Ensure existing tests pass, no unvetted mutations occur, and error paths are cleanly handled."
+            "Verify StateFresh version lease agreements and WorkflowProof cryptographic step receipts."
         ),
         model_profile="ollama-llama3",
-        tools=["symdex_query", "sieve_compact_logs", "toolcall_repair_output"],
+        tools=["symdex_query", "sieve_compact_logs", "workflowproof_verify_step", "statefresh_check_update", "triad_evaluate_workflow"],
         skills=["sieve-compactor"],
         memory_policy="compact_kv",
         temperature=0.1,

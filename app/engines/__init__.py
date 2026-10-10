@@ -23,6 +23,12 @@ from .compact_kv import CompactKVManager
 from .rewind import RewindEngine
 from .path_carry import audit_directory, audit_filename, PathAuditResult
 from .localdoc_search import chunk_document
+from .drift import evaluate_drift, SessionTracker as DriftTracker
+from .statefresh import evaluate_state_update, Decision as StateFreshDecision, StateFreshStore, FileVersionGuard
+from .workflowproof import WorkflowStep, WorkflowProofEngine
+from .cortex import CortexEngine, ExecutionShield
+from .triad import TriadEngine, TriadMetrics
+from .mojo_memory import MojoMemoryEngine
 
 __all__ = [
     "SymdexIndex",
@@ -38,4 +44,17 @@ __all__ = [
     "audit_filename",
     "PathAuditResult",
     "chunk_document",
+    "evaluate_drift",
+    "DriftTracker",
+    "evaluate_state_update",
+    "StateFreshDecision",
+    "StateFreshStore",
+    "FileVersionGuard",
+    "WorkflowStep",
+    "WorkflowProofEngine",
+    "CortexEngine",
+    "ExecutionShield",
+    "TriadEngine",
+    "TriadMetrics",
+    "MojoMemoryEngine",
 ]

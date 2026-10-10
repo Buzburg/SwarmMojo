@@ -25,6 +25,12 @@
     "compact-kv": "python swarmmojo.py compact-kv",
     "rewind": "python swarmmojo.py rewind",
     "path-carry": "python swarmmojo.py path-carry",
+    "drift": "python swarmmojo.py drift",
+    "statefresh": "python swarmmojo.py statefresh",
+    "workflowproof": "python swarmmojo.py workflowproof",
+    "cortex": "python swarmmojo.py cortex",
+    "triad": "python swarmmojo.py triad",
+    "mojo-memory": "python swarmmojo.py mojo-memory",
     "meta": "python swarmmojo.py meta"
   },
   "sandbox": {
@@ -74,6 +80,21 @@
       "name": "rewind-snapshotter",
       "enabled": true,
       "description": "Content-addressed workspace snapshotting and microsecond rollback"
+    },
+    {
+      "name": "pi-coding-toolkit",
+      "enabled": true,
+      "description": "Exact unambiguous line slicing, substring editing, and atomic writing"
+    },
+    {
+      "name": "prime-recursion",
+      "enabled": true,
+      "description": "Recursive subagent delegation in single, parallel, and chain modes"
+    },
+    {
+      "name": "drift-guard",
+      "enabled": true,
+      "description": "Real-time angular trajectory tracking and drift guardrails"
     },
     {
       "name": "meta-orchestrator",

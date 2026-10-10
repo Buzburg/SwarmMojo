@@ -18,6 +18,12 @@ Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills)
 - **compact-kv**: `python swarmmojo.py compact-kv`
 - **rewind**: `python swarmmojo.py rewind`
 - **path-carry**: `python swarmmojo.py path-carry`
+- **drift**: `python swarmmojo.py drift`
+- **statefresh**: `python swarmmojo.py statefresh`
+- **workflowproof**: `python swarmmojo.py workflowproof`
+- **cortex**: `python swarmmojo.py cortex`
+- **triad**: `python swarmmojo.py triad`
+- **mojo-memory**: `python swarmmojo.py mojo-memory`
 - **meta**: `python swarmmojo.py meta`
 
 ## Core Guidelines & Constraints
@@ -40,4 +46,7 @@ Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills)
 - **sieve-compactor**: Prune repetitive build and test output with 95%+ noise reduction
 - **horizon-circuit-breaker**: Track task DAG and intervene on semantic loops
 - **rewind-snapshotter**: Content-addressed workspace snapshotting and microsecond rollback
+- **pi-coding-toolkit**: Exact unambiguous line slicing, substring editing, and atomic writing
+- **prime-recursion**: Recursive subagent delegation in single, parallel, and chain modes
+- **drift-guard**: Real-time angular trajectory tracking and drift guardrails
 - **meta-orchestrator**: Orchestrates multi-agent teams across heterogeneous local models

@@ -26,4 +26,10 @@ Development Commands:
 - compact-kv: python swarmmojo.py compact-kv
 - rewind: python swarmmojo.py rewind
 - path-carry: python swarmmojo.py path-carry
+- drift: python swarmmojo.py drift
+- statefresh: python swarmmojo.py statefresh
+- workflowproof: python swarmmojo.py workflowproof
+- cortex: python swarmmojo.py cortex
+- triad: python swarmmojo.py triad
+- mojo-memory: python swarmmojo.py mojo-memory
 - meta: python swarmmojo.py meta

@@ -66,6 +66,52 @@ def run_entry():
         result = audit_directory(target)
         print(json.dumps(result.to_dict(), indent=2))
         raise SystemExit(0 if result.is_clean else 1)
+    elif len(sys.argv) > 1 and sys.argv[1] == "drift":
+        import json
+        from app.engines.drift import MojoDrift
+        drift = MojoDrift()
+        goal = sys.argv[2] if len(sys.argv) > 2 else "execute task safely"
+        action = sys.argv[3] if len(sys.argv) > 3 else "running command"
+        res = drift.evaluate_action(goal, action)
+        print(json.dumps(res, indent=2))
+        raise SystemExit(0 if res.get("status") != "blocked" else 1)
+    elif len(sys.argv) > 1 and sys.argv[1] == "statefresh":
+        import json
+        from app.engines.statefresh import StateFreshCoordinator
+        coord = StateFreshCoordinator()
+        target = sys.argv[2] if len(sys.argv) > 2 else "sample.txt"
+        lease = coord.acquire_lease(target, holder="cli")
+        print(json.dumps({"lease_acquired": lease is not None, "path": target}, indent=2))
+        raise SystemExit(0)
+    elif len(sys.argv) > 1 and sys.argv[1] == "workflowproof":
+        import json
+        from app.engines.workflowproof import WorkflowProofEngine
+        engine = WorkflowProofEngine()
+        status = engine.verify_proofs()
+        print(json.dumps(status, indent=2))
+        raise SystemExit(0 if status.get("valid", True) else 1)
+    elif len(sys.argv) > 1 and sys.argv[1] == "cortex":
+        import json
+        from app.engines.cortex import CortexEngine
+        cortex = CortexEngine()
+        action = sys.argv[2] if len(sys.argv) > 2 else "run tests"
+        status = cortex.evaluate_hazard(action)
+        print(json.dumps(status, indent=2))
+        raise SystemExit(0 if not status.get("hazard") else 1)
+    elif len(sys.argv) > 1 and sys.argv[1] == "triad":
+        import json
+        from app.engines.triad import TriadEngine
+        engine = TriadEngine()
+        summary = engine.summary()
+        print(json.dumps(summary, indent=2))
+        raise SystemExit(0)
+    elif len(sys.argv) > 1 and sys.argv[1] in ("mojo-memory", "mojomemory"):
+        import json
+        from app.engines.mojo_memory import MojoMemory
+        mem = MojoMemory()
+        stats = mem.stats()
+        print(json.dumps(stats, indent=2))
+        raise SystemExit(0)
     elif len(sys.argv) > 1 and sys.argv[1] == "meta":
         from app.meta.cli import main as meta_main
         raise SystemExit(meta_main(sys.argv[2:]))

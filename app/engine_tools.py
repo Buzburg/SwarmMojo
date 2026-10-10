@@ -129,3 +129,66 @@ def register_engine_tools(server: FastMCP) -> None:
         """Audits directory paths for Windows reserved device names, illegal chars, and traversal risks."""
         res = audit_directory(directory)
         return json.dumps(res.to_dict(), indent=2)
+
+    @server.tool()
+    def drift_evaluate_action(goal: str, action: str) -> str:
+        """Calculates trajectory angular drift in degrees [0-180] (warn >=65°, block >=80°)."""
+        from app.engines import evaluate_drift
+        return json.dumps(evaluate_drift(goal, action), indent=2)
+
+    @server.tool()
+    def statefresh_check_update(entity_id: str, updates_json: str, expected_version: int = 1) -> str:
+        """Verifies optimistic concurrency state update against StateFresh version leases."""
+        from app.engines import StateFreshStore
+        store = StateFreshStore()
+        try:
+            updates = json.loads(updates_json)
+        except Exception:
+            return json.dumps({"error": "updates_json must be valid JSON"})
+        decision = store.apply_update(entity_id, expected_version, updates)
+        return json.dumps(decision.to_dict(), indent=2)
+
+    @server.tool()
+    def workflowproof_verify_step(step_id: str, command: str, inputs_csv: str = "") -> str:
+        """Executes or retrieves cached cryptographic proof for a verified workflow step."""
+        from app.engines import WorkflowProofEngine, WorkflowStep
+        engine = WorkflowProofEngine()
+        inputs = [i.strip() for i in inputs_csv.split(",") if i.strip()]
+        cmd_parts = command.split()
+        res = engine.run_step(WorkflowStep(id=step_id, command=cmd_parts, inputs=inputs, outputs=[]))
+        return json.dumps(res, indent=2)
+
+    @server.tool()
+    def cortex_shield_forecast(action: str, goal: str = "") -> str:
+        """Pre-simulates candidate actions against hazard rules and cyclic loops."""
+        from app.engines import CortexEngine
+        cortex = CortexEngine()
+        return json.dumps(cortex.check_action(action, goal=goal if goal else None), indent=2)
+
+    @server.tool()
+    def triad_evaluate_workflow(workflow_id: str, reliability: float, duration_s: float, cost_tokens: int) -> str:
+        """Records and evaluates Pareto efficiency across (reliability, duration, cost)."""
+        from app.engines import TriadEngine
+        triad = TriadEngine()
+        metric = triad.record_run(workflow_id, reliability, duration_s, cost_tokens)
+        rankings = triad.rank_pareto_front()
+        return json.dumps({"recorded": metric.to_dict(), "pareto_rankings": rankings}, indent=2)
+
+    @server.tool()
+    def mojo_memory_store_lesson(text: str, evidence_json: str = "{}") -> str:
+        """Stores a lesson and evidence in Mojo phase-vector associative memory."""
+        from app.engines import MojoMemoryEngine
+        mem = MojoMemoryEngine()
+        try:
+            ev = json.loads(evidence_json)
+        except Exception:
+            ev = {}
+        return json.dumps(mem.put_lesson(text, evidence=ev), indent=2)
+
+    @server.tool()
+    def mojo_memory_search_lesson(query: str, limit: int = 3) -> str:
+        """Recalls relevant lessons and evidence using 512-dim phase vector cosine similarity."""
+        from app.engines import MojoMemoryEngine
+        mem = MojoMemoryEngine()
+        return json.dumps(mem.search_lessons(query, limit=limit), indent=2)
+

@@ -28,6 +28,12 @@
 - `python swarmmojo.py compact-kv` (compact-kv)
 - `python swarmmojo.py rewind` (rewind)
 - `python swarmmojo.py path-carry` (path-carry)
+- `python swarmmojo.py drift` (drift)
+- `python swarmmojo.py statefresh` (statefresh)
+- `python swarmmojo.py workflowproof` (workflowproof)
+- `python swarmmojo.py cortex` (cortex)
+- `python swarmmojo.py triad` (triad)
+- `python swarmmojo.py mojo-memory` (mojo-memory)
 - `python swarmmojo.py meta` (meta)
 
 ## Guardrails

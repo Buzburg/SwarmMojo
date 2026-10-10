@@ -23,8 +23,10 @@ data/*.db
 data/*.db-wal
 data/*.db-shm
 data/*.db-journal
+*.db
 # Local Engine State
 .mojo_*/
+.mojo_*
 .swarmmojo/
 
 # Local Scratch & Reference PDFs
