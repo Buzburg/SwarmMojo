@@ -195,6 +195,20 @@ def run_entry():
     elif len(sys.argv) > 1 and sys.argv[1] == "meta":
         from app.meta.cli import main as meta_main
         raise SystemExit(meta_main(sys.argv[2:]))
+    elif len(sys.argv) > 1 and sys.argv[1] in ("compare", "comparison"):
+        from pathlib import Path
+        comp_file = Path(__file__).resolve().parent / "docs" / "meta_agent_comparison.md"
+        if comp_file.exists():
+            content = comp_file.read_text(encoding="utf-8")
+            if hasattr(sys.stdout, "buffer"):
+                sys.stdout.buffer.write(content.encode("utf-8", errors="replace"))
+                sys.stdout.buffer.write(b"\n")
+                sys.stdout.buffer.flush()
+            else:
+                print(content)
+        else:
+            print("Comparison document not found at docs/meta_agent_comparison.md")
+        raise SystemExit(0)
     else:
         raise SystemExit(prefrontal_main(sys.argv[1:]))
 

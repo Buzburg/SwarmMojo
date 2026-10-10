@@ -8,6 +8,9 @@ version = "1.0.0"
 description = "Full-fledged local-first AI agent harness combining ROMS, Swarm Mojo (Aeon specialist reviews, workflow rehearsal, mSGL), and PolyHarness."
 readme = "README.md"
 requires-python = ">=3.11"
+authors = [
+    { name = "Buzburg AI", email = "buzburgai@gmail.com" }
+]
 dependencies = [
     "mcp[cli]>=1.3.0",
     "fastmcp>=0.4.0",

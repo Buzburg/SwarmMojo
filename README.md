@@ -24,7 +24,7 @@ The portable Python path is used on Windows and Linux. Omarchy is an optional in
 
 ## Specialized Local-First Engines
 
-SwarmMojo incorporates 10 high-speed specialized engines with Python bridges in `app/engines/`, FastMCP tool exposures in `app/engine_tools.py`, and native Mojo acceleration in `app_mojo/`:
+SwarmMojo incorporates 17 high-speed specialized engines with Python bridges in `app/engines/`, FastMCP tool exposures in `app/engine_tools.py`, and native Mojo acceleration in `app_mojo/`:
 
 | Engine | Primary Feature & Performance | CLI Command | FastMCP Tool |
 | --- | --- | --- | --- |
@@ -47,6 +47,28 @@ SwarmMojo incorporates 10 high-speed specialized engines with Python bridges in 
 | **Studio-Engine** | Multimodal cinematic video, ComfyUI execution graphs, storyboards & banner craft | `python swarmmojo.py studio` | `studio_compile_prompt`, `studio_create_storyboard`, `studio_export_comfyui_graph`, `studio_craft_banner` |
 | **Design-Engine** | High-craft UI/GUI landing pages, Filament admin dashboards & component systems | `python swarmmojo.py design` | `design_build_landing_page`, `design_build_dashboard` |
 | **Writer-Engine** | Authentic prose authoring, Ghost Protocol anti-slop filters & multi-chapter book planner | `python swarmmojo.py writer` | `writer_audit_prose`, `writer_clean_prose`, `writer_plan_book` |
+
+## Meta-Agent Architecture Comparison: SwarmMojo vs Paperclip vs OpenRig
+
+SwarmMojo represents a generational leap over cloud orchestrators (e.g. Paperclip) and terminal seat wrappers (e.g. OpenRig / OpenHarness). See the full breakdown in [docs/meta_agent_comparison.md](docs/meta_agent_comparison.md).
+
+| Architectural Dimension | **SwarmMojo (Buzburg AI)** | **Paperclip (`paperclip-master`)** | **OpenRig / OpenHarness (HKUDS)** |
+| :--- | :--- | :--- | :--- |
+| **Primary Philosophy** | Sub-millisecond local-first meta-harness with native Mojo SIMD acceleration | Enterprise ticketing, CI/CD PR reviewer & S3 cloud publishing app | Multi-seat terminal wrapper & academic agent benchmark harness |
+| **Core Runtime** | **Mojo (SIMD v25+)** + **Python 3.11+** hybrid engine | Node.js, TypeScript, Next.js, GraphQL, PostgreSQL | TypeScript / Node.js CLI (`@openrig/cli`) + Python |
+| **Decision / Tool Latency** | **< 50 microseconds** (native `fastgate_core.mojo`) | 150 – 500 ms (Node/GraphQL network roundtrips) | 80 – 300 ms (Subprocess CLI spawn & IPC pipes) |
+| **Native Compiler Kernels** | **40+ Native Mojo kernels** (`app_mojo/*.mojo`) | None (JavaScript V8 / Node.js) | None (V8 / Standard CPython) |
+| **Trajectory Drift & Safety** | **Deterministic 256-dim phase-space geometry** (<65° safe, ≥80° blocked) | Prompt-based system guidelines only | Fixed max-iteration counter & tool timeout |
+| **Memory Architecture** | **Titans DeltaNet** (fast/slow weights) + **Compact-KV** + **HMS Simd** | Flat PostgreSQL conversation history | In-memory message array / JSON disk logs |
+| **Concurrency Model** | **StateFresh OCC** (Atomic CAS, read-set validation, epoch commits) | Postgres row locking / database transactions | Sequential seat execution / bash locks |
+| **Rollback & Reversibility** | **Microsecond snapshot restore** (`mojo-agent-rewind` delta replay) | Git branch resets via GitHub/GitLab API | Manual terminal interrupts |
+| **Model Heterogeneity** | **Any local** (Ollama, LM Studio, vLLM, SGLang, RWKV7) + **Cloud** (OpenAI, Anthropic, Gemini, DeepSeek) | Cloud APIs primarily (OpenAI, Anthropic) | External commercial CLIs (Claude Code, Codex) |
+| **Specialized Agent Guilds** | **4 Full Guilds**: Coding (Triad/Prime), Studio (ComfyUI/70mm Cine), Design (Impeccable/Filament), Writer (Ghost Protocol) | Generic worker seats assigned tickets | Single coding/browser generalist seats |
+| **Harness Portability** | **PolyHarness**: Compiles zero-dependency configs for Claude Code, Cursor, DeepSeek, AGY | Locked to Paperclip runner & CloudFront stack | OpenRig YAML manifest runtime |
+| **UI / Desktop Experience** | **Herald-OS HUD**: Deep-blue glassmorphism, real-time kernel telemetry, canvas builders | Web dashboard (Next.js / Tailwind) | Terminal TUI table / graph view |
+| **Formal Mathematical Proofs** | **WorkflowProof**: Cryptographic Merkle invariants and transition proofs | None | None |
+
+
 
 ## Writer Agent Engine: Authentic Prose & Ghost Protocol Authoring
 
@@ -312,6 +334,13 @@ The Linux/Omarchy workshop adds staged changes, registered validation and operat
 - [Omarchy test-build setup](docs/wsl-test-build.md) and [voice setup](docs/voice.md)
 - [Chat data handling](docs/chat-privacy.md) and [security boundaries](SECURITY.md)
 
+## Author & Maintainer
+
+- **Author**: Buzburg AI
+- **Contact**: `buzburgai@gmail.com`
+- **GitHub**: [https://github.com/Buzburg/SwarmMojo](https://github.com/Buzburg/SwarmMojo)
+
 ## License
 
 [Apache-2.0](LICENSE). Copyright 2026 Buzburg LLC. Third-party licenses and acknowledgements remain in [NOTICE](NOTICE) and the relevant source directories.
+

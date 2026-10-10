@@ -1,0 +1,75 @@
+"""Tests for Meta-Agent Comparison documentation, author configuration, and native Mojo kernels."""
+import subprocess
+import sys
+from pathlib import Path
+
+
+def test_meta_agent_comparison_document_exists():
+    root = Path(__file__).resolve().parent.parent
+    doc_path = root / "docs" / "meta_agent_comparison.md"
+    assert doc_path.exists(), "docs/meta_agent_comparison.md must exist"
+
+    content = doc_path.read_text(encoding="utf-8")
+    assert "Paperclip" in content
+    assert "OpenRig" in content
+    assert "OpenHarness" in content
+    assert "SwarmMojo" in content
+    assert "buzburgai@gmail.com" in content
+    assert "Buzburg AI" in content
+    assert "fastgate_core.mojo" in content
+    assert "Titans DeltaNet" in content
+    assert "StateFresh OCC" in content
+    assert "mojo-drift" in content
+
+
+def test_swarmmojo_compare_cli():
+    root = Path(__file__).resolve().parent.parent
+    cmd = [sys.executable, str(root / "swarmmojo.py"), "compare"]
+    result = subprocess.run(cmd, cwd=str(root), capture_output=True, text=False)
+    assert result.returncode == 0
+    output = result.stdout.decode("utf-8", errors="replace")
+    assert "SwarmMojo vs. Paperclip vs. OpenRig" in output
+    assert "buzburgai@gmail.com" in output
+
+
+def test_native_mojo_kernels_exist():
+    root = Path(__file__).resolve().parent.parent
+    mojo_dir = root / "app_mojo"
+
+    expected_kernels = [
+        ("writer_core.mojo", "SlopFilterEngine"),
+        ("prose_metric.mojo", "calculate_rhythm_metrics"),
+        ("design_core.mojo", "calculate_contrast_ratio"),
+        ("studio_core.mojo", "compute_safe_zones"),
+        ("drift_core.mojo", "calculate_angular_drift"),
+        ("symdex_core.mojo", "embed_symbol"),
+        ("titans_core.mojo", "test_time_memorize_step"),
+        ("fastgate_core.mojo", "route_tools"),
+    ]
+
+    for fname, expected_sym in expected_kernels:
+        fpath = mojo_dir / fname
+        assert fpath.exists(), f"Kernel {fname} must exist in app_mojo/"
+        content = fpath.read_text(encoding="utf-8")
+        assert len(content) > 100
+        assert expected_sym in content, f"{expected_sym} must be present in {fname}"
+
+
+def test_pyproject_author():
+    root = Path(__file__).resolve().parent.parent
+    pyproject = root / "pyproject.toml"
+    assert pyproject.exists()
+    content = pyproject.read_text(encoding="utf-8")
+    assert "buzburgai@gmail.com" in content
+    assert "Buzburg AI" in content
+
+
+def test_readme_author_and_comparison():
+    root = Path(__file__).resolve().parent.parent
+    readme = root / "README.md"
+    assert readme.exists()
+    content = readme.read_text(encoding="utf-8")
+    assert "buzburgai@gmail.com" in content
+    assert "Buzburg AI" in content
+    assert "Meta-Agent Architecture Comparison: SwarmMojo vs Paperclip vs OpenRig" in content
+    assert "docs/meta_agent_comparison.md" in content
