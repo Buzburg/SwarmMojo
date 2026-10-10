@@ -121,7 +121,7 @@ def test_design_engine_build_herald_hud(tmp_path: Path):
     hud_file = tmp_path / ".mojo_design" / "herald_hud.html"
     assert hud_file.exists()
     content = hud_file.read_text(encoding="utf-8")
-    assert "HERALD-OS" in content
+    assert "SOVEREIGN-OS" in content
     assert "SPECIALIST ROSTER" in content
     assert "Atlas" in content
     assert "TriggerTangle Offline Rehearsal" in content

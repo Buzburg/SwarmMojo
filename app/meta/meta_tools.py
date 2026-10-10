@@ -156,7 +156,7 @@ def register_meta_tools(server: FastMCP) -> None:
         chain_json: str = "",
         max_depth: int = 3,
     ) -> str:
-        """Prime-agent recursive subagent tool (single, parallel, chain with {previous} piping)."""
+        """DeepCode recursive subagent tool (single, parallel, chain with {previous} piping)."""
         tasks_list = json.loads(tasks_json) if tasks_json else None
         chain_list = json.loads(chain_json) if chain_json else None
         engine = PrimeRecursionEngine(max_depth=max_depth)

@@ -1,4 +1,4 @@
-"""AnyTool-Inspired Smart Tool RAG, Schema Catalog, and Self-Healing Analytics.
+"""Smart Tool RAG, Schema Catalog, and Self-Healing Analytics.
 
 Optimized for local LLMs:
 - Dynamically retrieves top-K relevant tool schemas on-demand instead of bloating system prompt

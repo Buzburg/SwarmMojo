@@ -81,7 +81,7 @@ def run_benchmarks():
     def bench_tool_rag():
         search_tools("create support ticket customer issue", limit=2, db_path=test_db)
     tool_res = benchmark_function(bench_tool_rag, iterations=200)
-    print(f"\n[4] Smart Tool RAG Schema Discovery (AnyTool):")
+    print(f"\n[4] Smart Tool RAG Schema Discovery:")
     print(f"    Avg: {tool_res['avg_ms']:.4f} ms | Min: {tool_res['min_ms']:.4f} ms | P95: {tool_res['p95_ms']:.4f} ms")
 
     # 5. Context Compression & Grounding for Local LLMs

@@ -1,8 +1,8 @@
-"""Unit tests verifying the GitHub repository enhancements integrated into ROMS:
-1. Hindsight-style Continuous Memory Reflection (reflection.py)
-2. AgentMemory-style Karpathy LLM Wiki Export (reflection.py)
-3. Little-Coder & JCode Compact Small-Model Scaffold (compact_scaffold.py)
-4. Open-Code-Review & FailproofAI Deterministic AST Safety Gate (ast_validator.py)
+"""Unit tests verifying the repository enhancements integrated into ROMS:
+1. Autonomous Continuous Memory Reflection (reflection.py)
+2. Agent Memory LLM Wiki Export (reflection.py)
+3. Compact Small-Model Scaffold (compact_scaffold.py)
+4. Deterministic AST Safety Gate (ast_validator.py)
 """
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ class RepoEnhancementsTest(unittest.TestCase):
     def tearDown(self):
         self.temp_dir.cleanup()
 
-    def test_hindsight_continuous_reflection_success_and_failure(self):
+    def test_continuous_reflection_success_and_failure(self):
         reflector = ContinuousMemoryReflector(db_path=self.db_path)
 
         # 1. Reflect on a successful task
@@ -66,7 +66,7 @@ class RepoEnhancementsTest(unittest.TestCase):
         self.assertFalse(res_fail["memory"]["recommendation_eligible"])
         self.assertIn("AVOID ANTI-PATTERN", str(res_fail["memory"]["summary"]))
 
-    def test_agentmemory_llm_wiki_export(self):
+    def test_llm_wiki_export(self):
         reflector = ContinuousMemoryReflector(db_path=self.db_path)
         exporter = LLMWikiExporter(db_path=self.db_path)
 
@@ -96,7 +96,7 @@ class RepoEnhancementsTest(unittest.TestCase):
         self.assertIn("127.0.0.1 loopback", lessons_text)
         self.assertIn("Deadlock on concurrent MCP tool calls", anti_text)
 
-    def test_little_coder_compact_scaffold_budget_and_tools(self):
+    def test_compact_scaffold_budget_and_tools(self):
         # Verify 4 core primitive tools
         self.assertEqual(len(CORE_PRIMITIVE_TOOLS), 4)
         tool_names = [t["name"] for t in CORE_PRIMITIVE_TOOLS]
@@ -123,7 +123,7 @@ class RepoEnhancementsTest(unittest.TestCase):
         self.assertEqual(parsed["tool"], "read_file")
         self.assertEqual(parsed["arguments"]["path"], "app/memory.py")
 
-    def test_open_code_review_deterministic_ast_gate(self):
+    def test_deterministic_ast_gate(self):
         # 1. Valid safe Python code passes
         safe_code = "def add(a: int, b: int) -> int:\n    return a + b\n"
         res_safe = audit_python_code(safe_code, "math_utils.py")

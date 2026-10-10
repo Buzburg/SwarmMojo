@@ -263,7 +263,7 @@ def get_system_metrics(db_path: Path | str | None = None) -> Dict[str, Any]:
 
 
 # ==========================================
-# [M] Smart Tool RAG & Self-Healing (AnyTool)
+# [M] Smart Tool RAG & Self-Healing
 # ==========================================
 
 from app.tool_rag import (

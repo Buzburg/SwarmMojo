@@ -247,7 +247,7 @@ class PiCodingToolkit:
 
 
 class PrimeRecursionEngine:
-    """Prime-agent style recursive subagent orchestrator with depth limits and context isolation."""
+    """DeepCode recursive subagent orchestrator with depth limits and context isolation."""
 
     def __init__(
         self,
@@ -345,7 +345,7 @@ class PrimeRecursionEngine:
         chain: Optional[List[Dict[str, str]]] = None,
         model_profile: str = "mock",
     ) -> Dict[str, Any]:
-        """Prime-agent three-mode recursive delegation engine."""
+        """DeepCode three-mode recursive delegation engine."""
         if mode == "single":
             res = self.invoke_subagent(
                 agent_role=agent,

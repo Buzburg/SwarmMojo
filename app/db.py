@@ -115,7 +115,7 @@ def init_database(db_path: Path | str | None = None) -> None:
     cur.execute("CREATE INDEX IF NOT EXISTS idx_tickets_status ON support_tickets(status);")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_tickets_email ON support_tickets(customer_email);")
 
-    # 7. Tool Registry & Discovery (AnyTool Smart Tool RAG)
+    # 7. Tool Registry & Discovery (Smart Tool RAG)
     cur.execute("""
     CREATE TABLE IF NOT EXISTS tool_registry (
         tool_name TEXT PRIMARY KEY,

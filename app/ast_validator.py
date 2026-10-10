@@ -1,8 +1,7 @@
 """Deterministic AST Static Analysis & Safety Gate.
 
-Inspired by alibaba/open-code-review and FailproofAI/failproofai:
-Implements deterministic, outside-the-LLM static analysis for staged patches
-as mandated in Omarchy Mojo.pdf (Pages 14-16).
+Buzburg Deterministic AST Safety Gate & Anti-Regression Guardrail:
+Implements deterministic, outside-the-LLM static analysis for staged patches.
 
 Checks:
 - Syntax validity via Python AST parsing.

@@ -201,7 +201,7 @@ def add_skill(skill_name: str, content: str) -> str:
 
 
 # ============================================================================
-# [M] SMART TOOL RAG & ANALYTICS (AnyTool Inspired)
+# [M] SMART TOOL RAG & ANALYTICS
 # ============================================================================
 
 from app.tool_rag import (
@@ -214,7 +214,7 @@ from app.trajectory_recorder import distill_trajectory_to_skill as _distill_traj
 
 @mcp.tool()
 def search_tools(query: str, category: str = "", limit: int = 3) -> str:
-    """AnyTool Smart Tool RAG: retrieves exact tool schemas on-demand instead of crowding context."""
+    """Smart Tool RAG: retrieves exact tool schemas on-demand instead of crowding context."""
     return _format_tool_search_results(query=query, category=category, limit=limit)
 
 

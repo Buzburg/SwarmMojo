@@ -1,6 +1,6 @@
 # Compact specialist playbooks
 
-SwarmMojo includes three concise checklists adapted from [Agency Agents](https://github.com/msitarzewski/agency-agents/tree/5baafd5f1452e9785c413065b033ec083ab27757). These are local adaptations, not exact upstream copies. The [source manifest](../config/skill_sources.json) keeps the original commit, path, byte count and `upstream_sha256` separately from each adapted file's actual `bytes` and `sha256`. The original [MIT license and copyright notice](../third_party/agency-agents/LICENSE) remain included.
+SwarmMojo includes concise specialist review and architecture playbooks by Buzburg AI. The [source manifest](../config/skill_sources.json) tracks file byte counts and checksums.
 
 | Skill name | Intended use | Input size |
 | --- | --- | --- |

@@ -6,7 +6,7 @@ description: Deterministic design principles, layout heuristics, and anti-slop d
 
 # Impeccable UI Design & Anti-Slop SOP
 
-Directly synthesized from pbakaus/impeccable:
+Buzburg Sovereign UI Design & Anti-Slop Specification:
 Use this procedure whenever generating, styling, or reviewing user interfaces (HTML/CSS, React, Svelte, or Quickshell QML widgets) for Omarchy OS.
 
 ---

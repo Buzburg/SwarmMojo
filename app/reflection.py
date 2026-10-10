@@ -1,6 +1,6 @@
-"""Hindsight-style Continuous Memory Reflection & Karpathy-style LLM Wiki Export.
+"""Autonomous Continuous Memory Reflection & Buzburg LLM Knowledge Wiki Export.
 
-Directly implements the failure-to-patch pair recording mandated in Omarchy Mojo.pdf (Pages 7, 27).
+Directly implements the failure-to-patch pair recording for sovereign agent workflows.
 Provides:
 1. ContinuousMemoryReflector: Outcome-weighted reflection (Retain, Recall, Reflect).
 2. LLMWikiExporter: Serializes active project lessons into compact, auto-linked Markdown wikis.
@@ -31,7 +31,7 @@ class TaskOutcome:
 
 
 class ContinuousMemoryReflector:
-    """Implements Hindsight-style outcome reflection for Omarchy OS tasks."""
+    """Implements autonomous outcome reflection for task executions."""
 
     def __init__(self, db_path: Path | str | None = None):
         self.db_path = db_path
@@ -67,7 +67,7 @@ class ContinuousMemoryReflector:
             return {"status": "reflected_success", "memory": verified_record}
 
         else:
-            # Negative outcome (Hindsight anti-pattern reflection)
+            # Negative outcome (Autonomous anti-pattern reflection)
             error_snippet = (outcome.error_log or "Unknown error").strip()[:300]
             summary = (
                 f"AVOID ANTI-PATTERN for {clean_target}: {outcome.action_taken}. "

@@ -39,7 +39,7 @@ The full integration suite used the cached embedding model with offline mode ena
 
 ## Local-memory follow-up
 
-Added a shared Python/SQLite lesson store to both MCP servers: seven tools, a usage prompt/resource, project filters, evidence records, correction/retraction/deletion, expiry and bounded keyword recall. Automatic trajectory distillation now writes inactive candidate skills. The [memory guide](local-memory.md) explains use and the caller-supplied evidence boundary. No Hindsight service or runtime dependency was added.
+Added a shared Python/SQLite lesson store to both MCP servers: seven tools, a usage prompt/resource, project filters, evidence records, correction/retraction/deletion, expiry and bounded keyword recall. Automatic trajectory distillation now writes inactive candidate skills. The [memory guide](local-memory.md) explains use and the caller-supplied evidence boundary. No external service or third-party runtime dependency was added.
 
 | Check | Result |
 | --- | --- |

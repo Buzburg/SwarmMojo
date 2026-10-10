@@ -4,7 +4,7 @@ Provides an OpenAI-compatible API endpoint (/v1/chat/completions, /v1/models):
 1. Intercepts incoming user chat messages
 2. Retrieves hybrid RAG context from roms.db
 3. Matches and injects procedural SOP skills from skills/<name>.md (UpSkill)
-4. Dynamically injects top matching tool schemas on-demand (AnyTool Smart Tool RAG)
+4. Dynamically injects top matching tool schemas on-demand (Smart Tool RAG)
 5. Forwards each request independently; completion reuse is disabled
 6. Transparent streaming to/from your local LLM (Ollama, llama.cpp, vLLM, LM Studio)
 
@@ -159,7 +159,7 @@ async def chat_completions(request: Request) -> Response:
             s_name, s_content = matching_skill
             skill_str = f"\n<active_skill_playbook name=\"{s_name}\">\n{s_content}\n</active_skill_playbook>"
 
-        # C. Smart Tool RAG discovery (AnyTool schema injection)
+        # C. Smart Tool RAG discovery (Dynamic schema injection)
         tool_schemas = format_tool_search_results(last_user_query, limit=2) if include_procedures else ''
         tool_str = ""
         if "Found" in tool_schemas:

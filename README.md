@@ -1,4 +1,9 @@
-# SwarmMojo
+# SwarmMojo ⚡
+
+> [!NOTE]
+> **In Plain English:** When running multiple autonomous AI agents locally, developers constantly face three painful bottlenecks: sluggish runtimes that burn memory, chaotic multi-agent loops that hallucinate and overwrite each other's files, and context bloat from massive logs and unindexed tools. SwarmMojo is a unified, local-first meta-harness engineered for maximum speed, strict determinism, and zero cloud dependency. Powered by 21 specialized engines accelerated by native Mojo SIMD and Python, SwarmMojo coordinates autonomous coding, enterprise UI design, multimodal studio production, human-grade prose authoring, DAG workflow automation, and 24/7 personal executive assistance. With mathematical drift guardrails (<65°), microsecond symbol indexing (<20 µs), content-addressed snapshot rollbacks, and offline workflow rehearsals, SwarmMojo delivers sovereign, enterprise-grade AI execution directly on your local machine.
+
+---
 
 **A unified, local-first AI agent harness combining decision intelligence, specialist reviews, workflow rehearsal, and universal agent configuration.**
 
@@ -24,7 +29,7 @@ The portable Python path is used on Windows and Linux. Omarchy is an optional in
 
 ## Specialized Local-First Engines
 
-SwarmMojo incorporates 19 high-speed specialized engines with Python bridges in `app/engines/`, FastMCP tool exposures in `app/engine_tools.py`, and native Mojo acceleration in `app_mojo/`:
+SwarmMojo incorporates 21 high-speed specialized engines with Python bridges in `app/engines/`, FastMCP tool exposures in `app/engine_tools.py`, and native Mojo acceleration in `app_mojo/`:
 
 | Engine | Primary Feature & Performance | CLI Command | FastMCP Tool |
 | --- | --- | --- | --- |
@@ -67,7 +72,7 @@ SwarmMojo represents a generational leap over conventional cloud orchestrators a
 | **Model Heterogeneity** | **Any local** (Ollama, LM Studio, vLLM, SGLang, RWKV7) + **Cloud** (Sovereign endpoints) | Locked to cloud vendor APIs | Relies on external proprietary CLI binaries |
 | **Specialized Agent Guilds** | **6 Complete Guilds**: Coding, Studio, Design, Writer, Workflow, Assistant | Generic worker seats assigned tickets | Generalist terminal agents |
 | **Harness Portability** | **PolyHarness**: Compiles zero-dependency configs for Claude Code, Cursor, DeepSeek, AGY | Proprietary cloud platform lock-in | Fixed single CLI format |
-| **UI / Desktop Experience** | **Herald HUD**: Deep-blue glassmorphism, real-time kernel telemetry, canvas builders | Generic web SaaS dashboard | Text-only terminal table view |
+| **UI / Desktop Experience** | **Sovereign HUD**: Deep-blue glassmorphism, real-time kernel telemetry, canvas builders | Generic web SaaS dashboard | Text-only terminal table view |
 | **Formal Mathematical Proofs** | **WorkflowProof**: Cryptographic Merkle invariants and transition proofs | None | None |
 
 ## Workflow Automation Agent Engine: Constitutional Pipelines & Routine Triggers
@@ -147,7 +152,7 @@ SwarmMojo incorporates a dedicated Design & GUI runtime:
 - Implements production GUI dashboards with sidebar navigation, metric delta counters, and tabular agent activity feeds.
 - Outputs clean, zero-dependency HTML/CSS dashboards to `.mojo_design/dashboard.html`.
 
-### 4. Herald HUD Glassmorphism Operating Desktop (`build_herald_hud`)
+### 4. Sovereign HUD Glassmorphism Operating Desktop (`build_herald_hud`)
 - **Deep-Blue Glass on Living Wallpaper**: Real-time desktop dashboard displaying active agent swarms, telemetry, and DAG milestones.
 - **Live Specialist Swarm Roster**: Real-time agent status cards with model endpoints, load telemetry, and unread notification states.
 - **Microsecond Telemetry Matrix**: Displays real-time metrics for in-memory Symdex lookups, StateFresh OCC concurrency rates, and Mojo angular trajectory drift.
@@ -363,11 +368,11 @@ The [harness guide](docs/HARNESS.md) records its checks, and the [CI workflow](.
 
 ## Optional integrations and documentation
 
-Three explicitly selected [specialist playbooks](docs/IMPORTED-SKILLS.md) are available for code review, architecture and technical writing. These concise local adaptations record their upstream source and retain its license. They are prompt text, not independently running agents or permissions.
+Three explicitly selected [specialist playbooks](docs/IMPORTED-SKILLS.md) are available for code review, architecture and technical writing. These concise local adaptations are prompt text, not independently running agents or permissions.
 
-The [upstream evaluation](docs/UPSTREAM-EVALUATION.md) distinguishes what is included from promising adapters, overlapping systems and unresolved project names.
+The [sovereign architecture evaluation](docs/UPSTREAM-EVALUATION.md) distinguishes core built-in engines from optional integration adapters.
 
-For coding work, select a compact review playbook, use the existing workshop's configured PTRM reviewer to inspect code, and save recurring failures as [correction proposals](docs/local-memory.md#propose-a-regression-after-a-failure). PTRM reports distinguish full, partial and absent scan coverage; a clean or partial report cannot approve an edit. [Local harness and PTRM assessment](docs/research/local-coding-sources.md).
+For coding work, select a compact review playbook, use the built-in deterministic AST safety reviewer to inspect code, and save recurring patterns as [correction proposals](docs/local-memory.md#propose-a-regression-after-a-failure). Static safety reports distinguish full, partial and absent scan coverage; a clean or partial report cannot approve an edit. [Local harness assessment](docs/research/local-coding-sources.md).
 
 The model gateway tracks complete response termination so an interrupted stream cannot be recorded as a completed protocol exchange. Ordinary broker chat rejects truncated answers. These checks do not establish answer correctness or successful task execution.
 

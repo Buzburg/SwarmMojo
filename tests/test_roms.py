@@ -247,7 +247,7 @@ def test_watcher_lifecycle():
 
 
 def test_universal_multiformat_ingestion(temp_db, tmp_path):
-    """Verifies RAG-Anything universal ingestion of CSV tables and JSON datasets."""
+    """Verifies universal multiformat ingestion of CSV tables and JSON datasets."""
     k_dir = tmp_path / "knowledge_multi"
     k_dir.mkdir()
 
@@ -286,7 +286,7 @@ def test_universal_multiformat_ingestion(temp_db, tmp_path):
 
 
 def test_smart_tool_rag_and_analytics(temp_db):
-    """Verifies AnyTool-inspired tool schema discovery, latency tracking, and self-healing recovery."""
+    """Verifies smart tool schema discovery, latency tracking, and self-healing recovery."""
     from app.tool_rag import (
         init_default_tool_registry,
         search_tools,

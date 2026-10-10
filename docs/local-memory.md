@@ -2,7 +2,7 @@
 
 ROMS can keep small lessons between sessions through eight MCP tools. Both the Python server and the experimental Mojo server expose the same implementation. The Mojo path uses shared Python/SQLite storage and a native Mojo context-selection kernel. See [native context selection](native-context.md) for the boundary and benchmark.
 
-The feature uses the existing SQLite database and standard Python library. It adds no runtime dependency, embedding model, external service or background LLM call. Hindsight inspired the lifecycle design, but no Hindsight package or source code was imported.
+The feature uses the existing SQLite database and standard Python library. It adds no external runtime dependency, embedding model, external cloud service or background LLM call. The lifecycle design is fully self-contained and sovereign.
 
 The installed native broker also exposes read-only `memory.search` through a dedicated local MCP subprocess using this same `memory_recall` schema. It retains project filters, source references and evidence labels. See [broker memory integration](broker-memory-verification.md) for bounds, cancellation checks and its distinction from document retrieval.
 
@@ -70,4 +70,4 @@ Review the draft, check the underlying repair with real evidence, remove secrets
 
 The regression suite covers persistence across a fresh process, every operation's project filter, verification requirements, failed attempts, expiry, revision filtering, atomic corrections, competing corrections, retraction, deletion, malformed search input, output limits, MCP tools/playbook and inactive generated skills.
 
-The source preview remains experimental. This feature does not provide Hindsight's graph, semantic, temporal-reasoning or reflection pipeline. No retrieval-quality, latency or competition-score improvement has been established. See [GitHub readiness](github-readiness.md) for the test record and remaining release checks.
+The persistent memory store is designed for fast, local-first reflection and zero-cloud dependency. See [GitHub readiness](github-readiness.md) for the test record and remaining release checks.

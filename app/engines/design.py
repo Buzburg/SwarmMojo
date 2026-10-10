@@ -743,14 +743,14 @@ td {{
 
     def build_herald_hud(
         self,
-        system_title: str = "SwarmMojo Herald OS",
+        system_title: str = "SwarmMojo Sovereign OS",
         agents_roster: Optional[List[Dict[str, Any]]] = None,
         live_dag_milestones: Optional[List[Dict[str, str]]] = None,
     ) -> Dict[str, Any]:
-        """Generates an ultra-sleek, deep-blue glassmorphism operating desktop HUD inspired by Herald-OS and herdr-hud."""
+        """Generates an ultra-sleek, deep-blue glassmorphism operating desktop HUD with real-time agent telemetry and DAG milestones."""
         roster = agents_roster or [
             {"id": "atlas", "name": "Atlas", "role": "Meta Coordinator", "status": "active", "load": "12%", "model": "deepseek-r1", "avatar": "⚡"},
-            {"id": "daedalus", "name": "Daedalus", "role": "Prime/Pi Architect", "status": "busy", "load": "78%", "model": "qwen-coder", "avatar": "🛠️"},
+            {"id": "daedalus", "name": "Daedalus", "role": "DeepCode Architect", "status": "busy", "load": "78%", "model": "qwen-coder", "avatar": "🛠️"},
             {"id": "vitruvius", "name": "Vitruvius", "role": "UI/UX Designer", "status": "idle", "load": "4%", "model": "qwen-coder", "avatar": "🎨"},
             {"id": "lumiere", "name": "Lumiere", "role": "Studio Director", "status": "rendering", "load": "94%", "model": "flux-dev", "avatar": "🎬"},
             {"id": "orwell", "name": "Orwell", "role": "Ghost Scribe", "status": "active", "load": "32%", "model": "qwen-coder", "avatar": "✍️"},
@@ -759,7 +759,7 @@ td {{
 
         milestones = live_dag_milestones or [
             {"id": "m1", "title": "DAG Ingestion & Triage", "engine": "fastgate", "latency": "8µs", "state": "complete"},
-            {"id": "m2", "title": "Prime Recursive Subagent Fork", "engine": "prime-recursion", "latency": "14ms", "state": "running"},
+            {"id": "m2", "title": "DeepCode Recursive Subagent Fork", "engine": "deepcode-recursion", "latency": "14ms", "state": "running"},
             {"id": "m3", "title": "Mojo Angular Drift Evaluation", "engine": "mojo-drift", "latency": "42µs", "state": "pending"},
             {"id": "m4", "title": "StateFresh OCC File Write Lease", "engine": "statefresh", "latency": "6µs", "state": "pending"},
         ]
@@ -1147,7 +1147,7 @@ body {{
 <body>
   <div class="hud-menubar">
     <div class="menubar-left">
-      <div class="system-brand">◆ SWARM<span>MOJO</span> // HERALD-OS</div>
+      <div class="system-brand">◆ SWARM<span>MOJO</span> // SOVEREIGN-OS</div>
       <div>Session: 0x8F94-AEON</div>
       <div>Kernel: Native Mojo v25.1</div>
     </div>
@@ -1202,7 +1202,7 @@ body {{
 [00:00:01.004] [AtlasCoordinator] Objective received: Multi-agent studio &amp; coding convergence.
 [00:00:01.018] [FastgateTriage] 256-dim phase vector router mapped tools in 18 µs.
 [00:00:01.042] [DaedalusArchitect] Pi exact substring edit committed with Rewind snapshot #snap-482.
-[00:00:01.065] [VitruviusDesign] Herald OS glassmorphism theme compiled with Impeccable contrast floor.
+[00:00:01.065] [VitruviusDesign] Sovereign glassmorphism theme compiled with Impeccable contrast floor.
 [00:00:01.092] [LumiereStudio] ComfyUI Flux graph exported for 16:9 4K render.
 [00:00:01.115] [OrwellScribe] Ghost Protocol passed: 0 banned clichés, sentence variance = 8.4.
 [00:00:01.128] [MojoDrift] Angular trajectory: 4.2° (SAFE &lt; 65°). Status: VERIFIED.
