@@ -1,12 +1,12 @@
-"""Design Agent Engine for SwarmMojo.
+"""Design Agent Engine for SwarmMojo by Buzburg AI.
 
-High-craft UI, GUI, and Website generation engine inspired by:
-- Impeccable (Craft Floor, WCAG AAA contrast, typographic measures, subtle depth, zero-halo shadows)
-- UI-UX Pro Max (Design system tokens, components, banner layouts, responsive safe-zones)
-- AgentSite (Multi-agent pipeline: PM -> Designer -> Developer -> Reviewer for single & multi-page websites)
-- Filament 4.x (Enterprise admin panel schemas, data tables, metrics widgets, forms)
-- UI Builder & Shadcn (Component registries: cards, dialogs, navbars, charts, hero sections)
-- OSW Studio (Desktop Electron / web GUI canvas & layout generation)
+High-craft UI, GUI, and Website generation engine:
+- Buzburg Impeccable Craft Floor: WCAG AAA contrast, typographic measures, subtle depth, zero-halo shadows
+- Buzburg Design System: enterprise tokens, components, banner layouts, responsive safe-zones
+- Buzburg Multi-Stage Web Pipeline: PM -> Designer -> Developer -> Reviewer for single & multi-page websites
+- Buzburg Enterprise Admin Panels: data tables, metric delta widgets, modern forms
+- Buzburg UI Component Registry: cards, dialogs, navbars, charts, hero sections
+- Buzburg Desktop & Web GUI canvas layout generation
 """
 from __future__ import annotations
 
@@ -499,7 +499,7 @@ body {{
         stats: List[Dict[str, str]],
         recent_activity: List[Dict[str, str]],
     ) -> Dict[str, Any]:
-        """Generates an enterprise Filament/Shadcn-style GUI dashboard layout."""
+        """Generates an enterprise Buzburg GUI dashboard layout."""
         stat_cards = []
         for s in stats:
             stat_cards.append(f"""

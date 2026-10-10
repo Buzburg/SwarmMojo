@@ -107,12 +107,22 @@
     {
       "name": "design-architect",
       "enabled": true,
-      "description": "Builds dark-mode landing pages, Filament admin dashboards, and UI component systems"
+      "description": "Builds dark-mode landing pages, enterprise admin dashboards, and UI component systems"
     },
     {
       "name": "author-scribe",
       "enabled": true,
       "description": "Ghost Protocol literary authoring, 200+ banned AI cliché filters, and narrative book chapter planning"
+    },
+    {
+      "name": "workflow-automator",
+      "enabled": true,
+      "description": "Constitutional pipeline governance, routine triggers, and self-correcting task automation"
+    },
+    {
+      "name": "personal-assistant",
+      "enabled": true,
+      "description": "24/7 background companion, secure vault, consult gateway, and realtime voice bridge"
     },
     {
       "name": "meta-orchestrator",

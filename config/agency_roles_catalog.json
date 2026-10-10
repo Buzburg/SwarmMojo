@@ -456,11 +456,11 @@
     "activation": "not loaded; runtime integration pending"
   },
   {
-    "id": "engineering/engineering-filament-optimization-specialist",
-    "name": "Filament Optimization Specialist",
-    "description": "Expert in restructuring and optimizing Filament PHP admin interfaces for maximum usability and efficiency. Focuses on impactful structural changes — not just cosmetic tweaks.",
+    "id": "engineering/engineering-admin-panel-optimization-specialist",
+    "name": "Admin Panel Optimization Specialist",
+    "description": "Expert in restructuring and optimizing enterprise admin interfaces for maximum usability and efficiency. Focuses on impactful structural changes — not just cosmetic tweaks.",
     "category": "engineering",
-    "file": "roles/engineering/engineering-filament-optimization-specialist.md",
+    "file": "roles/engineering/engineering-admin-panel-optimization-specialist.md",
     "source_entry": "agency-agents-main/engineering/engineering-filament-optimization-specialist.md",
     "sha256": "428f6a6be2318a123678b2838600e33c5e193afecbe8f828fa97c779eaf85fbf",
     "bytes": 14269,

@@ -289,7 +289,7 @@ def register_engine_tools(server: FastMCP) -> None:
         stats_json: str = "[]",
         activity_json: str = "[]",
     ) -> str:
-        """Generates an enterprise Filament/Shadcn-style GUI dashboard layout."""
+        """Generates an enterprise Buzburg GUI dashboard layout."""
         from app.engines.design import DesignAgentEngine
         engine = DesignAgentEngine()
         try:
@@ -334,7 +334,7 @@ def register_engine_tools(server: FastMCP) -> None:
         roster_json: str = "[]",
         milestones_json: str = "[]",
     ) -> str:
-        """Generates an ultra-sleek, deep-blue glassmorphism operating desktop HUD inspired by Herald-OS and herdr-hud."""
+        """Generates an ultra-sleek, deep-blue glassmorphism operating desktop HUD by Buzburg AI."""
         from app.engines.design import DesignAgentEngine
         engine = DesignAgentEngine()
         try:
@@ -351,6 +351,56 @@ def register_engine_tools(server: FastMCP) -> None:
             live_dag_milestones=milestones,
         )
         return json.dumps(res, indent=2)
+
+    @server.tool()
+    def workflow_run_dag(workflow_id: str, name: str, steps_json: str) -> str:
+        """Executes a workflow DAG with constitutional governance and WorkflowProof verification."""
+        from app.engines.workflow_automation import WorkflowAutomationEngine
+        engine = WorkflowAutomationEngine()
+        try:
+            steps_data = json.loads(steps_json)
+        except Exception:
+            steps_data = [{"id": "step_1", "name": name, "action": "query", "params": {}}]
+        dag = engine.create_workflow(workflow_id=workflow_id, name=name, steps_data=steps_data)
+        res = engine.run_workflow(dag)
+        return json.dumps(res, indent=2)
+
+    @server.tool()
+    def workflow_schedule_routine(routine_id: str, name: str, schedule: str, workflow_id: str) -> str:
+        """Schedules a recurring background automation routine with cron/interval timing."""
+        from app.engines.workflow_automation import WorkflowAutomationEngine
+        engine = WorkflowAutomationEngine()
+        res = engine.schedule_routine(routine_id=routine_id, name=name, schedule=schedule, workflow_id=workflow_id)
+        return json.dumps(res, indent=2)
+
+    @server.tool()
+    def workflow_list_routines() -> str:
+        """Lists all active and scheduled background automation routines."""
+        from app.engines.workflow_automation import WorkflowAutomationEngine
+        engine = WorkflowAutomationEngine()
+        return json.dumps(engine.list_routines(), indent=2)
+
+    @server.tool()
+    def assistant_get_briefing() -> str:
+        """Assembles the user's daily morning briefing, agenda, and system health status."""
+        from app.engines.personal_assistant import PersonalAssistantEngine
+        assistant = PersonalAssistantEngine()
+        return json.dumps(assistant.get_briefing(), indent=2)
+
+    @server.tool()
+    def assistant_consult_specialist(goal: str, division: str = "general") -> str:
+        """Delegates a high-level goal to specialist agent guilds and synthesizes results."""
+        from app.engines.personal_assistant import PersonalAssistantEngine
+        assistant = PersonalAssistantEngine()
+        return json.dumps(assistant.consult_specialist(goal=goal, division=division), indent=2)
+
+    @server.tool()
+    def assistant_store_credential(key_name: str, secret_val: str) -> str:
+        """Stores a sensitive credential in the local encrypted assistant vault."""
+        from app.engines.personal_assistant import PersonalAssistantEngine
+        assistant = PersonalAssistantEngine()
+        return json.dumps(assistant.store_credential(key_name=key_name, secret_val=secret_val), indent=2)
+
 
 
 

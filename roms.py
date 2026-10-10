@@ -192,6 +192,57 @@ def run_entry():
             )
             print(json.dumps(res, indent=2))
         raise SystemExit(0)
+    elif len(sys.argv) > 1 and sys.argv[1] == "workflow":
+        import json
+        from app.engines.workflow_automation import WorkflowAutomationEngine
+        engine = WorkflowAutomationEngine()
+        subcmd = sys.argv[2] if len(sys.argv) > 2 else "list"
+        if subcmd == "list":
+            routines = engine.list_routines()
+            print(json.dumps(routines, indent=2))
+        elif subcmd == "schedule":
+            rid = sys.argv[3] if len(sys.argv) > 3 else "daily_audit"
+            rname = sys.argv[4] if len(sys.argv) > 4 else "Daily Repository Health Audit"
+            sched = sys.argv[5] if len(sys.argv) > 5 else "@daily"
+            wfid = sys.argv[6] if len(sys.argv) > 6 else "wf_health"
+            res = engine.schedule_routine(routine_id=rid, name=rname, schedule=sched, workflow_id=wfid)
+            print(json.dumps(res, indent=2))
+        elif subcmd == "run":
+            wfid = sys.argv[3] if len(sys.argv) > 3 else "wf_quick_check"
+            wfname = sys.argv[4] if len(sys.argv) > 4 else "Quick System Check"
+            dag = engine.create_workflow(
+                workflow_id=wfid,
+                name=wfname,
+                steps_data=[
+                    {"id": "step_1", "name": "System Status Check", "action": "system_status"},
+                    {"id": "step_2", "name": "Proof Verification", "action": "workflowproof_verify", "depends_on": ["step_1"]},
+                ],
+            )
+            res = engine.run_workflow(dag)
+            print(json.dumps(res, indent=2))
+        raise SystemExit(0)
+    elif len(sys.argv) > 1 and sys.argv[1] == "assistant":
+        import json
+        from app.engines.personal_assistant import PersonalAssistantEngine
+        assistant = PersonalAssistantEngine()
+        subcmd = sys.argv[2] if len(sys.argv) > 2 else "briefing"
+        if subcmd == "briefing":
+            res = assistant.get_briefing()
+            print(json.dumps(res, indent=2))
+        elif subcmd == "consult":
+            goal = sys.argv[3] if len(sys.argv) > 3 else "Check active workspace and suggest improvements"
+            div = sys.argv[4] if len(sys.argv) > 4 else "general"
+            res = assistant.consult_specialist(goal=goal, division=div)
+            print(json.dumps(res, indent=2))
+        elif subcmd == "vault":
+            key_name = sys.argv[3] if len(sys.argv) > 3 else "default_key"
+            val = sys.argv[4] if len(sys.argv) > 4 else "local_credential"
+            res = assistant.store_credential(key_name=key_name, secret_val=val)
+            print(json.dumps(res, indent=2))
+        elif subcmd == "voice":
+            res = assistant.inspect_voice_contract()
+            print(json.dumps(res, indent=2))
+        raise SystemExit(0)
     elif len(sys.argv) > 1 and sys.argv[1] == "meta":
         from app.meta.cli import main as meta_main
         raise SystemExit(meta_main(sys.argv[2:]))

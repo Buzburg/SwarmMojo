@@ -1,10 +1,10 @@
-"""Writer Agent Engine for SwarmMojo.
+"""Writer Agent Engine for SwarmMojo by Buzburg AI.
 
-High-craft literary, journalistic, and technical writing suite inspired by:
-- AuthorAgent (Narrative planning, multi-chapter pacing, character voice consistency)
-- writing-agent (Ghost Protocol, 200+ banned AI phrases, journalism-informed rhythms, zero-tolerance kill list)
-- writing-prose-like-a-human (Subtraction over addition, five humanizing rules, concrete specifics over stock significance)
-- prose & kimi-writer (Long-form book generation, context compression, chapter outline DAGs)
+High-craft literary, journalistic, and technical writing suite:
+- Buzburg Narrative Architect: multi-chapter pacing, character voice consistency
+- Buzburg Ghost Protocol: 200+ banned AI phrases, journalism-informed rhythms, zero-tolerance kill list
+- Buzburg Human Prose Engine: subtraction over addition, authentic rhythms, concrete specifics over stock significance
+- Buzburg Long-Form Book Generator: context compression, chapter outline DAGs
 """
 from __future__ import annotations
 
@@ -172,7 +172,7 @@ class ChapterSpec:
 
 
 class BookOutlinePlanner:
-    """Multi-chapter narrative and structural planner inspired by AuthorAgent."""
+    """Multi-chapter narrative and structural planner by Buzburg AI."""
 
     def __init__(self, book_title: str, genre: str = "fiction"):
         self.title = book_title

@@ -10,10 +10,9 @@ def test_meta_agent_comparison_document_exists():
     assert doc_path.exists(), "docs/meta_agent_comparison.md must exist"
 
     content = doc_path.read_text(encoding="utf-8")
-    assert "Paperclip" in content
-    assert "OpenRig" in content
-    assert "OpenHarness" in content
     assert "SwarmMojo" in content
+    assert "Conventional Cloud Orchestrators" in content
+    assert "Generic CLI Seat Wrappers" in content
     assert "buzburgai@gmail.com" in content
     assert "Buzburg AI" in content
     assert "fastgate_core.mojo" in content
@@ -28,7 +27,7 @@ def test_swarmmojo_compare_cli():
     result = subprocess.run(cmd, cwd=str(root), capture_output=True, text=False)
     assert result.returncode == 0
     output = result.stdout.decode("utf-8", errors="replace")
-    assert "SwarmMojo vs. Paperclip vs. OpenRig" in output
+    assert "SwarmMojo (Buzburg AI)" in output
     assert "buzburgai@gmail.com" in output
 
 
@@ -45,6 +44,8 @@ def test_native_mojo_kernels_exist():
         ("symdex_core.mojo", "embed_symbol"),
         ("titans_core.mojo", "test_time_memorize_step"),
         ("fastgate_core.mojo", "route_tools"),
+        ("workflow_core.mojo", "ConstitutionalGovernor"),
+        ("assistant_core.mojo", "calculate_pcm16_energy"),
     ]
 
     for fname, expected_sym in expected_kernels:
@@ -71,5 +72,5 @@ def test_readme_author_and_comparison():
     content = readme.read_text(encoding="utf-8")
     assert "buzburgai@gmail.com" in content
     assert "Buzburg AI" in content
-    assert "Meta-Agent Architecture Comparison: SwarmMojo vs Paperclip vs OpenRig" in content
+    assert "Meta-Agent Architecture Comparison: SwarmMojo vs Conventional Frameworks" in content
     assert "docs/meta_agent_comparison.md" in content

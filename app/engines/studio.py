@@ -1,11 +1,11 @@
-"""Studio Agent Engine for SwarmMojo.
+"""Studio Agent Engine for SwarmMojo by Buzburg AI.
 
-High-fidelity multimodal production suite for AI video, cinema, photography, and UI/visual design:
-- Camera & Lens Optics: Grand Format 70mm, Modular 8K Cine, Super 35, Anamorphic, Vintage Prime, Tilt-Shift, Depth of Field
-- Multi-Model Generation Gateways: ComfyUI execution graphs, MuAPI, Fal.ai / Seedance 2.0, Kling, VEO 3.1, Flux Dev, SDXL
-- Storyboarding & Scene Sequencing: Multi-shot scene progression, camera motion vectors, lighting moods, pacing
-- UI/UX & Visual Asset Craft: Banner generation, design tokens, color harmonies, aspect-ratio safe zones
-- Docker / ComfyUI Server Operator: Local execution bridge and node graph templates
+High-fidelity multimodal production suite for video, cinema, photography, and visual design:
+- Buzburg Directorial Optics: Grand Format 70mm, Modular 8K Cine, Super 35, Anamorphic, Vintage Prime, Tilt-Shift, Depth of Field
+- Generation Gateways: local visual execution graphs, model bridges, and rendering pipelines
+- Storyboarding & Scene Sequencing: multi-shot scene progression, camera motion vectors, lighting moods, pacing
+- UI/UX & Visual Asset Craft: banner generation, design tokens, color harmonies, aspect-ratio safe zones
+- Local Node Server Operator: execution bridge and graph templates
 """
 from __future__ import annotations
 

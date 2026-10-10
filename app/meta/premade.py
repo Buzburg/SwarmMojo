@@ -1,11 +1,12 @@
-"""Premade Specialist Agents and Teams for SwarmMojo MetaHarness.
+"""Premade Specialist Agents and Teams for SwarmMojo MetaHarness by Buzburg AI.
 
-Curated from inspiration repos:
-- agency-agents (Engineering, Quality, Operations, Design, Security divisions)
-- paperclip (Company/Task coordinator, e2e runner, PR reviewer)
-- OpenHarness & ClawTeam (Code implementation, review gates, frontend architecture)
-- FastAgent & herdr-projects (DAG Coordinator-Worker thread topology)
-- TencentDB-Agent-Memory & HMS (Holographic and Titans memory curation)
+Specialist divisions:
+- Systems & Core Engineering (Architecture, implementation, and code verification)
+- Autonomous Multimodal Production (Cinematic video, photography, visual layouts)
+- Impeccable Design & Craft (Dark-mode interfaces, enterprise dashboards, component design)
+- Authentic Prose & Narrative (Ghost Protocol, literary composition, chapter planning)
+- Workflow Automation & Task Engineering (Constitutional governance, routine triggers, self-correcting pipelines)
+- Personal Desktop Assistant (24/7 background companion, vault, consult gateway, voice bridge)
 """
 from __future__ import annotations
 
@@ -166,11 +167,11 @@ PREMADE_AGENTS: List[AgentManifest] = [
         id="design_architect",
         name="Vitruvius UI/UX Architect",
         role="Principal UI/UX, GUI & Website Design Specialist",
-        description="Builds production-grade landing pages, Filament admin dashboards, component systems, and dark-mode web surfaces with Impeccable craft floor standards.",
+        description="Builds production-grade landing pages, enterprise admin dashboards, component systems, and dark-mode web surfaces with Impeccable craft floor standards.",
         division="design",
         system_prompt=(
             "You are Vitruvius, Principal Design & GUI Architect. You craft production-ready interfaces, "
-            "responsive web layouts, Filament data tables, and metrics widgets following the Impeccable craft floor: "
+            "responsive web layouts, enterprise data tables, and metrics widgets following the Impeccable craft floor: "
             "WCAG AAA contrast (≥7:1 body, ≥4.5:1 secondary), 65-75ch measure, soft zero-halo depth, and clean typographic rhythms. "
             "Never build safe, timid, or generic interfaces; make every surface feel out-of-distribution in craft."
         ),
@@ -209,6 +210,51 @@ PREMADE_AGENTS: List[AgentManifest] = [
             "compact_kv_scratchpad",
         ],
         skills=["author-agent", "writing-prose-like-a-human", "ghost-protocol"],
+        memory_policy="compact_kv",
+        temperature=0.3,
+    ),
+    AgentManifest(
+        id="workflow_automator",
+        name="Chronos Workflow Engineer",
+        role="Constitutional Automation & Task Pipeline Specialist",
+        description="Orchestrates multi-step task DAGs, enforces constitutional safety rules, executes recurring routine schedules, and verifies WorkflowProof hashes.",
+        division="operations",
+        system_prompt=(
+            "You are Chronos, Constitutional Workflow Automation Specialist. You construct deterministic, "
+            "verified multi-step pipelines with zero failure tolerance, schedule recurring background routines, "
+            "and audit every execution step with Merkle proof verification."
+        ),
+        model_profile="ollama-qwen-coder",
+        tools=[
+            "workflow_run_dag",
+            "workflow_schedule_routine",
+            "workflow_list_routines",
+            "coding_write_atomic",
+            "coding_read_slice",
+        ],
+        skills=["workflow-automation", "constitutional-governance", "routine-scheduler"],
+        memory_policy="compact_kv",
+        temperature=0.2,
+    ),
+    AgentManifest(
+        id="personal_assistant",
+        name="Aura Personal Companion",
+        role="24/7 Sovereign Assistant, Vault Custodian & Consult Gateway",
+        description="Continuous personal companion managing daily briefings, local encrypted vault secrets, consult dispatching to specialist agent guilds, and realtime voice interaction.",
+        division="executive",
+        system_prompt=(
+            "You are Aura, the Operator's 24/7 sovereign personal companion and executive assistant. "
+            "You maintain the Operator's daily agenda, protect local encrypted credentials, delegate "
+            "complex requests to specialist agent guilds, and deliver concise, high-agency results."
+        ),
+        model_profile="ollama-r1",
+        tools=[
+            "assistant_get_briefing",
+            "assistant_consult_specialist",
+            "assistant_store_credential",
+            "compact_kv_scratchpad",
+        ],
+        skills=["personal-assistant", "voice-bridge", "vault-custody"],
         memory_policy="compact_kv",
         temperature=0.3,
     ),
@@ -251,7 +297,7 @@ PREMADE_TEAMS: List[AgentTeamConfig] = [
     AgentTeamConfig(
         id="design_site_team",
         name="Website, GUI & Product Design Squad",
-        description="End-to-end design collective inspired by AgentSite and Impeccable: coordination, design tokens, responsive web layout, and visual craft.",
+        description="End-to-end design collective: coordination, design tokens, responsive web layout, and visual craft.",
         coordinator_id="coordinator",
         member_ids=["coordinator", "design_architect", "studio_director"],
         mode="coordinator_worker",
@@ -265,11 +311,27 @@ PREMADE_TEAMS: List[AgentTeamConfig] = [
         mode="pipeline",
     ),
     AgentTeamConfig(
+        id="workflow_ops_team",
+        name="Autonomous Workflow & Operations Squad",
+        description="Constitutional workflow execution, background routine scheduling, and safe DevOps automation.",
+        coordinator_id="coordinator",
+        member_ids=["coordinator", "workflow_automator", "devops_operator", "security_auditor"],
+        mode="coordinator_worker",
+    ),
+    AgentTeamConfig(
+        id="personal_exec_team",
+        name="Personal Executive & Life Operations Team",
+        description="Executive personal assistance: daily briefings, credential vault custody, and cross-guild task delegation.",
+        coordinator_id="personal_assistant",
+        member_ids=["personal_assistant", "coordinator", "workflow_automator", "author_scribe"],
+        mode="coordinator_worker",
+    ),
+    AgentTeamConfig(
         id="autonomous_delivery_team",
         name="Autonomous Delivery Squad",
-        description="Complete meta-harness collective covering coordination, implementation, QA, security audit, devops, design, studio, and authorship.",
+        description="Complete meta-harness collective covering coordination, implementation, QA, security audit, devops, design, studio, authorship, workflow automation, and executive assistance.",
         coordinator_id="coordinator",
-        member_ids=["coordinator", "code_architect", "code_reviewer", "security_auditor", "design_architect", "studio_director", "author_scribe", "devops_operator"],
+        member_ids=["coordinator", "code_architect", "code_reviewer", "security_auditor", "design_architect", "studio_director", "author_scribe", "workflow_automator", "personal_assistant", "devops_operator"],
         mode="coordinator_worker",
     ),
 ]

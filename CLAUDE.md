@@ -53,6 +53,8 @@ Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills)
 - **prime-recursion**: Recursive subagent delegation in single, parallel, and chain modes
 - **drift-guard**: Real-time angular trajectory tracking and drift guardrails
 - **studio-director**: Directs cinematic visual prompts, storyboards, ComfyUI graphs, and UI banners
-- **design-architect**: Builds dark-mode landing pages, Filament admin dashboards, and UI component systems
+- **design-architect**: Builds dark-mode landing pages, enterprise admin dashboards, and UI component systems
 - **author-scribe**: Ghost Protocol literary authoring, 200+ banned AI cliché filters, and narrative book chapter planning
+- **workflow-automator**: Constitutional pipeline governance, routine triggers, and self-correcting task automation
+- **personal-assistant**: 24/7 background companion, secure vault, consult gateway, and realtime voice bridge
 - **meta-orchestrator**: Orchestrates multi-agent teams across heterogeneous local models

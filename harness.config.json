@@ -175,13 +175,23 @@
     },
     {
       "name": "design-architect",
-      "description": "Builds dark-mode landing pages, Filament admin dashboards, and UI component systems",
+      "description": "Builds dark-mode landing pages, enterprise admin dashboards, and UI component systems",
       "prompt": "Craft production-ready websites and GUI dashboards following Impeccable craft floor standards and design tokens"
     },
     {
       "name": "author-scribe",
       "description": "Ghost Protocol literary authoring, 200+ banned AI cliché filters, and narrative book chapter planning",
       "prompt": "Write authentic human-textured prose, audit AI slop, and plan long-form book chapters with concrete specifics"
+    },
+    {
+      "name": "workflow-automator",
+      "description": "Constitutional pipeline governance, routine triggers, and self-correcting task automation",
+      "prompt": "Automate multi-step task DAGs with constitutional governance, trigger subscriptions, and self-correcting rollback loops"
+    },
+    {
+      "name": "personal-assistant",
+      "description": "24/7 background companion, secure vault, consult gateway, and realtime voice bridge",
+      "prompt": "Provide continuous personal assistance, ambient monitoring, secure credentials storage, and multi-agent task dispatch"
     },
     {
       "name": "meta-orchestrator",

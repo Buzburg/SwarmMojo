@@ -24,7 +24,7 @@ The portable Python path is used on Windows and Linux. Omarchy is an optional in
 
 ## Specialized Local-First Engines
 
-SwarmMojo incorporates 17 high-speed specialized engines with Python bridges in `app/engines/`, FastMCP tool exposures in `app/engine_tools.py`, and native Mojo acceleration in `app_mojo/`:
+SwarmMojo incorporates 19 high-speed specialized engines with Python bridges in `app/engines/`, FastMCP tool exposures in `app/engine_tools.py`, and native Mojo acceleration in `app_mojo/`:
 
 | Engine | Primary Feature & Performance | CLI Command | FastMCP Tool |
 | --- | --- | --- | --- |
@@ -45,34 +45,76 @@ SwarmMojo incorporates 17 high-speed specialized engines with Python bridges in 
 | **Triad-Engine** | Pareto reliability, duration, and token cost multi-objective ranking | `python swarmmojo.py triad` | `triad_pareto_rank` |
 | **Mojo-Memory** | 512-dim phase vector associative memory with sub-10ms recall | `python swarmmojo.py mojo-memory` | `mojomemory_store`, `mojomemory_query` |
 | **Studio-Engine** | Multimodal cinematic video, ComfyUI execution graphs, storyboards & banner craft | `python swarmmojo.py studio` | `studio_compile_prompt`, `studio_create_storyboard`, `studio_export_comfyui_graph`, `studio_craft_banner` |
-| **Design-Engine** | High-craft UI/GUI landing pages, Filament admin dashboards & component systems | `python swarmmojo.py design` | `design_build_landing_page`, `design_build_dashboard` |
+| **Design-Engine** | High-craft UI/GUI landing pages, enterprise admin dashboards & component systems | `python swarmmojo.py design` | `design_build_landing_page`, `design_build_dashboard` |
 | **Writer-Engine** | Authentic prose authoring, Ghost Protocol anti-slop filters & multi-chapter book planner | `python swarmmojo.py writer` | `writer_audit_prose`, `writer_clean_prose`, `writer_plan_book` |
+| **Workflow-Engine** | Constitutional pipeline governance, routine scheduler & WorkflowProof Merkle verification | `python swarmmojo.py workflow` | `workflow_run_dag`, `workflow_schedule_routine`, `workflow_list_routines` |
+| **Assistant-Engine** | 24/7 sovereign companion, encrypted vault, consult gateway & realtime voice bridge | `python swarmmojo.py assistant` | `assistant_get_briefing`, `assistant_consult_specialist`, `assistant_store_credential` |
 
-## Meta-Agent Architecture Comparison: SwarmMojo vs Paperclip vs OpenRig
+## Meta-Agent Architecture Comparison: SwarmMojo vs Conventional Frameworks
 
-SwarmMojo represents a generational leap over cloud orchestrators (e.g. Paperclip) and terminal seat wrappers (e.g. OpenRig / OpenHarness). See the full breakdown in [docs/meta_agent_comparison.md](docs/meta_agent_comparison.md).
+SwarmMojo represents a generational leap over conventional cloud orchestrators and generic CLI seat wrappers. See the full architectural breakdown in [docs/meta_agent_comparison.md](docs/meta_agent_comparison.md).
 
-| Architectural Dimension | **SwarmMojo (Buzburg AI)** | **Paperclip (`paperclip-master`)** | **OpenRig / OpenHarness (HKUDS)** |
+| Architectural Dimension | **SwarmMojo (Buzburg AI)** | **Conventional Cloud Orchestrators** | **Generic CLI Seat Wrappers** |
 | :--- | :--- | :--- | :--- |
-| **Primary Philosophy** | Sub-millisecond local-first meta-harness with native Mojo SIMD acceleration | Enterprise ticketing, CI/CD PR reviewer & S3 cloud publishing app | Multi-seat terminal wrapper & academic agent benchmark harness |
-| **Core Runtime** | **Mojo (SIMD v25+)** + **Python 3.11+** hybrid engine | Node.js, TypeScript, Next.js, GraphQL, PostgreSQL | TypeScript / Node.js CLI (`@openrig/cli`) + Python |
-| **Decision / Tool Latency** | **< 50 microseconds** (native `fastgate_core.mojo`) | 150 – 500 ms (Node/GraphQL network roundtrips) | 80 – 300 ms (Subprocess CLI spawn & IPC pipes) |
-| **Native Compiler Kernels** | **40+ Native Mojo kernels** (`app_mojo/*.mojo`) | None (JavaScript V8 / Node.js) | None (V8 / Standard CPython) |
-| **Trajectory Drift & Safety** | **Deterministic 256-dim phase-space geometry** (<65° safe, ≥80° blocked) | Prompt-based system guidelines only | Fixed max-iteration counter & tool timeout |
-| **Memory Architecture** | **Titans DeltaNet** (fast/slow weights) + **Compact-KV** + **HMS Simd** | Flat PostgreSQL conversation history | In-memory message array / JSON disk logs |
-| **Concurrency Model** | **StateFresh OCC** (Atomic CAS, read-set validation, epoch commits) | Postgres row locking / database transactions | Sequential seat execution / bash locks |
-| **Rollback & Reversibility** | **Microsecond snapshot restore** (`mojo-agent-rewind` delta replay) | Git branch resets via GitHub/GitLab API | Manual terminal interrupts |
-| **Model Heterogeneity** | **Any local** (Ollama, LM Studio, vLLM, SGLang, RWKV7) + **Cloud** (OpenAI, Anthropic, Gemini, DeepSeek) | Cloud APIs primarily (OpenAI, Anthropic) | External commercial CLIs (Claude Code, Codex) |
-| **Specialized Agent Guilds** | **4 Full Guilds**: Coding (Triad/Prime), Studio (ComfyUI/70mm Cine), Design (Impeccable/Filament), Writer (Ghost Protocol) | Generic worker seats assigned tickets | Single coding/browser generalist seats |
-| **Harness Portability** | **PolyHarness**: Compiles zero-dependency configs for Claude Code, Cursor, DeepSeek, AGY | Locked to Paperclip runner & CloudFront stack | OpenRig YAML manifest runtime |
-| **UI / Desktop Experience** | **Herald-OS HUD**: Deep-blue glassmorphism, real-time kernel telemetry, canvas builders | Web dashboard (Next.js / Tailwind) | Terminal TUI table / graph view |
+| **Primary Philosophy** | Sub-millisecond local-first meta-harness with native Mojo SIMD acceleration | Cloud-hosted ticketing, multi-tier enterprise web app & remote deployment runner | Multi-seat terminal wrapper & basic CLI subprocess manager |
+| **Core Runtime** | **Mojo (SIMD v25+)** + **Python 3.11+** hybrid engine | Heavyweight Node.js, GraphQL, PostgreSQL web stacks | Basic Node/Python CLI subprocess supervisor |
+| **Decision / Tool Latency** | **< 50 microseconds** (native `fastgate_core.mojo`) | 150 – 500 ms (database queries & network hops) | 80 – 300 ms (subprocess creation & IPC pipes) |
+| **Native Compiler Kernels** | **40+ Native Mojo kernels** (`app_mojo/*.mojo`) | None (JavaScript V8 / Node.js) | None (Standard CPython / V8) |
+| **Trajectory Drift & Safety** | **Deterministic 256-dim phase-space geometry** (<65° safe, ≥80° blocked) | Prompt-based system guidelines only | Fixed max-iteration counters & tool timeouts |
+| **Memory Architecture** | **Titans DeltaNet** (fast/slow weights) + **Compact-KV** + **HMS Simd** | Flat conversation rows in remote SQL tables | In-memory message arrays / raw JSON logs |
+| **Concurrency Model** | **StateFresh OCC** (Atomic CAS, read-set validation, epoch commits) | Remote SQL row locks / database transactions | Sequential command queues / filesystem race hazards |
+| **Rollback & Reversibility** | **Microsecond snapshot restore** (`mojo-agent-rewind` delta replay) | Remote git branch resets via web APIs | Manual developer terminal interrupts |
+| **Model Heterogeneity** | **Any local** (Ollama, LM Studio, vLLM, SGLang, RWKV7) + **Cloud** (Sovereign endpoints) | Locked to cloud vendor APIs | Relies on external proprietary CLI binaries |
+| **Specialized Agent Guilds** | **6 Complete Guilds**: Coding, Studio, Design, Writer, Workflow, Assistant | Generic worker seats assigned tickets | Generalist terminal agents |
+| **Harness Portability** | **PolyHarness**: Compiles zero-dependency configs for Claude Code, Cursor, DeepSeek, AGY | Proprietary cloud platform lock-in | Fixed single CLI format |
+| **UI / Desktop Experience** | **Herald HUD**: Deep-blue glassmorphism, real-time kernel telemetry, canvas builders | Generic web SaaS dashboard | Text-only terminal table view |
 | **Formal Mathematical Proofs** | **WorkflowProof**: Cryptographic Merkle invariants and transition proofs | None | None |
 
+## Workflow Automation Agent Engine: Constitutional Pipelines & Routine Triggers
 
+SwarmMojo features a deterministic workflow execution and routine automation engine:
+
+### 1. 8-Stage Constitutional Execution Pipeline (`WorkflowPipeline`)
+- **Turn Governor & Rate Gate**: Enforces strict turn limits and cycle interceptors.
+- **Risk Classifier**: Automatically classifies action risks (LOW: read-only, MEDIUM: mutations, HIGH: shell/network, CRITICAL: destructive operations).
+- **Constitutional Safety Checks**: Blocks dangerous destructive commands (`rm -rf /`, `mkfs`, `format`, SQL drops, credential leaks).
+- **Pre-Execution Lease**: Acquires StateFresh optimistic concurrency control (OCC) leases.
+- **Fastgate System-1 Dispatch**: Routes step commands in <50 microseconds via native phase vectors.
+- **Sandboxed Execution & Log Compaction**: Executes tools while applying Sieve log compaction (95%+ noise reduction).
+- **WorkflowProof Cryptographic Verification**: Calculates deterministic SHA-256 Merkle hashes for every step and result.
+- **Rewind Self-Correction Loop**: If a step encounters an error, automatically triggers diagnostic reflection, rolls back workspace state using `mojo-agent-rewind`, and retries with modified parameters.
+
+### 2. Routine Scheduler (`WorkflowRoutineScheduler`)
+- Manages recurring background automations (daily repository audits, dependency checks, test regressions).
+- Persisted in `.mojo_workflows/routines.json` (`python swarmmojo.py workflow schedule`).
+
+---
+
+## Personal Assistant Agent Engine: 24/7 Companion, Secure Vault & Realtime Voice
+
+SwarmMojo includes a 24/7 sovereign personal companion:
+
+### 1. Persistent 24/7 Companion (`PersonalAssistantEngine`)
+- Manages active desk context, ongoing tasks, and daily objectives in `.mojo_assistant/`.
+
+### 2. Encrypted Personal Vault (`AssistantVault`)
+- Stores API keys, tokens, and personal preference profiles with SHA-256 fingerprinting.
+
+### 3. Specialist Consult Gateway (`ConsultGateway`)
+- Receives natural language goals and delegates to specialist agent guilds (Coding, Studio, Design, Writer, Workflow), returning synthesized executive answers.
+
+### 4. Realtime Voice & Audio Bridge (`RealtimeVoiceBridge`)
+- **Audio Pipeline Law**: 16kHz PCM Ears STT -> Conversational Voice Captain -> 24kHz PCM Mouth TTS.
+- **Energy-Gated VAD & Barge-In**: Real-time RMS audio energy calculation with automatic barge-in interruption.
+
+### 5. Proactive Daily Briefing (`DailyBriefingEngine`)
+- Generates structured morning briefings covering system health, active priorities, and scheduled routine updates (`python swarmmojo.py assistant briefing`).
+
+---
 
 ## Writer Agent Engine: Authentic Prose & Ghost Protocol Authoring
 
-SwarmMojo features an authentic authoring suite inspired by **AuthorAgent**, **writing-agent**, **writing-prose-like-a-human-for-agents**, **prose**, and **kimi-writer**:
+SwarmMojo features an authentic authoring suite by Buzburg AI:
 
 ### 1. Ghost Protocol Anti-Slop Audit (`ProseHumanizer.audit_text`)
 - **200+ Zero-Tolerance Phrase Blacklist**: Scans and flags statistically overrepresented AI phrases (`in today's digital landscape`, `delve into`, `testament to`, `rich tapestry`, `moreover`, `having said that`, `watershed moment`).
@@ -86,10 +128,11 @@ SwarmMojo features an authentic authoring suite inspired by **AuthorAgent**, **w
 - Breaks novels and non-fiction books into structured chapter DAGs with target word budgets, POV characters, and narrative conflict drivers.
 - Exports persistent outline plans directly into `.mojo_writer/`.
 
+---
 
 ## Design Agent Engine: Impeccable UI, GUI & Website Builder
 
-SwarmMojo incorporates a dedicated Design & GUI runtime synthesizing **Impeccable**, **UI-UX Pro Max**, **AgentSite**, **Filament 4.x**, **UI Builder / Shadcn**, and **OSW Studio**:
+SwarmMojo incorporates a dedicated Design & GUI runtime:
 
 ### 1. Impeccable Craft Floor & Design Tokens (`DesignTokens`)
 - **Accessibility & Contrast**: Built-in WCAG AAA text contrast ($\ge 7:1$ body, $\ge 4.5:1$ secondary), tinting secondary text directly from background surfaces rather than flat grays.
@@ -101,21 +144,21 @@ SwarmMojo incorporates a dedicated Design & GUI runtime synthesizing **Impeccabl
 - Automatically persists rendered HTML & modern CSS tokens directly to `.mojo_design/index.html`.
 
 ### 3. Enterprise GUI & Admin Dashboards (`build_admin_dashboard`)
-- Implements Filament/Shadcn-grade GUI dashboards with sidebar navigation, metric delta counters, and tabular agent activity feeds.
+- Implements production GUI dashboards with sidebar navigation, metric delta counters, and tabular agent activity feeds.
 - Outputs clean, zero-dependency HTML/CSS dashboards to `.mojo_design/dashboard.html`.
 
-### 4. Herald OS & Herdr HUD Glassmorphism Operating Desktop (`build_herald_hud`)
-- **Deep-Blue Glass on Living Wallpaper**: Inspired by **Herald-OS**, **herdr-hud**, **openmuse**, **open-dot**, and **paperclip**.
+### 4. Herald HUD Glassmorphism Operating Desktop (`build_herald_hud`)
+- **Deep-Blue Glass on Living Wallpaper**: Real-time desktop dashboard displaying active agent swarms, telemetry, and DAG milestones.
 - **Live Specialist Swarm Roster**: Real-time agent status cards with model endpoints, load telemetry, and unread notification states.
 - **Microsecond Telemetry Matrix**: Displays real-time metrics for in-memory Symdex lookups, StateFresh OCC concurrency rates, and Mojo angular trajectory drift.
 - **Active Task DAG Visualizer**: Displays interactive milestone execution stages (`complete`, `running`, `pending`) alongside verified TriggerTangle rehearsals.
 - Output generated directly to `.mojo_design/herald_hud.html` (`python swarmmojo.py design hud`).
 
+---
 
+## Studio Agent Engine: Cinematic Video, Photography & Visual Craft
 
-## Studio Agent Engine: Cinematic Video, Photography & UI/Visual Craft
-
-SwarmMojo incorporates a studio runtime inspired by **OpenMontage**, **ComfyUI**, **Open-Higgsfield-AI**, **ui-ux-pro-max-skill**, and **impeccable**:
+SwarmMojo incorporates a cinematic production studio runtime:
 
 ### 1. Cinematic Camera, Lens & Optics Rig (`StudioPromptCompiler`)
 - **Directorial Optics Presets**: Grand Format 70mm Film (IMAX grain), Modular 8K Digital (Arri Alexa 65 look), Super 35, Classic 16mm Vintage, Anamorphic 2x (oval bokeh & horizontal streak flares), Tilt-Shift selective focus, and Extreme Macro.
@@ -126,25 +169,27 @@ SwarmMojo incorporates a studio runtime inspired by **OpenMontage**, **ComfyUI**
 - Breaks creative concepts into timed shot lists with duration, camera setup, lighting mood, motion vector, and sound design.
 - Compiles sequence JSON specifications and exports them to `.mojo_studio/` for render pipeline feeding.
 
-### 3. ComfyUI Node Graph Generator (`ComfyUIBridge`)
-- Programmatically generates production-ready API graphs for **Flux Dev / SDXL** text-to-image and **SVD / Kling / Wan** image-to-video pipelines.
+### 3. Visual Execution Node Graphs (`ComfyUIBridge`)
+- Programmatically generates production-ready API graphs for text-to-image and image-to-video pipelines.
 - Auto-scales dimensions to match exact aspect ratios (`16:9`, `9:16`, `1:1`, `2.39:1 Cinemascope`, `4:5`) while respecting optimal VRAM latent constraints.
-- Local ComfyUI health check and system status probing (`http://127.0.0.1:8188`).
 
 ### 4. UI/UX Banner & Visual Asset Craft
-- Impeccable platform safe-zone templates: YouTube banners, Twitter/X headers, LinkedIn covers, responsive website hero sections, and Instagram portrait cards.
+- Platform safe-zone templates: YouTube banners, Twitter/X headers, LinkedIn covers, responsive website hero sections, and Instagram cards.
 - Design tokens: typography hierarchy, high-contrast palette pairings, and container buffer validation.
 
+---
 
-SwarmMojo features a dedicated coding agent runtime synthesizing the best patterns from **Pi Agent**, **Prime Agent**, and **LoopForge / DeepCode**:
+## Coding Agent Engine: Triad Engine & Recursive Code Reflection
 
-### 1. Pi Agent Coding Structure (`PiCodingToolkit`)
+SwarmMojo features a dedicated coding agent runtime:
+
+### 1. Precise Coding Toolkit (`PiCodingToolkit`)
 - **Exact Substring Editing (`edit_file_exact`)**: Replaces target blocks only if they match uniquely. Strictly checks occurrence counts to prevent multi-location mutations, accompanied by automatic pre-edit Rewind snapshots and StateFresh OCC version checks.
 - **Line-Numbered Slicing (`read_file_slice`)**: 1-indexed, line-numbered views avoiding full-file context dumps.
 - **Atomic Writing (`write_file_atomic`)**: Creates or writes files atomically with PathCarry directory audits.
 - **Fast Symbol Discovery (`symdex_callgraph`, `find_files`, `grep_content`)**: Sub-20 µs caller/callee and definition indexing via Symdex.
 
-### 2. Prime Agent Recursion (`PrimeRecursionEngine`)
+### 2. Recursive Reflection Engine (`PrimeRecursionEngine`)
 - **Three Delegation Modes**:
   - `single`: Focuses a single specialized subagent on an isolated subtask.
   - `parallel`: Dispatches multiple independent tasks simultaneously and aggregates results.
@@ -153,19 +198,22 @@ SwarmMojo features a dedicated coding agent runtime synthesizing the best patter
 - **Context Window Isolation**: Subagents run with isolated scratchpads; only distilled findings return to the parent context.
 - **Mojo-Drift Active Guardrails**: Re-evaluates each subagent task against the parent goal, blocking actions with >=80° angular drift.
 
+---
 
 ## MetaHarness: Multi-Agent & Heterogeneous Multi-Model Orchestration
 
 SwarmMojo provides a meta-harness capable of coordinating multiple autonomous specialist agents concurrently or in structured pipelines across **the same local model or multiple distinct local models** (Ollama, LM Studio, vLLM, SGLang / mSGL, RWKV-7).
 
 ### Premade Specialist Agents
-- **Atlas Coordinator (`coordinator`)**: Meta coordinator and task DAG dispatcher inspired by *herdr-projects* and *FastAgent*. Breaks down complex goals into atomic subtasks.
-- **Daedalus Architect (`code_architect`)**: Principal systems and software engineer inspired by *agency-agents* and *OpenHarness*. Leverages Symdex for call-graph exploration.
-- **Argus Reviewer (`code_reviewer`)**: QA and verification specialist inspired by *Aeon* and *PTRM*. Rigorous regression detection.
-- **Hypatia Researcher (`researcher`)**: Semantic retrieval and knowledge grounding specialist inspired by *RAG-Anything* and *localdoc-search*.
-- **Vulcan DevOps (`devops_operator`)**: Shell and sandbox operator inspired by *CLI-Anything* and *paperclip*. Applies Sieve log compaction.
+- **Atlas Coordinator (`coordinator`)**: Meta coordinator and task DAG dispatcher. Breaks down complex goals into atomic subtasks.
+- **Daedalus Architect (`code_architect`)**: Principal systems and software engineer. Leverages Symdex for call-graph exploration.
+- **Argus Reviewer (`code_reviewer`)**: QA and verification specialist. Rigorous regression detection.
+- **Hypatia Researcher (`researcher`)**: Semantic retrieval and knowledge grounding specialist.
+- **Vulcan DevOps (`devops_operator`)**: Shell and sandbox operator. Applies Sieve log compaction.
 - **Aegis Security (`security_auditor`)**: Path traversal and Windows reserved-name safety auditor via PathCarry.
-- **Mnemosyne Curator (`memory_curator`)**: Titans test-time neural memory and Compact-KV working memory curator inspired by *TencentDB-Agent-Memory*.
+- **Mnemosyne Curator (`memory_curator`)**: Titans test-time neural memory and Compact-KV working memory curator.
+- **Chronos Workflow Engineer (`workflow_automator`)**: Constitutional pipeline automation, routine scheduling, and Merkle proof verification.
+- **Aura Personal Companion (`personal_assistant`)**: 24/7 personal assistant, secure vault custodian, and consult gateway.
 
 ### Multi-Model Local Routing
 Agents can share a single local model or each be assigned their own dedicated local model endpoint:
