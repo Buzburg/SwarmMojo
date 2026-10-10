@@ -29,7 +29,8 @@
     "fastgate": "python swarmmojo.py fastgate",
     "compact-kv": "python swarmmojo.py compact-kv",
     "rewind": "python swarmmojo.py rewind",
-    "path-carry": "python swarmmojo.py path-carry"
+    "path-carry": "python swarmmojo.py path-carry",
+    "meta": "python swarmmojo.py meta"
   },
   "rules": [
     {
@@ -70,6 +71,16 @@
       "guidelines": [
         "Maintain zero external runtime dependencies in ESM",
         "Ensure all target formats (Claude, Cursor, DSH, AGENTS) remain synchronized"
+      ]
+    },
+    {
+      "name": "meta-harness",
+      "description": "Guidelines for SwarmMojo MetaHarness multi-agent and multi-model execution",
+      "globs": ["app/meta/**/*.py"],
+      "guidelines": [
+        "Support heterogeneous local and remote models (Ollama, LM Studio, vLLM, SGLang, mock)",
+        "Enforce bounded memory preambles and safe sandbox execution with Rewind checkpoints",
+        "Maintain progressive task delegation between coordinators and specialist agents"
       ]
     }
   ],
@@ -127,6 +138,11 @@
       "name": "rewind-snapshotter",
       "description": "Content-addressed workspace snapshotting and microsecond rollback",
       "prompt": "Create a checkpoint with Rewind before risky file modifications"
+    },
+    {
+      "name": "meta-orchestrator",
+      "description": "Orchestrates multi-agent teams across heterogeneous local models",
+      "prompt": "Coordinate specialist agents, construct task DAGs, and synthesize unified proposals"
     }
   ]
 }

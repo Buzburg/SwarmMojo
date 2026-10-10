@@ -28,6 +28,7 @@
 - `python swarmmojo.py compact-kv` (compact-kv)
 - `python swarmmojo.py rewind` (rewind)
 - `python swarmmojo.py path-carry` (path-carry)
+- `python swarmmojo.py meta` (meta)
 
 ## Guardrails
 - Protected paths: `.env`, `.git`, `secrets/`

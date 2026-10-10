@@ -31,10 +31,12 @@ from app.tools import (
 
 from app.memory_tools import register_memory_tools
 from app.engine_tools import register_engine_tools
+from app.meta.meta_tools import register_meta_tools
 
 mcp = FastMCP("SwarmMojo")
 register_memory_tools(mcp)
 register_engine_tools(mcp)
+register_meta_tools(mcp)
 
 
 def _prepare_harness_json(request_json: str) -> str:

@@ -1,0 +1,16 @@
+---
+description: Guidelines for SwarmMojo MetaHarness multi-agent and multi-model execution
+globs: app/meta/**/*.py
+alwaysApply: false
+---
+
+# meta-harness
+
+<!-- Generated automatically by polyharness — DO NOT EDIT DIRECTLY -->
+
+Guidelines for SwarmMojo MetaHarness multi-agent and multi-model execution
+
+## Guidelines
+- Support heterogeneous local and remote models (Ollama, LM Studio, vLLM, SGLang, mock)
+- Enforce bounded memory preambles and safe sandbox execution with Rewind checkpoints
+- Maintain progressive task delegation between coordinators and specialist agents

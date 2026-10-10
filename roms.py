@@ -66,6 +66,9 @@ def run_entry():
         result = audit_directory(target)
         print(json.dumps(result.to_dict(), indent=2))
         raise SystemExit(0 if result.is_clean else 1)
+    elif len(sys.argv) > 1 and sys.argv[1] == "meta":
+        from app.meta.cli import main as meta_main
+        raise SystemExit(meta_main(sys.argv[2:]))
     else:
         raise SystemExit(prefrontal_main(sys.argv[1:]))
 

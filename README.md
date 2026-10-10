@@ -39,6 +39,41 @@ SwarmMojo incorporates 10 high-speed specialized engines with Python bridges in 
 | **Path-Carry** | Filename safety, cross-platform reserved-name & path audit | `python swarmmojo.py path-carry` | `path_carry_audit` |
 | **LocalDoc-Search** | Line-level local document chunking & search | `python -m app.engines.localdoc_search` | Integrated via RAG & OKF |
 
+## MetaHarness: Multi-Agent & Heterogeneous Multi-Model Orchestration
+
+SwarmMojo provides a meta-harness capable of coordinating multiple autonomous specialist agents concurrently or in structured pipelines across **the same local model or multiple distinct local models** (Ollama, LM Studio, vLLM, SGLang / mSGL, RWKV-7).
+
+### Premade Specialist Agents
+- **Atlas Coordinator (`coordinator`)**: Meta coordinator and task DAG dispatcher inspired by *herdr-projects* and *FastAgent*. Breaks down complex goals into atomic subtasks.
+- **Daedalus Architect (`code_architect`)**: Principal systems and software engineer inspired by *agency-agents* and *OpenHarness*. Leverages Symdex for call-graph exploration.
+- **Argus Reviewer (`code_reviewer`)**: QA and verification specialist inspired by *Aeon* and *PTRM*. Rigorous regression detection.
+- **Hypatia Researcher (`researcher`)**: Semantic retrieval and knowledge grounding specialist inspired by *RAG-Anything* and *localdoc-search*.
+- **Vulcan DevOps (`devops_operator`)**: Shell and sandbox operator inspired by *CLI-Anything* and *paperclip*. Applies Sieve log compaction.
+- **Aegis Security (`security_auditor`)**: Path traversal and Windows reserved-name safety auditor via PathCarry.
+- **Mnemosyne Curator (`memory_curator`)**: Titans test-time neural memory and Compact-KV working memory curator inspired by *TencentDB-Agent-Memory*.
+
+### Multi-Model Local Routing
+Agents can share a single local model or each be assigned their own dedicated local model endpoint:
+```sh
+# Run with heterogeneous local models (e.g. DeepSeek-R1 coordinator + Qwen-Coder architect)
+python swarmmojo.py meta run --task "Refactor event broker" --team fullstack_team
+
+# Run all agents on a specific local Ollama model
+python swarmmojo.py meta run --task "Verify test matrix" --team review_audit_team --model ollama-qwen-coder
+
+# Run offline with deterministic zero-cost execution
+python swarmmojo.py meta run --task "Audit security boundaries" --team review_audit_team --model mock
+```
+
+### Build Your Own Agents & Environments
+```sh
+# Create a custom specialist agent
+python swarmmojo.py meta create-agent --id api_dev --name "API Specialist" --role "Backend REST Developer" --model ollama-qwen-coder --tools "symdex_query,sieve_compact_logs"
+
+# Create a custom execution sandbox with Rewind snapshots & Horizon breakers
+python swarmmojo.py meta create-env --id microservices_sandbox --name "Microservices Sandbox" --root ./services
+```
+
 The workflow is **request → knowledge and skills → decision → proposed next step → operator approval → separately configured execution**. The preparation API implements the first four steps. It does not execute the proposal or approve itself. See the [component map](docs/components.md).
 
 ## Try one useful thing first

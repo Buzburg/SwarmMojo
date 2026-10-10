@@ -24,7 +24,8 @@
     "fastgate": "python swarmmojo.py fastgate",
     "compact-kv": "python swarmmojo.py compact-kv",
     "rewind": "python swarmmojo.py rewind",
-    "path-carry": "python swarmmojo.py path-carry"
+    "path-carry": "python swarmmojo.py path-carry",
+    "meta": "python swarmmojo.py meta"
   },
   "sandbox": {
     "denyCommands": [
@@ -73,6 +74,11 @@
       "name": "rewind-snapshotter",
       "enabled": true,
       "description": "Content-addressed workspace snapshotting and microsecond rollback"
+    },
+    {
+      "name": "meta-orchestrator",
+      "enabled": true,
+      "description": "Orchestrates multi-agent teams across heterogeneous local models"
     }
   ]
 }

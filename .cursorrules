@@ -26,3 +26,4 @@ Development Commands:
 - compact-kv: python swarmmojo.py compact-kv
 - rewind: python swarmmojo.py rewind
 - path-carry: python swarmmojo.py path-carry
+- meta: python swarmmojo.py meta

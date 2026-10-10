@@ -23,9 +23,9 @@ data/*.db
 data/*.db-wal
 data/*.db-shm
 data/*.db-journal
-*.db
-workspaces/
-repos/
+# Local Engine State
+.mojo_*/
+.swarmmojo/
 
 # Local Scratch & Reference PDFs
 *.pdf

@@ -18,6 +18,7 @@ Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills)
 - **compact-kv**: `python swarmmojo.py compact-kv`
 - **rewind**: `python swarmmojo.py rewind`
 - **path-carry**: `python swarmmojo.py path-carry`
+- **meta**: `python swarmmojo.py meta`
 
 ## Core Guidelines & Constraints
 - Always run tests before completing changes (pytest)
@@ -39,3 +40,4 @@ Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills)
 - **sieve-compactor**: Prune repetitive build and test output with 95%+ noise reduction
 - **horizon-circuit-breaker**: Track task DAG and intervene on semantic loops
 - **rewind-snapshotter**: Content-addressed workspace snapshotting and microsecond rollback
+- **meta-orchestrator**: Orchestrates multi-agent teams across heterogeneous local models
