@@ -12,12 +12,22 @@
 - Write concise commit messages following Conventional Commits
 - Never commit API keys, tokens, or plain secrets
 - Keep specialist reviews and decision maker checks bounded and reproducible
+- Use PathCarry audits before writing or unpacking files on Windows and cross-platform filesystems
 
 ## Verification Scripts
-- `pytest` (test)
+- `uv run --directory . --with pytest python -m pytest tests/test_engines.py tests/test_swarmmojo.py` (test)
 - `python swarmmojo.py harness` (harness)
 - `python swarmmojo.py aeon` (aeon)
 - `python swarmmojo.py polyharness build` (polyharness)
+- `python swarmmojo.py symdex` (symdex)
+- `python swarmmojo.py titans` (titans)
+- `python swarmmojo.py toolcall` (toolcall)
+- `python swarmmojo.py sieve` (sieve)
+- `python swarmmojo.py horizon` (horizon)
+- `python swarmmojo.py fastgate` (fastgate)
+- `python swarmmojo.py compact-kv` (compact-kv)
+- `python swarmmojo.py rewind` (rewind)
+- `python swarmmojo.py path-carry` (path-carry)
 
 ## Guardrails
 - Protected paths: `.env`, `.git`, `secrets/`

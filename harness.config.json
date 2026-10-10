@@ -1,7 +1,7 @@
 {
   "name": "SwarmMojo",
   "version": "1.0.0",
-  "description": "Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills), Swarm Mojo (Aeon specialist reviews, workflow rehearsal, mSGL), and PolyHarness (universal configuration & deterministic guardrails).",
+  "description": "Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills), Swarm Mojo (Aeon specialist reviews, workflow rehearsal, mSGL), PolyHarness (universal configuration & deterministic guardrails), and 10 specialized Buzburg engines (Symdex, Titans, ToolCall, Sieve, Horizon, Fastgate, Compact-KV, Rewind, PathCarry, LocalDocSearch).",
   "stack": {
     "primary": "python",
     "secondary": "mojo",
@@ -13,13 +13,23 @@
     "Preserve existing comments and docstrings",
     "Write concise commit messages following Conventional Commits",
     "Never commit API keys, tokens, or plain secrets",
-    "Keep specialist reviews and decision maker checks bounded and reproducible"
+    "Keep specialist reviews and decision maker checks bounded and reproducible",
+    "Use PathCarry audits before writing or unpacking files on Windows and cross-platform filesystems"
   ],
   "commands": {
-    "test": "pytest",
+    "test": "uv run --directory . --with pytest python -m pytest tests/test_engines.py tests/test_swarmmojo.py",
     "harness": "python swarmmojo.py harness",
     "aeon": "python swarmmojo.py aeon",
-    "polyharness": "python swarmmojo.py polyharness build"
+    "polyharness": "python swarmmojo.py polyharness build",
+    "symdex": "python swarmmojo.py symdex",
+    "titans": "python swarmmojo.py titans",
+    "toolcall": "python swarmmojo.py toolcall",
+    "sieve": "python swarmmojo.py sieve",
+    "horizon": "python swarmmojo.py horizon",
+    "fastgate": "python swarmmojo.py fastgate",
+    "compact-kv": "python swarmmojo.py compact-kv",
+    "rewind": "python swarmmojo.py rewind",
+    "path-carry": "python swarmmojo.py path-carry"
   },
   "rules": [
     {
@@ -30,6 +40,17 @@
         "Follow explicit typing and avoid untracked mutations",
         "Keep decision boundaries deterministic and bounded",
         "Use safe path validation for all file access"
+      ]
+    },
+    {
+      "name": "specialized-engines",
+      "description": "Guidelines for high-speed local agent engines (Symdex, Titans, ToolCall, Sieve, Horizon, Fastgate, Compact-KV, Rewind, PathCarry, LocalDocSearch)",
+      "globs": ["app/engines/**/*.py", "app_mojo/**/*.mojo"],
+      "guidelines": [
+        "Maintain sub-millisecond execution for in-memory operations and phase vector triage",
+        "Enforce cross-platform path safety and reserved-name audit via PathCarry",
+        "Keep structured working memory preambles bounded (<800 tokens) via Compact-KV",
+        "Maintain native Mojo acceleration in app_mojo/ alongside Python bridges in app/engines/"
       ]
     },
     {
@@ -81,6 +102,31 @@
       "name": "polyharness-builder",
       "description": "Transpiles agent harness configs to all target formats",
       "prompt": "Compile harness.config.json into CLAUDE.md, AGENTS.md, dsh.config.json, .cursorrules"
+    },
+    {
+      "name": "symdex-indexer",
+      "description": "Index and query symbols and call graphs in microsecond latency",
+      "prompt": "Use Symdex to find symbol definitions, callers, and callees before editing code"
+    },
+    {
+      "name": "titans-memory",
+      "description": "Test-time neural memory with momentum and surprise gating",
+      "prompt": "Store verified facts and recall associative knowledge via Titans memory"
+    },
+    {
+      "name": "sieve-compactor",
+      "description": "Prune repetitive build and test output with 95%+ noise reduction",
+      "prompt": "Filter stdout logs through Sieve to preserve error traces and strip repetitive lines"
+    },
+    {
+      "name": "horizon-circuit-breaker",
+      "description": "Track task DAG and intervene on semantic loops",
+      "prompt": "Record steps in Horizon task graph to prevent repetitive failed actions"
+    },
+    {
+      "name": "rewind-snapshotter",
+      "description": "Content-addressed workspace snapshotting and microsecond rollback",
+      "prompt": "Create a checkpoint with Rewind before risky file modifications"
     }
   ]
 }

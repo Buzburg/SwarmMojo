@@ -22,6 +22,23 @@ The portable Python path is used on Windows and Linux. Omarchy is an optional in
 | **PolyHarness** | **Progressive Disclosure** | Scoped rule generator emitting `.cursor/rules/*.mdc` and `.claude/rules/*.md` to prevent context saturation. |
 | **PolyHarness** | **Deterministic Guardrails** | Generates `.githooks/pre-commit` and `safe-exec.sh` to block destructive actions and leaks at the shell/git level. |
 
+## Specialized Local-First Engines
+
+SwarmMojo incorporates 10 high-speed specialized engines with Python bridges in `app/engines/`, FastMCP tool exposures in `app/engine_tools.py`, and native Mojo acceleration in `app_mojo/`:
+
+| Engine | Primary Feature & Performance | CLI Command | FastMCP Tool |
+| --- | --- | --- | --- |
+| **Symdex** | In-memory code symbol & bi-directional call-graph index (<20 µs) | `python swarmmojo.py symdex` | `symdex_query` |
+| **Titans** | Test-Time Neural Memory with momentum & surprise gating (arXiv:2501.00663) | `python swarmmojo.py titans` | `titans_memory_update`, `titans_memory_recall` |
+| **Micro-ToolCall** | JSON extraction, auto-repair, and type coercion for 7B-32B models | `python swarmmojo.py toolcall` | `toolcall_repair_output` |
+| **Sieve** | Streaming terminal and compiler log compaction (95%+ noise reduction) | `python swarmmojo.py sieve` | `sieve_compact_logs` |
+| **Local-Horizon** | State-machine task graph (DAG) & anti-loop vector circuit breaker | `python swarmmojo.py horizon` | `horizon_record_step` |
+| **Fastgate** | 256-dim phase vector System-1 tool triage router | `python swarmmojo.py fastgate` | `fastgate_triage_tools` |
+| **Compact-KV** | VRAM-capped rolling structured scratchpad (<800 tokens) | `python swarmmojo.py compact-kv` | `compact_kv_scratchpad` |
+| **Agent-Rewind** | Content-addressed workspace snapshotting and microsecond rollback | `python swarmmojo.py rewind` | `rewind_snapshot_workspace`, `rewind_rollback_workspace` |
+| **Path-Carry** | Filename safety, cross-platform reserved-name & path audit | `python swarmmojo.py path-carry` | `path_carry_audit` |
+| **LocalDoc-Search** | Line-level local document chunking & search | `python -m app.engines.localdoc_search` | Integrated via RAG & OKF |
+
 The workflow is **request → knowledge and skills → decision → proposed next step → operator approval → separately configured execution**. The preparation API implements the first four steps. It does not execute the proposal or approve itself. See the [component map](docs/components.md).
 
 ## Try one useful thing first
