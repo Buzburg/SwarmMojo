@@ -60,6 +60,20 @@ from .code_ledger import CodeLedgerEngine, FileCodemap, LedgerTransaction
 from .fast_search import FastSearchEngine, SearchMatch
 from .git_guard import GitCheckpointGuard, GitCheckpoint
 
+# Sovereign Buzburg Aliases
+SymNexus = SymdexIndex
+TitanDelta = TitansMemory
+ToolMender = repair_json_string
+TaskHorizon = HorizonManager
+PhaseGate = route_tools
+SnapScratchpad = CompactKVManager
+DeltaRewind = RewindEngine
+PathSentry = audit_directory
+StateEpoch = StateFreshStore
+ProofGraph = WorkflowProofEngine
+CognitiveShield = CortexEngine
+ParetoTriad = TriadEngine
+
 __all__ = [
     "SymdexIndex",
     "TitansMemory",
@@ -123,6 +137,19 @@ __all__ = [
     "SearchMatch",
     "GitCheckpointGuard",
     "GitCheckpoint",
+    # Sovereign Buzburg Aliases
+    "SymNexus",
+    "TitanDelta",
+    "ToolMender",
+    "TaskHorizon",
+    "PhaseGate",
+    "SnapScratchpad",
+    "DeltaRewind",
+    "PathSentry",
+    "StateEpoch",
+    "ProofGraph",
+    "CognitiveShield",
+    "ParetoTriad",
 ]
 
 

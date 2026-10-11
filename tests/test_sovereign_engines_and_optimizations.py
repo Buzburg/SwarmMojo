@@ -17,6 +17,18 @@ from app.engines import (
     BinaryAnalysisEngine,
     FastSearchEngine,
     GitCheckpointGuard,
+    SymNexus,
+    TitanDelta,
+    ToolMender,
+    TaskHorizon,
+    PhaseGate,
+    SnapScratchpad,
+    DeltaRewind,
+    PathSentry,
+    StateEpoch,
+    ProofGraph,
+    CognitiveShield,
+    ParetoTriad,
 )
 from app.meta import (
     HerdImmunityRegistry,
@@ -214,3 +226,18 @@ def test_git_checkpoint_guard():
         cp = guard.create_checkpoint(label="unit_test_checkpoint")
         assert cp.checkpoint_id.startswith("chk_")
         assert len(cp.commit_sha) >= 4 or cp.commit_sha == ""
+
+
+def test_sovereign_buzburg_engine_aliases():
+    assert SymNexus is not None
+    assert TitanDelta is not None
+    assert ToolMender is not None
+    assert TaskHorizon is not None
+    assert PhaseGate is not None
+    assert SnapScratchpad is not None
+    assert DeltaRewind is not None
+    assert PathSentry is not None
+    assert StateEpoch is not None
+    assert ProofGraph is not None
+    assert CognitiveShield is not None
+    assert ParetoTriad is not None
