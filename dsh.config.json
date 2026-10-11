@@ -1,8 +1,8 @@
 {
   "$schema": "https://dsh.deepseek.com/schema/v1.json",
-  "name": "SwarmMojo",
+  "name": "Swarmojo",
   "version": "1.0.0",
-  "description": "Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills), Swarm Mojo (Aeon specialist reviews, workflow rehearsal, mSGL), PolyHarness (universal configuration & deterministic guardrails), and 10 specialized Buzburg engines (Symdex, Titans, ToolCall, Sieve, Horizon, Fastgate, Compact-KV, Rewind, PathCarry, LocalDocSearch).",
+  "description": "Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills), Swarmojo (Aeon specialist reviews, workflow rehearsal, mSGL), PolyHarness (universal configuration & deterministic guardrails), and 10 specialized Buzburg engines (Symdex, Titans, ToolCall, Sieve, Horizon, Fastgate, Compact-KV, Rewind, PathCarry, LocalDocSearch).",
   "rules": [
     "Always run tests before completing changes (pytest)",
     "Preserve existing comments and docstrings",
@@ -102,7 +102,7 @@
     {
       "name": "studio-director",
       "enabled": true,
-      "description": "Directs cinematic visual prompts, storyboards, ComfyUI graphs, and UI banners"
+      "description": "Directs cinematic visual prompts, storyboards, diffusion graphs, and UI banners"
     },
     {
       "name": "design-architect",

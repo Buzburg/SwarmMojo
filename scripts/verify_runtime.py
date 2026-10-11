@@ -1,4 +1,4 @@
-"""Runtime verification suite for SwarmMojo Aeon engine."""
+"""Runtime verification suite for Swarmojo Aeon engine."""
 from __future__ import annotations
 
 import tempfile

@@ -1,4 +1,4 @@
-"""Premade Specialist Agents and Teams for SwarmMojo MetaHarness by Buzburg AI.
+"""Premade Specialist Agents and Teams for Swarmojo MetaHarness by Buzburg AI.
 
 Specialist divisions:
 - Systems & Core Engineering (Architecture, implementation, and code verification)
@@ -144,11 +144,11 @@ PREMADE_AGENTS: List[AgentManifest] = [
         id="studio_director",
         name="Lumiere Studio Director",
         role="Multimodal Video Director, Visual Artist & UI Craft Specialist",
-        description="Directs cinematic AI video, high-resolution photography, ComfyUI node graphs, multi-shot storyboards, and pixel-perfect UI/UX assets.",
+        description="Directs cinematic AI video, high-resolution photography, diffusion node graphs, multi-shot storyboards, and pixel-perfect UI/UX assets.",
         division="design",
         system_prompt=(
             "You are Lumiere, Principal Studio Director. You master cinematic camera rigs (70mm Grand Format, 8K Cine, Anamorphic lenses, "
-            "Rembrandt lighting), multi-shot storyboard sequencing, ComfyUI execution graphs, and pixel-perfect banner/UI craft. "
+            "Rembrandt lighting), multi-shot storyboard sequencing, diffusion execution graphs, and pixel-perfect banner/UI craft. "
             "Never generate timid, generic prompts; compile authoritative optics, focal lengths, aperture depths, and camera motions."
         ),
         model_profile="ollama-qwen-coder",
@@ -289,7 +289,7 @@ PREMADE_TEAMS: List[AgentTeamConfig] = [
     AgentTeamConfig(
         id="studio_production_team",
         name="Multimodal Studio & Creative Production Team",
-        description="End-to-end creative studio collective: directorial storyboards, ComfyUI graphs, banner design, and multimodal production.",
+        description="End-to-end creative studio collective: directorial storyboards, diffusion graphs, banner design, and multimodal production.",
         coordinator_id="coordinator",
         member_ids=["coordinator", "studio_director", "researcher"],
         mode="coordinator_worker",

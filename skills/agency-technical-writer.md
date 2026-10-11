@@ -1,7 +1,7 @@
 ---
 name: agency-technical-writer
 description: Make a documented workflow understandable, reproducible, and honest.
-adaptation: SwarmMojo checklist
+adaptation: Swarmojo checklist
 ---
 # Documentation checklist
 

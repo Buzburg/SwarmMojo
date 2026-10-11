@@ -1,4 +1,4 @@
-"""Autonomous Specialist Agent Instance for SwarmMojo MetaHarness.
+"""Autonomous Specialist Agent Instance for Swarmojo MetaHarness.
 
 Binds an AgentManifest to an LLM model backend (local or remote), execution memory,
 and tool triage via Fastgate.

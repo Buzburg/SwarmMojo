@@ -1,4 +1,4 @@
-"""Parallel Tool Dispatcher for SwarmMojo by Buzburg AI.
+"""Parallel Tool Dispatcher for Swarmojo by Buzburg AI.
 
 Concurrent tool and subtask execution architecture by Buzburg AI:
 - Dispatches batches of independent agent operations concurrently across a lightweight thread pool

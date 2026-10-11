@@ -1,4 +1,4 @@
-"""WorkflowProof Engine for SwarmMojo.
+"""WorkflowProof Engine for Swarmojo.
 
 Evidence-aware sequential DAG verification and cryptographic proof-of-work caching.
 Adapted from Buzburg/workflowproof (Apache-2.0).

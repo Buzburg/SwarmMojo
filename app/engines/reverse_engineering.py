@@ -1,4 +1,4 @@
-"""Reverse Engineering Engine for SwarmMojo by Buzburg AI.
+"""Reverse Engineering Engine for Swarmojo by Buzburg AI.
 
 Binary and bytecode reverse engineering architecture by Buzburg AI:
 - Binary format inspection (ELF, PE, Mach-O, WASM, and archive magic signatures)

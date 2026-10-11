@@ -58,7 +58,7 @@ This is a synthetic example, including its hash. It creates the named local data
 
 The result includes the candidate ID, complete proposal, fingerprint and an inactive Markdown draft returned as text. Default recall excludes it. Inspect it using `memory_get` or `memory_recall` with `include_candidates=true`. Identical normalized content, project, revision, session and evidence reuse the same record across restarts and concurrent retries. Retrying a retracted or superseded proposal preserves that lifecycle. Changed input creates a new candidate.
 
-Review the proposed regression, implement any accepted test through the existing coding/workshop process, and record an actual result separately. No active skill, verification receipt or permission is created by saving a proposal. This borrows the correction-to-regression idea from [AI Engineering lesson 46](https://github.com/rohitg00/ai-engineering-from-scratch/tree/7a181b46332db6d2e1274c798e851bf978a008a9); it reuses SwarmMojo's lesson store instead of importing another learning runtime.
+Review the proposed regression, implement any accepted test through the existing coding/workshop process, and record an actual result separately. No active skill, verification receipt or permission is created by saving a proposal. This borrows the correction-to-regression idea from [AI Engineering lesson 46](https://github.com/rohitg00/ai-engineering-from-scratch/tree/7a181b46332db6d2e1274c798e851bf978a008a9); it reuses Swarmojo's lesson store instead of importing another learning runtime.
 
 ## Generated skills remain drafts
 

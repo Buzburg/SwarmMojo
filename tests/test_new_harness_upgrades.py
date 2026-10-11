@@ -1,4 +1,4 @@
-"""Tests for SwarmMojo Supercharged Coding, Design, Studio, and Meta Harness Engines."""
+"""Tests for Swarmojo Supercharged Coding, Design, Studio, and Meta Harness Engines."""
 from __future__ import annotations
 
 import asyncio
@@ -244,7 +244,7 @@ def test_everywhere_dispatcher():
 
 
 def test_mcp_new_tools_registration():
-    server = FastMCP(name="SwarmMojoTestServer")
+    server = FastMCP(name="SwarmojoTestServer")
     register_meta_tools(server)
 
     tool_names = [tool.name for tool in asyncio.run(server.list_tools())]

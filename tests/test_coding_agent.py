@@ -241,7 +241,7 @@ def test_triad_engine():
 
 def test_mojo_memory():
     mem = MojoMemory(dimension=512)
-    mem.store("fact_1", "SwarmMojo combines PolyHarness and SwarmMojo with native Mojo speed.", phase=0.2)
+    mem.store("fact_1", "Swarmojo combines PolyHarness and Swarmojo with native Mojo speed.", phase=0.2)
     mem.store("fact_2", "Pi agent performs exact unambiguous slice edits.", phase=0.8)
 
     results = mem.query("unambiguous slice edits", top_k=1)

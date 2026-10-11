@@ -1,4 +1,4 @@
-"""Triad Engine for SwarmMojo.
+"""Triad Engine for Swarmojo.
 
 Evaluates coding workflows and agent configurations across three Pareto dimensions:
 1. Reliability (verification pass rate)

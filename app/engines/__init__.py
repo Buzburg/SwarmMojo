@@ -1,6 +1,6 @@
 """
-SwarmMojo Specialized Engines Package.
-Unifies Buzburg AI specialized engines into SwarmMojo:
+Swarmojo Specialized Engines Package.
+Unifies Buzburg AI specialized engines into Swarmojo:
 - Symdex: High-speed in-memory code symbol & bi-directional call-graph index (<20 µs)
 - Titans: Test-time neural memory with momentum & adaptive forgetting (arXiv:2501.00663)
 - ToolCall: Microsecond JSON repair, balance extraction & type coercion for 7B-32B models

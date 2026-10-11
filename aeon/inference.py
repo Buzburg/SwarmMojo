@@ -81,7 +81,7 @@ Tool definitions: """ + packed({k: {a: ("string[]" if t is list else "integer" i
 
 
 class NativeBackend:
-    """Standard native and chat completions backend for SwarmMojo."""
+    """Standard native and chat completions backend for Swarmojo."""
 
     def __init__(self, profile, timeout=120, max_tokens=2048):
         self.profile = profile

@@ -21,6 +21,6 @@ class DecisionClient:
         return {
             "status": "abstained",
             "choice": None,
-            "engine": "SwarmMojo Decision Maker",
+            "engine": "Swarmojo Decision Maker",
             "decision_calls": 0,
         }

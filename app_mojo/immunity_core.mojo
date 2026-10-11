@@ -1,6 +1,6 @@
 """
 immunity_core.mojo
-Native Mojo SIMD and error signature hashing kernel for SwarmMojo Fleet Herd Immunity by Buzburg AI.
+Native Mojo SIMD and error signature hashing kernel for Swarmojo Fleet Herd Immunity by Buzburg AI.
 Provides sub-microsecond 64-bit FNV-1a error hashing, immunity signature lookup,
 and rapid byte pattern matching across swarms.
 """

@@ -1,4 +1,4 @@
-"""Multi-model router and provider client for SwarmMojo MetaHarness.
+"""Multi-model router and provider client for Swarmojo MetaHarness.
 
 Supports:
 - Local endpoints: Ollama, LM Studio, vLLM, Deep Reasoner, RWKV-7

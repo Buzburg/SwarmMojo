@@ -1,7 +1,7 @@
 {
-  "name": "SwarmMojo",
+  "name": "Swarmojo",
   "version": "1.0.0",
-  "description": "Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills), Swarm Mojo (Aeon specialist reviews, workflow rehearsal, mSGL), PolyHarness (universal configuration & deterministic guardrails), and 10 specialized Buzburg engines (Symdex, Titans, ToolCall, Sieve, Horizon, Fastgate, Compact-KV, Rewind, PathCarry, LocalDocSearch).",
+  "description": "Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills), Swarmojo (Aeon specialist reviews, workflow rehearsal, mSGL), PolyHarness (universal configuration & deterministic guardrails), and 10 specialized Buzburg engines (Symdex, Titans, ToolCall, Sieve, Horizon, Fastgate, Compact-KV, Rewind, PathCarry, LocalDocSearch).",
   "stack": {
     "primary": "python",
     "secondary": "mojo",
@@ -87,7 +87,7 @@
     },
     {
       "name": "meta-harness",
-      "description": "Guidelines for SwarmMojo MetaHarness and Coding Agent (Pi Tools + Prime Recursion)",
+      "description": "Guidelines for Swarmojo MetaHarness and Coding Agent (Pi Tools + Prime Recursion)",
       "globs": ["app/meta/**/*.py"],
       "guidelines": [
         "Support heterogeneous local and remote models (Ollama, LM Studio, vLLM, SGLang, mock)",
@@ -170,8 +170,8 @@
     },
     {
       "name": "studio-director",
-      "description": "Directs cinematic visual prompts, storyboards, ComfyUI graphs, and UI banners",
-      "prompt": "Compile cinematic camera rigs, multi-shot sequences, and ComfyUI workflows for high-fidelity video and images"
+      "description": "Directs cinematic visual prompts, storyboards, diffusion graphs, and UI banners",
+      "prompt": "Compile cinematic camera rigs, multi-shot sequences, and diffusion workflows for high-fidelity video and images"
     },
     {
       "name": "design-architect",

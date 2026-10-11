@@ -10,7 +10,7 @@ def test_meta_agent_comparison_document_exists():
     assert doc_path.exists(), "docs/meta_agent_comparison.md must exist"
 
     content = doc_path.read_text(encoding="utf-8")
-    assert "SwarmMojo" in content
+    assert "Swarmojo" in content or "SwarmMojo" in content
     assert "Conventional Cloud Orchestrators" in content
     assert "Generic CLI Seat Wrappers" in content
     assert "buzburgai@gmail.com" in content
@@ -27,7 +27,7 @@ def test_swarmmojo_compare_cli():
     result = subprocess.run(cmd, cwd=str(root), capture_output=True, text=False)
     assert result.returncode == 0
     output = result.stdout.decode("utf-8", errors="replace")
-    assert "SwarmMojo (Buzburg AI)" in output
+    assert "Swarmojo (Buzburg AI)" in output or "SwarmMojo (Buzburg AI)" in output
     assert "buzburgai@gmail.com" in output
 
 
@@ -80,5 +80,5 @@ def test_readme_author_and_comparison():
     content = readme.read_text(encoding="utf-8")
     assert "buzburgai@gmail.com" in content
     assert "Buzburg AI" in content
-    assert "Meta-Agent Architecture Comparison: SwarmMojo vs Conventional Frameworks" in content
+    assert "Meta-Agent Architecture Comparison: Swarmojo vs Conventional Frameworks" in content or "Meta-Agent Architecture Comparison: SwarmMojo vs Conventional Frameworks" in content
     assert "docs/meta_agent_comparison.md" in content

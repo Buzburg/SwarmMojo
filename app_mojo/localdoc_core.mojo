@@ -3,7 +3,7 @@ localdoc_core.mojo
 Native Mojo SIMD and term-frequency scoring kernel for LocalDoc search engine.
 Implements bounded passage chunking, byte-level token matching, and Okapi BM25
 term saturation calculations for sub-millisecond document retrieval.
-Adapted for Buzburg SwarmMojo.
+Adapted for Buzburg Swarmojo.
 """
 
 from std.collections import List

@@ -1,4 +1,4 @@
-"""StateFresh Engine for SwarmMojo.
+"""StateFresh Engine for Swarmojo.
 
 Optimistic Concurrency Control, version leases, collision prevention, and stale-write guards
 for multi-agent workspace operations.

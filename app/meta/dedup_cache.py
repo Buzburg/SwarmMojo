@@ -1,4 +1,4 @@
-"""Deduplicated Command Execution Cache for SwarmMojo by Buzburg AI.
+"""Deduplicated Command Execution Cache for Swarmojo by Buzburg AI.
 
 Execution deduplication cache architecture by Buzburg AI:
 - Run expensive commands once, cache outputs in memory for a configurable TTL.

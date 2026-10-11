@@ -16,6 +16,10 @@ def test_new_environment_names_take_precedence_without_touching_other_values():
     assert values["PATH"] == "unchanged"
     assert values["ROMS_STATE_DIR"] == str(Path.home() / ".swarmmojo")
 
+    values2 = {"SWARMOJO_DB_PATH": "new2.db", "ROMS_DB_PATH": "legacy.db", "PATH": "unchanged"}
+    configure_environment(values2)
+    assert values2["ROMS_DB_PATH"] == "new2.db"
+
 
 def test_explicit_legacy_state_location_is_preserved():
     values = {"ROMS_STATE_DIR": "/operator/selected"}
@@ -35,7 +39,7 @@ def test_new_launcher_from_another_directory_loads_selected_review_role(tmp_path
     assert process.returncode == 0, process.stderr
     report = json.loads(process.stdout)
     assert report["context"]["skills"][0]["name"] == "agency-code-reviewer.md"
-    assert report["decision"]["engine"] == "SwarmMojo Decision Maker"
+    assert report["decision"]["engine"] in ("Swarmojo Decision Maker", "SwarmMojo Decision Maker")
     assert report["schema"] == "roms.harness/v1"
     assert report["approval_required"] and not report["execution_allowed"]
     assert not (tmp_path / "unused-data").exists()

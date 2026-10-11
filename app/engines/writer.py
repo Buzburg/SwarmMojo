@@ -1,4 +1,4 @@
-"""Writer Agent Engine for SwarmMojo by Buzburg AI.
+"""Writer Agent Engine for Swarmojo by Buzburg AI.
 
 High-craft literary, journalistic, and technical writing suite:
 - Buzburg Narrative Architect: multi-chapter pacing, character voice consistency

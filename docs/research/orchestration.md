@@ -1,15 +1,15 @@
 # Sovereign Multi-Agent Guild Topology & Orchestration Architecture
 
-**SwarmMojo by Buzburg AI**  
+**Swarmojo by Buzburg AI**  
 *Maintainer:* Buzburg AI (`buzburgai@gmail.com`)
 
-This specification defines the multi-agent coordination topologies, thread scheduling, and communication contracts in the SwarmMojo meta-harness.
+This specification defines the multi-agent coordination topologies, thread scheduling, and communication contracts in the Swarmojo meta-harness.
 
 ---
 
 ## 1. Topologies Supported
 
-SwarmMojo provides three native coordination patterns across specialist agents:
+Swarmojo provides three native coordination patterns across specialist agents:
 
 1. **Coordinator-Worker (DAG Dispatch)**:
    - Lead coordinator (`Atlas`) decomposes objectives into an acyclic task graph (DAG).

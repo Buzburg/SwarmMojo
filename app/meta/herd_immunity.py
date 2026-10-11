@@ -1,4 +1,4 @@
-"""Fleet Herd Immunity Engine for SwarmMojo by Buzburg AI.
+"""Fleet Herd Immunity Engine for Swarmojo by Buzburg AI.
 
 Fleet herd immunity architecture by Buzburg AI:
 - When any agent in the swarm discovers and resolves an error, it generates an Immunity Signature.

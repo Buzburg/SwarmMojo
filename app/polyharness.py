@@ -1,4 +1,4 @@
-"""PolyHarness integration for SwarmMojo.
+"""PolyHarness integration for Swarmojo.
 
 Provides programmatic and CLI invocation of the PolyHarness universal
 agent configuration transpiler, progressive disclosure rule compiler,

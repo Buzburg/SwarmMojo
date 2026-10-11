@@ -1,4 +1,4 @@
-"""Tests for SwarmMojo Design Agent Engine."""
+"""Tests for Swarmojo Design Agent Engine."""
 from __future__ import annotations
 
 from pathlib import Path

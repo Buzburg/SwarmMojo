@@ -2,7 +2,7 @@
 <!-- Generated automatically by polyharness v0.1.0 — DO NOT EDIT DIRECTLY -->
 
 ## Project Overview
-Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills), Swarm Mojo (Aeon specialist reviews, workflow rehearsal, mSGL), PolyHarness (universal configuration & deterministic guardrails), and 10 specialized Buzburg engines (Symdex, Titans, ToolCall, Sieve, Horizon, Fastgate, Compact-KV, Rewind, PathCarry, LocalDocSearch).
+Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills), Swarmojo (Aeon specialist reviews, workflow rehearsal, mSGL), PolyHarness (universal configuration & deterministic guardrails), and 10 specialized Buzburg engines (Symdex, Titans, ToolCall, Sieve, Horizon, Fastgate, Compact-KV, Rewind, PathCarry, LocalDocSearch).
 
 ## Essential Commands
 - **test**: `uv run --directory . --with pytest python -m pytest tests/test_engines.py tests/test_swarmmojo.py`
@@ -52,7 +52,7 @@ Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills)
 - **pi-coding-toolkit**: Exact unambiguous line slicing, substring editing, and atomic writing
 - **prime-recursion**: Recursive subagent delegation in single, parallel, and chain modes
 - **drift-guard**: Real-time angular trajectory tracking and drift guardrails
-- **studio-director**: Directs cinematic visual prompts, storyboards, ComfyUI graphs, and UI banners
+- **studio-director**: Directs cinematic visual prompts, storyboards, diffusion graphs, and UI banners
 - **design-architect**: Builds dark-mode landing pages, enterprise admin dashboards, and UI component systems
 - **author-scribe**: Ghost Protocol literary authoring, 200+ banned AI cliché filters, and narrative book chapter planning
 - **workflow-automator**: Constitutional pipeline governance, routine triggers, and self-correcting task automation

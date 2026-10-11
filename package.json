@@ -1,7 +1,7 @@
 {
   "name": "swarmmojo",
   "version": "1.0.0",
-  "description": "Full-fledged local-first AI agent harness combining ROMS, Swarm Mojo, and PolyHarness",
+  "description": "Full-fledged local-first AI agent harness combining ROMS, Swarmojo, and PolyHarness",
   "scripts": {
     "polyharness": "node polyharness/bin/polyharness.js",
     "polyharness:build": "node polyharness/bin/polyharness.js build",
@@ -9,6 +9,6 @@
     "polyharness:protect": "node polyharness/bin/polyharness.js protect",
     "test:polyharness": "npm --prefix polyharness test"
   },
-  "author": "Buzburg AI <dev@buzburg.ai>",
+  "author": "Buzburg AI <buzburgai@gmail.com>",
   "license": "Apache-2.0"
 }

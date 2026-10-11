@@ -1,4 +1,4 @@
-"""Universal Omnipresent Desktop Bridge for SwarmMojo by Buzburg AI.
+"""Universal Omnipresent Desktop Bridge for Swarmojo by Buzburg AI.
 
 Omnipresent desktop companion and clipboard router by Buzburg AI:
 - Omnipresent floating desktop action dispatcher

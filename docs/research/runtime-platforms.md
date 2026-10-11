@@ -1,15 +1,15 @@
 # Sovereign Local Model Runtimes & Inference Acceleration
 
-**SwarmMojo by Buzburg AI**  
+**Swarmojo by Buzburg AI**  
 *Maintainer:* Buzburg AI (`buzburgai@gmail.com`)
 
-This specification details the heterogeneous local model runtime layer for SwarmMojo.
+This specification details the heterogeneous local model runtime layer for Swarmojo.
 
 ---
 
 ## 1. Supported Inference Backends
 
-SwarmMojo connects natively to local model servers without cloud telemetry:
+Swarmojo connects natively to local model servers without cloud telemetry:
 
 1. **Ollama**: Default local REST API endpoint (`http://localhost:11434`).
 2. **LM Studio**: Local OpenAI-compatible REST server (`http://localhost:1234/v1`).

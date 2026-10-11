@@ -1,6 +1,6 @@
 """
 dedup_core.mojo
-Native Mojo execution deduplication and cache eviction kernel for SwarmMojo by Buzburg AI.
+Native Mojo execution deduplication and cache eviction kernel for Swarmojo by Buzburg AI.
 Provides sub-microsecond command key hashing, TTL epoch validation,
 and in-memory entry eviction checks.
 """

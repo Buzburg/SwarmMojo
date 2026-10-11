@@ -1,4 +1,4 @@
-"""Universal Prefrontal Cortex & Execution Shield for SwarmMojo.
+"""Universal Prefrontal Cortex & Execution Shield for Swarmojo.
 
 Combines:
 - ExecutionShield: Hazard pattern scoring, cyclic action detection, and trajectory alignment

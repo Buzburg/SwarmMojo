@@ -1,6 +1,6 @@
 # Security and release boundaries
 
-SwarmMojo is an experimental local tool for a single trusted operator. The installed Omarchy gateway requires a private bearer key; this does not provide tenant isolation or authorize arbitrary tool execution. Keep the gateway bound to loopback and use trusted MCP clients. A local MCP client can invoke tools that read documents and change records.
+Swarmojo is an experimental local tool for a single trusted operator. The installed Omarchy gateway requires a private bearer key; this does not provide tenant isolation or authorize arbitrary tool execution. Keep the gateway bound to loopback and use trusted MCP clients. A local MCP client can invoke tools that read documents and change records.
 
 - Python plugins in `custom_tools/` execute with the server's filesystem permissions, including during hot reload. Review every plugin before installing it. The plugin folder is not a sandbox.
 - Skills and retrieved text are untrusted input to an agent. Grounding prompts do not prevent prompt injection or guarantee correct actions.

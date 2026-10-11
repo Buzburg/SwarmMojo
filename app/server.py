@@ -1,4 +1,4 @@
-"""SwarmMojo FastMCP Server Entrypoint."""
+"""Swarmojo FastMCP Server Entrypoint."""
 
 import importlib.util
 import os
@@ -33,7 +33,7 @@ from app.memory_tools import register_memory_tools
 from app.engine_tools import register_engine_tools
 from app.meta.meta_tools import register_meta_tools
 
-mcp = FastMCP("SwarmMojo")
+mcp = FastMCP("Swarmojo")
 register_memory_tools(mcp)
 register_engine_tools(mcp)
 register_meta_tools(mcp)
@@ -158,7 +158,7 @@ def list_tickets(status: str = "") -> str:
 
 @mcp.tool()
 def get_system_metrics() -> str:
-    """Returns real-time host hardware metrics (CPU %, available RAM) and SwarmMojo database statistics."""
+    """Returns real-time host hardware metrics (CPU %, available RAM) and Swarmojo database statistics."""
     metrics = _get_metrics()
     return (
         f"Host CPU Load: {metrics['host_cpu_percent']}%\n"
@@ -484,9 +484,9 @@ def load_custom_tools():
                 spec.loader.exec_module(mod)
                 if hasattr(mod, "register_tools"):
                     mod.register_tools(mcp)
-                    print(f"[SwarmMojo] Loaded custom tools plugin: {py_file.name}", file=sys.stderr)
+                    print(f"[Swarmojo] Loaded custom tools plugin: {py_file.name}", file=sys.stderr)
         except Exception as e:
-            print(f"[SwarmMojo Warning] Failed to load custom tool {py_file.name}: {e}", file=sys.stderr)
+            print(f"[Swarmojo Warning] Failed to load custom tool {py_file.name}: {e}", file=sys.stderr)
 
 
 # ============================================================================
@@ -496,17 +496,17 @@ def load_custom_tools():
 
 def start_server():
     """Bootstraps database, ingests OKF documents, loads plugins, starts watcher, and launches FastMCP."""
-    print("[SwarmMojo] Initializing database schema...", file=sys.stderr)
+    print("[Swarmojo] Initializing database schema...", file=sys.stderr)
     init_database()
-    print("[SwarmMojo] Initializing Smart Tool RAG registry...", file=sys.stderr)
+    print("[Swarmojo] Initializing Smart Tool RAG registry...", file=sys.stderr)
     _init_default_tool_registry()
-    print("[SwarmMojo] Ingesting OKF knowledge documents...", file=sys.stderr)
+    print("[Swarmojo] Ingesting OKF knowledge documents...", file=sys.stderr)
     count = ingest_okf_directory(KNOWLEDGE_DIR)
-    print(f"[SwarmMojo] OKF ingestion complete ({count} files processed).", file=sys.stderr)
+    print(f"[Swarmojo] OKF ingestion complete ({count} files processed).", file=sys.stderr)
     load_custom_tools()
-    print("[SwarmMojo] Starting background file watcher...", file=sys.stderr)
+    print("[Swarmojo] Starting background file watcher...", file=sys.stderr)
     start_watcher(mcp)
-    print("[SwarmMojo] Starting FastMCP server...", file=sys.stderr)
+    print("[Swarmojo] Starting FastMCP server...", file=sys.stderr)
     mcp.run()
 
 

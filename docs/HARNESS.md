@@ -1,6 +1,6 @@
-# Portable SwarmMojo harness
+# Portable Swarmojo harness
 
-SwarmMojo prepares work by combining the existing Decision Maker with retrieval, indexed Open Knowledge Format (OKF) records and selected Markdown skills. The same preparation API is available through the CLI and MCP. It runs on Windows and Linux; Omarchy is optional. macOS has not been verified.
+Swarmojo prepares work by combining the existing Decision Maker with retrieval, indexed Open Knowledge Format (OKF) records and selected Markdown skills. The same preparation API is available through the CLI and MCP. It runs on Windows and Linux; Omarchy is optional. macOS has not been verified.
 
 ## Run it
 
@@ -16,7 +16,7 @@ The example describes a failed invoice check and offers two possible responses. 
 
 The demo creates a **synthetic temporary OKF/FTS index**, a selected skill and a request. It exercises the real public CLI, retrieval and Decision Maker, checks the proposal and hashes, verifies that the index and decision-state directory are unchanged, and removes the fixture. This tests preparation, not ingestion, model quality or real invoice processing. It needs no model, GPU, account or network service.
 
-For your existing SwarmMojo index and skills, use operator-selected paths:
+For your existing Swarmojo index and skills, use operator-selected paths:
 
 ```sh
 python swarmmojo.py harness --request examples/harness-request.json --db /path/to/roms.db --skills-dir /path/to/skills
@@ -52,7 +52,7 @@ The report identifies itself as `schema: "roms.harness/v1"`.
 | `decision` | Actual Decision Maker output, reasons for abstention, option scores and an explicit advisory marker. |
 | `proposed_next_step` | Supplied description of the suggested option, or `null` on abstention. An internal highest-scoring choice can remain inside an abstained decision; do not execute it. |
 | `context.evidence` | Budgeted observation text, original supplied-text SHA-256 and truncation flag. |
-| `context.knowledge` | Retrieval status and up to three matches from existing SwarmMojo `lexical_search` / SQLite FTS5. Each source has an OKF document ID, title, registered `index_checksum`, full `indexed_chunk_sha256`, returned `snippet_sha256`, excerpt and truncation flag. |
+| `context.knowledge` | Retrieval status and up to three matches from existing Swarmojo `lexical_search` / SQLite FTS5. Each source has an OKF document ID, title, registered `index_checksum`, full `indexed_chunk_sha256`, returned `snippet_sha256`, excerpt and truncation flag. |
 | `context.skills` | Selected text, `skills://` reference, full-file SHA-256, untrusted-input label and truncation flag. |
 | `context.coverage` | Actual supplied character count, budget and truncated/omitted source references. |
 | `backend` | Declares `lexical_heuristic`, `model_called: false`, uncalibrated scores and no persisted topic discovery. |

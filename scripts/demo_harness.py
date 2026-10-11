@@ -61,7 +61,7 @@ def run_demo() -> dict:
         }
         if not all(checks.values()):
             raise RuntimeError("Harness demo checks failed: " + json.dumps(checks))
-        return {"scope": "Synthetic OKF/FTS fixture; real SwarmMojo retrieval, Decision Maker and CLI. No model or execution.",
+        return {"scope": "Synthetic OKF/FTS fixture; real Swarmojo retrieval, Decision Maker and CLI. No model or execution.",
                 "checks": checks, "report": report}
 
 

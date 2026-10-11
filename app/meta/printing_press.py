@@ -1,4 +1,4 @@
-"""Terminal Printing Press compatibility module for SwarmMojo by Buzburg AI.
+"""Terminal Printing Press compatibility module for Swarmojo by Buzburg AI.
 
 All terminal formatting and layout logic is maintained in `app.meta.terminal_press`.
 This module provides backward-compatible exports.

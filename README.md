@@ -1,4 +1,4 @@
-# SwarmMojo ⚡
+# Swarmojo ⚡
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Runtime: Mojo + Python](https://img.shields.io/badge/Runtime-Mojo_SIMD_v25+_|_Python_3.11+-orange.svg)](app_mojo/)
@@ -15,9 +15,9 @@
 > 3. **They destroy code**: One hallucinating agent overwrites another's files or triggers an endless circular failure loop of repeating the exact same error.
 > 4. **They trap you in cloud silos**: Proprietary platform fees, vendor rate limits, and zero offline privacy.
 >
-> **SwarmMojo changes all of that instantly.**
+> **Swarmojo changes all of that instantly.**
 >
-> Built by **Buzburg AI** from the bare metal up, SwarmMojo is the **fastest local-first AI agent meta-harness on Earth**. Powered by **30+ sovereign intelligence engines** and accelerated by **native Mojo SIMD compute kernels** running in **sub-microseconds (<50 µs)**, SwarmMojo turns any laptop or local workstation into a world-class autonomous agency:
+> Built by **Buzburg AI** from the bare metal up, Swarmojo is the **fastest local-first AI agent meta-harness on Earth**. Powered by **30+ sovereign intelligence engines** and accelerated by **native Mojo SIMD compute kernels** running in **sub-microseconds (<50 µs)**, Swarmojo turns any laptop or local workstation into a world-class autonomous agency:
 >
 > - 🧠 **Fleet Herd Immunity**: The moment *any* agent solves a bug, it instantly broadcasts an immunity signature across the entire fleet memory. Your agents *never make the same mistake twice*.
 > - ⚡ **Blistering Mojo Acceleration**: Tool candidate triage in **12 nanoseconds**, in-memory code symbol lookup in **<20 µs**, and parallel tool batch dispatch that makes agent actions feel instantaneous.
@@ -32,13 +32,13 @@
 
 ---
 
-## The Core Pillars of SwarmMojo
+## The Core Pillars of Swarmojo
 
-SwarmMojo unifies five foundational pillars into a cohesive, zero-cloud architecture:
+Swarmojo unifies five foundational pillars into a cohesive, zero-cloud architecture:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                 SWARMMOJO META-HARNESS                                       │
+│                                 SWARMOJO META-HARNESS                                       │
 ├───────────────────────────────┬───────────────────────────────┬──────────────────────────────┤
 │       1. SPECIALIST GUILDS    │     2. HIGH-SPEED ENGINES     │      3. FLEET IMMUNITY       │
 │  • Coding Agent (AST/Binary)  │  • SymNexus Symbol Index (<20µ│  • Herd Immunity Registry    │
@@ -63,7 +63,7 @@ SwarmMojo unifies five foundational pillars into a cohesive, zero-cloud architec
 
 ## Sovereign Engines Directory
 
-Every engine in SwarmMojo is available via Python in `app/engines/`, terminal CLI via `python swarmmojo.py <command>`, FastMCP via `app/meta/meta_tools.py`, and native Mojo kernels in `app_mojo/`:
+Every engine in Swarmojo is available via Python in `app/engines/`, terminal CLI via `python swarmmojo.py <command>`, FastMCP via `app/meta/meta_tools.py`, and native Mojo kernels in `app_mojo/`:
 
 | Engine | Primary Capability & Performance Metric | CLI Command | FastMCP Tool |
 | :--- | :--- | :--- | :--- |
@@ -104,11 +104,11 @@ Every engine in SwarmMojo is available via Python in `app/engines/`, terminal CL
 
 ---
 
-## Meta-Agent Architecture Comparison: SwarmMojo vs Conventional Frameworks
+## Meta-Agent Architecture Comparison: Swarmojo vs Conventional Frameworks
 
 For our deep architectural whitepaper, see [docs/meta_agent_comparison.md](docs/meta_agent_comparison.md).
 
-| Architectural Dimension | **SwarmMojo (Buzburg AI)** | **Conventional Cloud Orchestrators** | **Generic CLI Seat Wrappers** |
+| Architectural Dimension | **Swarmojo (Buzburg AI)** | **Conventional Cloud Orchestrators** | **Generic CLI Seat Wrappers** |
 | :--- | :--- | :--- | :--- |
 | **Primary Philosophy** | Sub-millisecond local-first meta-harness with native Mojo SIMD acceleration | Cloud-hosted ticketing, multi-tier enterprise web app & remote deployment runner | Multi-seat terminal wrapper & basic CLI subprocess manager |
 | **Core Runtime** | **Mojo (SIMD v25+)** + **Python 3.11+** hybrid engine | Heavyweight Node.js, GraphQL, PostgreSQL web stacks | Basic Node/Python CLI subprocess supervisor |
@@ -172,7 +172,7 @@ For our deep architectural whitepaper, see [docs/meta_agent_comparison.md](docs/
 
 ## Meta Harness Fleet Operations & Ubiquitous Control
 
-SwarmMojo provides groundbreaking infrastructure to keep agent swarms resilient and accessible across your entire operating system:
+Swarmojo provides groundbreaking infrastructure to keep agent swarms resilient and accessible across your entire operating system:
 
 ### 🛡️ Fleet Herd Immunity (`HerdImmunityRegistry`)
 When any specialist agent in your swarm encounters and debugs an error (e.g. POSIX `fcntl` on Windows, SQLite locks, timeout backoffs), it generates a signed **Immunity Signature**. The immunity is broadcast across peer swarm memory: the moment another agent hits a matching error pattern, it immediately applies the verified remedy, preventing duplicate failure loops.
@@ -218,14 +218,14 @@ def hash_error_signature(error_type: String, error_msg: String) -> UInt64:
 
 ## FastMCP Universal Tool Integration
 
-SwarmMojo exposes all specialist engines and fleet capabilities over FastMCP. Connect any compatible client (Claude Code, Cursor, Windsurf, or custom harnesses):
+Swarmojo exposes all specialist engines and fleet capabilities over FastMCP. Connect any compatible client (Claude Code, Cursor, Windsurf, or custom harnesses):
 
 ```json
 {
   "mcpServers": {
     "swarmmojo": {
       "command": "python",
-      "args": ["d:/Buzburg Files/Github/SwarmMojo/swarmmojo.py", "mcp"]
+      "args": ["d:/Buzburg Files/Github/Swarmojo/swarmmojo.py", "mcp"]
     }
   }
 }
@@ -275,5 +275,5 @@ uv run --directory . --with pytest python -m pytest tests/test_swarmmojo.py test
 
 - **Author**: Buzburg AI
 - **Contact & Inquiries**: `buzburgai@gmail.com`
-- **GitHub Repository**: [https://github.com/Buzburg/SwarmMojo](https://github.com/Buzburg/SwarmMojo)
+- **GitHub Repository**: [https://github.com/Buzburg/Swarmojo](https://github.com/Buzburg/Swarmojo)
 - **License**: [Apache-2.0](LICENSE) © 2026 Buzburg LLC.

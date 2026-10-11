@@ -1,7 +1,7 @@
 # Rule: meta-harness
 <!-- Generated automatically by polyharness — DO NOT EDIT DIRECTLY -->
 
-Guidelines for SwarmMojo MetaHarness and Coding Agent (Pi Tools + Prime Recursion)
+Guidelines for Swarmojo MetaHarness and Coding Agent (Pi Tools + Prime Recursion)
 
 **Applicable Paths**: `app/meta/**/*.py`
 

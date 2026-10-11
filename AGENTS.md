@@ -2,7 +2,7 @@
 <!-- Generated automatically by polyharness v0.1.0 — DO NOT EDIT DIRECTLY -->
 
 ## Repository Identity
-- **Name**: SwarmMojo
+- **Name**: Swarmojo
 - **Version**: 1.0.0
 - **Primary Stack**: python (fastmcp)
 

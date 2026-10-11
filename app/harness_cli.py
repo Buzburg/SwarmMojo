@@ -1,4 +1,4 @@
-"""Portable command-line entry point for preparing an advisory SwarmMojo request."""
+"""Portable command-line entry point for preparing an advisory Swarmojo request."""
 from __future__ import annotations
 
 import argparse
@@ -36,14 +36,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--evidence", help="Observed facts, separate from the question")
     parser.add_argument("--skill", action="append", dest="skills", help="Selected Markdown skill name; repeat up to four times")
     parser.add_argument("--max-context-chars", type=int, help="Combined text budget, 512–16000 characters")
-    parser.add_argument("--db", type=Path, help="Existing SwarmMojo knowledge index; opened read-only")
+    parser.add_argument("--db", type=Path, help="Existing Swarmojo knowledge index; opened read-only")
     parser.add_argument("--skills-dir", type=Path, default=SKILLS_DIR, help="Operator-owned skill directory")
     args = parser.parse_args(argv)
     if args.request and any(value is not None for value in
                             (args.options, args.evidence, args.skills, args.max_context_chars)):
         parser.error("Put goal, options, evidence, skills and budget inside the request file")
     if args.goal is not None and args.options is None:
-        parser.error("--goal requires --options; SwarmMojo does not invent permitted actions")
+        parser.error("--goal requires --options; Swarmojo does not invent permitted actions")
     try:
         if args.request:
             request = decode_request(_read_request(args.request))

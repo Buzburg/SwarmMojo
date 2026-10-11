@@ -1,7 +1,7 @@
-"""SwarmMojo MetaHarness Multi-Agent & Multi-Model Orchestration Engine.
+"""Swarmojo MetaHarness Multi-Agent & Multi-Model Orchestration Engine.
 
 Orchestrates heterogeneous teams of autonomous agents across multiple local or remote
-model backends, sandboxed execution environments, and SwarmMojo specialized engines.
+model backends, sandboxed execution environments, and Swarmojo specialized engines.
 """
 from __future__ import annotations
 

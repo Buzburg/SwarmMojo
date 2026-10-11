@@ -1,7 +1,7 @@
 ---
 name: agency-software-architect
 description: Choose a maintainable design and record its constraints and tradeoffs.
-adaptation: SwarmMojo checklist
+adaptation: Swarmojo checklist
 ---
 # Architecture checklist
 

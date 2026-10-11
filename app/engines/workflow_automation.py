@@ -1,4 +1,4 @@
-"""Workflow Automation Engine for SwarmMojo by Buzburg AI.
+"""Workflow Automation Engine for Swarmojo by Buzburg AI.
 
 Autonomous workflow pipeline, constitutional governance, and routine trigger system:
 - Constitutional Governance: 8-stage execution gate (Turn governor -> Risk classification ->

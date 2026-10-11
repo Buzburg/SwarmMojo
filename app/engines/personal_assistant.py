@@ -1,4 +1,4 @@
-"""Personal Assistant Engine for SwarmMojo by Buzburg AI.
+"""Personal Assistant Engine for Swarmojo by Buzburg AI.
 
 24/7 sovereign personal companion, secure vault, consult gateway, and realtime voice bridge:
 - Persistent Companion: 24/7 background state, daily agenda, active desk context (.mojo_assistant/)

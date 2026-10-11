@@ -1,4 +1,4 @@
-"""Run SwarmMojo's real log, symbol, and recovery tools on a disposable fixture."""
+"""Run Swarmojo's real log, symbol, and recovery tools on a disposable fixture."""
 from __future__ import annotations
 
 import argparse
@@ -144,7 +144,7 @@ def _summary(report: dict[str, Any]) -> str:
     log = report["log"]
     symbol = report["symbol"]
     return "\n".join([
-        "SwarmMojo: find the failure, locate the code, restore the working file.",
+        "Swarmojo: find the failure, locate the code, restore the working file.",
         "A disposable invoice example. No model, downloads, or project files required.",
         "",
         "PASS  Original invoice check: 1550 cents.",
@@ -171,7 +171,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.json:
             print(json.dumps({"schema_version": 1, "status": "failed", "error": str(error)}))
         else:
-            print(f"SwarmMojo demo failed: {error}", file=sys.stderr)
+            print(f"Swarmojo demo failed: {error}", file=sys.stderr)
         return 1
     print(json.dumps(report, indent=2) if args.json else _summary(report))
     return 0

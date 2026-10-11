@@ -1,4 +1,4 @@
-"""Desktop Automation Bridge compatibility module for SwarmMojo by Buzburg AI.
+"""Desktop Automation Bridge compatibility module for Swarmojo by Buzburg AI.
 
 All desktop automation logic is maintained in `app.meta.desktop_bridge`.
 This module provides backward-compatible exports.

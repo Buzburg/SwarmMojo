@@ -1,4 +1,4 @@
-"""Fleet Herd Immunity Engine compatibility module for SwarmMojo by Buzburg AI.
+"""Fleet Herd Immunity Engine compatibility module for Swarmojo by Buzburg AI.
 
 All herd immunity logic is maintained in `app.meta.herd_immunity`.
 This module provides backward-compatible exports.

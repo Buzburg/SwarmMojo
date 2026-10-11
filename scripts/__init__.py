@@ -1,1 +1,1 @@
-"""Package utilities for SwarmMojo by Buzburg AI."""
+"""Package utilities for Swarmojo by Buzburg AI."""

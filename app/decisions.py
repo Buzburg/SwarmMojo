@@ -1,4 +1,4 @@
-"""Compatibility stub for SwarmMojo decisions module pending upgraded Decision Maker AI engine."""
+"""Compatibility stub for Swarmojo decisions module pending upgraded Decision Maker AI engine."""
 from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict
@@ -11,7 +11,7 @@ def evaluate_decision(*args: Any, **kwargs: Any) -> Dict[str, Any]:
     return {
         "status": "abstained",
         "choice": None,
-        "engine": "SwarmMojo Decision Maker",
+        "engine": "Swarmojo Decision Maker",
         "abstention_reasons": ["evidence_missing"],
         "probabilities": {},
     }

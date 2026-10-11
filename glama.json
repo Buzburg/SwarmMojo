@@ -3,7 +3,7 @@
   "maintainers": [
     "Buzburg"
   ],
-  "name": "SwarmMojo",
+  "name": "Swarmojo",
   "description": "Full-fledged local-first AI agent harness combining ROMS (RAG, Open Knowledge Files, MCP, Skills), Decision AI, correction memory, and reviewable workflow preparation.",
   "categories": [
     "memory",

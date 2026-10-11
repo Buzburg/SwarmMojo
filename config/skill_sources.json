@@ -16,7 +16,7 @@
       "bytes": 1276,
       "upstream_sha256": "7509fcc3ea1dda46511b2801996305bf3d4a125576f9655ff0b63df25602f446",
       "upstream_bytes": 3076,
-      "adaptation": "SwarmMojo checklist adapted from the pinned upstream role; not an exact copy"
+      "adaptation": "Swarmojo checklist adapted from the pinned upstream role; not an exact copy"
     },
     {
       "name": "agency-software-architect",
@@ -27,7 +27,7 @@
       "bytes": 1293,
       "upstream_sha256": "b85121691776147bacde26673e68fbbacd6a7f0816d1ca8e203c264d25ce1d30",
       "upstream_bytes": 6485,
-      "adaptation": "SwarmMojo checklist adapted from the pinned upstream role; not an exact copy"
+      "adaptation": "Swarmojo checklist adapted from the pinned upstream role; not an exact copy"
     },
     {
       "name": "agency-technical-writer",
@@ -38,7 +38,7 @@
       "bytes": 1259,
       "upstream_sha256": "bf5c809977e10904b988ab8b218853ce8dfa38b2cbd89a7d2cfadba44ac25761",
       "upstream_bytes": 14214,
-      "adaptation": "SwarmMojo checklist adapted from the pinned upstream role; not an exact copy"
+      "adaptation": "Swarmojo checklist adapted from the pinned upstream role; not an exact copy"
     }
   ]
 }

@@ -1,6 +1,6 @@
-# SwarmMojo component map
+# Swarmojo component map
 
-SwarmMojo is a general-purpose agent harness organized around a Decision Maker, RAG, OKF, MCP and Skills. The preparation layer combines these inputs into a reviewable proposal. Supporting modules provide project memory, diagnostics and optional execution integrations.
+Swarmojo is a general-purpose agent harness organized around a Decision Maker, RAG, OKF, MCP and Skills. The preparation layer combines these inputs into a reviewable proposal. Supporting modules provide project memory, diagnostics and optional execution integrations.
 
 “Implemented” means the referenced code provides the described operation. It does not mean every environment or workload has been tested. Linked reports record their own dates, fixtures, dependencies and limitations; some describe older revisions. The portable Python path has Windows and Linux checks. macOS remains unverified.
 

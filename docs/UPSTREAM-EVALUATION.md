@@ -1,15 +1,15 @@
 # Sovereign Architecture & Engine Evaluation
 
-**SwarmMojo by Buzburg AI**  
+**Swarmojo by Buzburg AI**  
 *Maintainer:* Buzburg AI (`buzburgai@gmail.com`)
 
-SwarmMojo maintains complete architectural sovereignty. It avoids dependencies on external agent frameworks, cloud orchestrators, or third-party wrappers, relying instead on 19 native Buzburg AI mathematical engines and over 40 compiled Mojo SIMD kernels.
+Swarmojo maintains complete architectural sovereignty. It avoids dependencies on external agent frameworks, cloud orchestrators, or third-party wrappers, relying instead on 19 native Buzburg AI mathematical engines and over 40 compiled Mojo SIMD kernels.
 
 ---
 
 ## 1. Sovereign Architecture Invariants
 
-SwarmMojo enforces five foundational architectural invariants:
+Swarmojo enforces five foundational architectural invariants:
 
 1. **Sub-Millisecond System-1 Triage (`mojo-fastgate`)**:
    Deterministic 256-dimensional phase embeddings evaluated in SIMD Mojo kernels triage tool capabilities in under 50 microseconds, completely bypassing expensive LLM reasoning turns for basic routing.
@@ -52,7 +52,7 @@ SwarmMojo enforces five foundational architectural invariants:
 
 ## 3. Sovereign Deployment Guarantee
 
-SwarmMojo is 100% locally sovereign:
+Swarmojo is 100% locally sovereign:
 - Operates fully air-gapped without external cloud telemetries or databases.
 - Supports heterogeneous local model inference (Ollama, LM Studio, vLLM, Native, RWKV7).
 - Preserves all licenses, proofs, and developer artifacts on the operator's machine.

@@ -1,4 +1,4 @@
-"""Unit tests for SwarmMojo's 10 specialized engines and FastMCP engine tools."""
+"""Unit tests for Swarmojo's 10 specialized engines and FastMCP engine tools."""
 
 import json
 from pathlib import Path
@@ -51,13 +51,13 @@ def test_titans_memory(tmp_path: Path):
     mem.init()
     
     # Test write/memorize
-    loss = mem.write("SwarmMojo combines ROMS, Aeon, PolyHarness, and 10 engines.", key="swarmmojo_core")
+    loss = mem.write("Swarmojo combines ROMS, Aeon, PolyHarness, and 10 engines.", key="swarmojo_core")
     assert isinstance(loss, float)
 
     # Test read/recall
-    results = mem.read("SwarmMojo engines")
+    results = mem.read("Swarmojo engines")
     assert len(results) >= 1
-    assert "swarmmojo_core" == results[0]["key"]
+    assert "swarmojo_core" == results[0]["key"]
 
 
 def test_toolcall_repair():
@@ -124,18 +124,18 @@ def test_fastgate_tool_triage():
 
 def test_compact_kv_scratchpad(tmp_path: Path):
     mgr = CompactKVManager(root=str(tmp_path))
-    mgr.init("Implement local engines in SwarmMojo")
+    mgr.init("Implement local engines in Swarmojo")
 
-    assert mgr.add_fact("SwarmMojo engine suite verified.")
+    assert mgr.add_fact("Swarmojo engine suite verified.")
     # Deduplicate check
-    assert not mgr.add_fact("SwarmMojo engine suite verified.")
+    assert not mgr.add_fact("Swarmojo engine suite verified.")
 
     mgr.set_hypothesis("Integrate native Mojo kernels into app_mojo/")
     mgr.touch_file("roms.py")
 
     preamble = mgr.generate_compact_preamble()
     assert "COMPACT-KV" in preamble
-    assert "SwarmMojo engine suite verified." in preamble
+    assert "Swarmojo engine suite verified." in preamble
     assert "roms.py" in preamble
 
 
@@ -175,7 +175,7 @@ def test_path_carry_safety_audit(tmp_path: Path):
 def test_localdoc_search_chunking():
     doc = (
         "Heading 1\n"
-        "This is paragraph one explaining how SwarmMojo orchestrates autonomous agents.\n\n"
+        "This is paragraph one explaining how Swarmojo orchestrates autonomous agents.\n\n"
         "Heading 2\n"
         "This is paragraph two explaining the high-speed local engines.\n"
     )
@@ -183,7 +183,7 @@ def test_localdoc_search_chunking():
     assert len(passages) >= 2
     assert passages[0].source == "guide.md"
 
-    matches = keyword_search(passages, "SwarmMojo engines", limit=2)
+    matches = keyword_search(passages, "Swarmojo engines", limit=2)
     assert len(matches) >= 1
 
 

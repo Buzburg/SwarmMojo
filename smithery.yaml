@@ -1,4 +1,4 @@
-# MCP registry manifest for SwarmMojo; no registry deployment is automatic.
+# MCP registry manifest for Swarmojo; no registry deployment is automatic.
 startCommand:
   type: stdio
   configSchema:

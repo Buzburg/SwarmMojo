@@ -1,4 +1,4 @@
-"""Omnipresent Dispatcher compatibility module for SwarmMojo by Buzburg AI.
+"""Omnipresent Dispatcher compatibility module for Swarmojo by Buzburg AI.
 
 All omnipresent dispatch logic is maintained in `app.meta.omnipresent_dispatcher`.
 This module provides backward-compatible exports.

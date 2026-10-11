@@ -1,6 +1,6 @@
-"""Execution Environment Sandbox for SwarmMojo MetaHarness.
+"""Execution Environment Sandbox for Swarmojo MetaHarness.
 
-Binds workspace execution to SwarmMojo specialized engines:
+Binds workspace execution to Swarmojo specialized engines:
 - Rewind: Automatic microsecond checkpoints before file mutations
 - PathCarry: Cross-platform reserved-name, illegal-character, and traversal audit
 - Sieve: Compaction of tool and terminal logs (95%+ noise reduction)

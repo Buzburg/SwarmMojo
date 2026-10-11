@@ -1,4 +1,4 @@
-"""Fluent Builders for Custom Agents, Environments, and Teams in SwarmMojo MetaHarness."""
+"""Fluent Builders for Custom Agents, Environments, and Teams in Swarmojo MetaHarness."""
 from __future__ import annotations
 
 import json

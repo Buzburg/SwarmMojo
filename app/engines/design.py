@@ -1,4 +1,4 @@
-"""Design Agent Engine for SwarmMojo by Buzburg AI.
+"""Design Agent Engine for Swarmojo by Buzburg AI.
 
 High-craft UI, GUI, and Website generation engine:
 - Buzburg Impeccable Craft Floor: WCAG AAA contrast, typographic measures, subtle depth, zero-halo shadows
@@ -186,7 +186,7 @@ class DesignAgentEngine:
             {"icon": "⚡", "title": "Microsecond Execution", "description": "Native Mojo-accelerated kernels delivering sub-10 µs symbol indices and tool triage."},
             {"icon": "🛡️", "title": "StateFresh OCC", "description": "Optimistic concurrency control with cryptographic fingerprinting to prevent stale overwrites."},
             {"icon": "🧠", "title": "Associative Memory", "description": "512-dimensional phase-vector memory with surprise-gated Titans test-time learning."},
-            {"icon": "🎬", "title": "Directorial Studio", "description": "Multimodal video pipelines with 70mm camera rigs and ComfyUI graph synthesis."},
+            {"icon": "🎬", "title": "Directorial Studio", "description": "Multimodal video pipelines with 70mm camera rigs and diffusion graph synthesis."},
         ]
 
         metric_list = metrics or [
@@ -207,7 +207,7 @@ class DesignAgentEngine:
         )
 
         hero = UIComponentRegistry.render_hero(
-            badge="SwarmMojo Autonomous Engine",
+            badge="Swarmojo Autonomous Engine",
             title=headline,
             subtitle=subheadline,
             primary_cta="Get Started Free",
@@ -743,7 +743,7 @@ td {{
 
     def build_herald_hud(
         self,
-        system_title: str = "SwarmMojo Sovereign OS",
+        system_title: str = "Swarmojo Sovereign OS",
         agents_roster: Optional[List[Dict[str, Any]]] = None,
         live_dag_milestones: Optional[List[Dict[str, str]]] = None,
     ) -> Dict[str, Any]:
@@ -1203,7 +1203,7 @@ body {{
 [00:00:01.018] [FastgateTriage] 256-dim phase vector router mapped tools in 18 µs.
 [00:00:01.042] [DaedalusArchitect] Pi exact substring edit committed with Rewind snapshot #snap-482.
 [00:00:01.065] [VitruviusDesign] Sovereign glassmorphism theme compiled with Impeccable contrast floor.
-[00:00:01.092] [LumiereStudio] ComfyUI Flux graph exported for 16:9 4K render.
+[00:00:01.092] [LumiereStudio] Diffusion Flux graph exported for 16:9 4K render.
 [00:00:01.115] [OrwellScribe] Ghost Protocol passed: 0 banned clichés, sentence variance = 8.4.
 [00:00:01.128] [MojoDrift] Angular trajectory: 4.2° (SAFE &lt; 65°). Status: VERIFIED.
           </div>
@@ -1240,7 +1240,7 @@ body {{
 
 
 # -------------------------------------------------------------------------
-# Photocraft Layered Canvas Engine & Liquid Glass Material System
+# Visual Canvas Engine & Optical Glass Material System
 # -------------------------------------------------------------------------
 
 @dataclass

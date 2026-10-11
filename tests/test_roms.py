@@ -191,7 +191,7 @@ def test_skills_loader():
 
 def test_mcp_registration():
     """Verifies FastMCP exposes all expected tools and resources."""
-    assert mcp.name in ("SwarmMojo", "ROMS-Engine")
+    assert mcp.name in ("Swarmojo", "SwarmMojo", "ROMS-Engine")
 
 
 def test_prompt_builder_grounding_and_deduplication():

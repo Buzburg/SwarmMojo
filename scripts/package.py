@@ -1,4 +1,4 @@
-"""Packaging manifests and file listing for SwarmMojo by Buzburg AI."""
+"""Packaging manifests and file listing for Swarmojo by Buzburg AI."""
 from __future__ import annotations
 from pathlib import Path
 from typing import Set

@@ -1,6 +1,6 @@
 # Compact specialist playbooks
 
-SwarmMojo includes concise specialist review and architecture playbooks by Buzburg AI. The [source manifest](../config/skill_sources.json) tracks file byte counts and checksums.
+Swarmojo includes concise specialist review and architecture playbooks by Buzburg AI. The [source manifest](../config/skill_sources.json) tracks file byte counts and checksums.
 
 | Skill name | Intended use | Input size |
 | --- | --- | --- |
@@ -12,7 +12,7 @@ The three files total **3,828 bytes**, down from 23,775 bytes of imported prose 
 
 Select them in a harness request's `skills` array, or read them through MCP `skills://{skill_name}`. The [review example](../examples/code-review-request.json) loads the small review playbook. It supplies example observations rather than inspecting a real project; replace them with your actual evidence.
 
-These checklists are untrusted context, not trained agents, execution capabilities or factual evidence. SwarmMojo keeps their content outside decision scoring. They do not broaden the operator's instructions or grant permission to change, execute or publish anything.
+These checklists are untrusted context, not trained agents, execution capabilities or factual evidence. Swarmojo keeps their content outside decision scoring. They do not broaden the operator's instructions or grant permission to change, execute or publish anything.
 
 The shared context budget applies. A long playbook can be truncated or omitted when evidence and retrieved excerpts consume the budget; inspect `context.coverage`. Select one relevant role at a time, preserve source references and evaluate its usefulness on representative tasks before expanding the collection.
 

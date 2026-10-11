@@ -1,4 +1,4 @@
-"""FastMCP Tool Registrations for SwarmMojo Specialized Engines.
+"""FastMCP Tool Registrations for Swarmojo Specialized Engines.
 
 Exposes Buzburg AI specialized engines as native FastMCP tools:
 - Symdex: High-speed symbol & call-graph lookup (<20 µs)
@@ -415,7 +415,7 @@ def register_engine_tools(server: FastMCP) -> None:
 
     @server.tool()
     def design_build_herald_hud(
-        system_title: str = "SwarmMojo Herald OS",
+        system_title: str = "Swarmojo Herald OS",
         roster_json: str = "[]",
         milestones_json: str = "[]",
     ) -> str:

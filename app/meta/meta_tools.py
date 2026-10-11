@@ -1,4 +1,4 @@
-"""FastMCP Tool Registrations for SwarmMojo MetaHarness."""
+"""FastMCP Tool Registrations for Swarmojo MetaHarness."""
 from __future__ import annotations
 
 import json

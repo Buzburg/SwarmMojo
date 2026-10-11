@@ -1,4 +1,4 @@
-"""Transactional Code Ledger and Repository Codemap for SwarmMojo by Buzburg AI.
+"""Transactional Code Ledger and Repository Codemap for Swarmojo by Buzburg AI.
 
 Transactional repository codemap and atomic change ledger architecture by Buzburg AI:
 - Hierarchical repository codemap extraction (modules, symbols, imports, line boundaries)

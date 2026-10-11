@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Compatibility entry point for SwarmMojo; existing ROMS commands remain available.
+Compatibility entry point for Swarmojo; existing ROMS commands remain available.
 Usage:
   python roms.py harness --request examples/harness-request.json
   python roms.py mcp                  # Launch the configured MCP server
@@ -140,13 +140,13 @@ def run_entry():
         engine = DesignAgentEngine()
         subcmd = sys.argv[2] if len(sys.argv) > 2 else "landing"
         if subcmd == "landing":
-            proj = sys.argv[3] if len(sys.argv) > 3 else "SwarmMojo"
+            proj = sys.argv[3] if len(sys.argv) > 3 else "Swarmojo"
             head = sys.argv[4] if len(sys.argv) > 4 else "Autonomous Multi-Agent AI Harness"
             subhead = sys.argv[5] if len(sys.argv) > 5 else "Sub-microsecond Mojo acceleration with Impeccable UI craft"
             res = engine.build_landing_page(project_name=proj, headline=head, subheadline=subhead)
             print(json.dumps(res, indent=2))
         elif subcmd == "dashboard":
-            title = sys.argv[3] if len(sys.argv) > 3 else "SwarmMojo"
+            title = sys.argv[3] if len(sys.argv) > 3 else "Swarmojo"
             res = engine.build_admin_dashboard(
                 dashboard_title=title,
                 stats=[
@@ -162,7 +162,7 @@ def run_entry():
             )
             print(json.dumps(res, indent=2))
         elif subcmd == "hud":
-            title = sys.argv[3] if len(sys.argv) > 3 else "SwarmMojo Herald OS"
+            title = sys.argv[3] if len(sys.argv) > 3 else "Swarmojo Herald OS"
             res = engine.build_herald_hud(system_title=title)
             print(json.dumps(res, indent=2))
         raise SystemExit(0)

@@ -1,4 +1,4 @@
-"""High-Craft Terminal Printing Press for SwarmMojo by Buzburg AI.
+"""High-Craft Terminal Printing Press for Swarmojo by Buzburg AI.
 
 Terminal typography and reporting architecture by Buzburg AI:
 - Beautiful terminal card formatting with rounded Unicode borders
@@ -109,7 +109,7 @@ class TerminalPressEngine:
         ]
         for k, v in metrics.items():
             lines.append(f"{k.ljust(20)}: {v}")
-        return self.format_box(title="SWARMMOJO AGENT VERIFICATION", content_lines=lines, style="rounded")
+        return self.format_box(title="SWARMOJO AGENT VERIFICATION", content_lines=lines, style="rounded")
 
 
 # Backward-compatible alias

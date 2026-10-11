@@ -1,4 +1,4 @@
-"""Tests for SwarmMojo Studio Agent Engine."""
+"""Tests for Swarmojo Studio Agent Engine."""
 from __future__ import annotations
 
 import json

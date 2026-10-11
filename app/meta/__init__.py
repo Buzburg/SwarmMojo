@@ -1,7 +1,7 @@
-"""SwarmMojo MetaHarness Package.
+"""Swarmojo MetaHarness Package.
 
 Multi-agent, multi-model orchestration harness supporting heterogeneous local models,
-declarative agent/environment builders, and SwarmMojo specialized engines by Buzburg AI.
+declarative agent/environment builders, and Swarmojo specialized engines by Buzburg AI.
 """
 from app.meta.manifest import AgentManifest, EnvironmentConfig, AgentTeamConfig
 from app.meta.models import ModelConfig, ModelRegistry, ModelClient

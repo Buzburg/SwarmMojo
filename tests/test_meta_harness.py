@@ -1,4 +1,4 @@
-"""Unit and integration tests for SwarmMojo MetaHarness."""
+"""Unit and integration tests for Swarmojo MetaHarness."""
 from __future__ import annotations
 
 import json

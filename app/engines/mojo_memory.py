@@ -1,4 +1,4 @@
-"""Mojo Phase-Vector Associative Memory for SwarmMojo.
+"""Mojo Phase-Vector Associative Memory for Swarmojo.
 
 Zero-dependency Python implementation of Buzburg/mojo-memory phase-vector algebra.
 Preserves lessons and evidence with median sub-10 ms recall.

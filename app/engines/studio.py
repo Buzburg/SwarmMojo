@@ -1,4 +1,4 @@
-"""Studio Agent Engine for SwarmMojo by Buzburg AI.
+"""Studio Agent Engine for Swarmojo by Buzburg AI.
 
 High-fidelity multimodal production suite for video, cinema, photography, and visual design:
 - Buzburg Directorial Optics: Grand Format 70mm, Modular 8K Cine, Super 35, Anamorphic, Vintage Prime, Tilt-Shift, Depth of Field
@@ -83,7 +83,7 @@ class StudioPromptCompiler:
         style_tags: Optional[List[str]] = None,
         negative_prompt: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Constructs an authoritative visual prompt ready for ComfyUI, Flux, Kling, or VEO."""
+        """Constructs an authoritative visual prompt ready for Flux, Kling, SDXL, or VEO."""
         cam_desc = CAMERA_PRESETS.get(camera, camera)
         lens_desc = LENS_PRESETS.get(lens, lens)
         light_desc = LIGHTING_PRESETS.get(lighting, lighting)
@@ -220,7 +220,7 @@ class DiffusionGraphBridge:
         guidance: float = 3.5,
         seed: Optional[int] = None,
     ) -> Dict[str, Any]:
-        """Constructs a production-ready ComfyUI API execution graph for Flux / SDXL."""
+        """Constructs a production-ready diffusion API execution graph for Flux / SDXL."""
         actual_seed = seed if seed is not None else int(time.time() * 1000) % 1_000_000_000
         return {
             "1": {
@@ -260,7 +260,7 @@ class DiffusionGraphBridge:
             },
             "7": {
                 "class_type": "SaveImage",
-                "inputs": {"filename_prefix": "SwarmMojo_Studio", "images": ["6", 0]},
+                "inputs": {"filename_prefix": "Swarmojo_Studio", "images": ["6", 0]},
             },
         }
 
@@ -292,14 +292,14 @@ class DiffusionGraphBridge:
             },
             "12": {
                 "class_type": "SaveAnimatedWEBP",
-                "inputs": {"filename_prefix": "SwarmMojo_Video", "fps": fps},
+                "inputs": {"filename_prefix": "Swarmojo_Video", "fps": fps},
             },
         }
 
     def check_status(self) -> Dict[str, Any]:
-        """Checks if local ComfyUI server is reachable."""
+        """Checks if local diffusion node server is reachable."""
         try:
-            req = urllib.request.Request(f"{self.host}/system_stats", headers={"User-Agent": "SwarmMojo"})
+            req = urllib.request.Request(f"{self.host}/system_stats", headers={"User-Agent": "Swarmojo"})
             with urllib.request.urlopen(req, timeout=2.0) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
                 return {"online": True, "host": self.host, "stats": data}
@@ -441,7 +441,7 @@ class StudioAgentEngine:
 
 
 # -------------------------------------------------------------------------
-# Director Studio, Video Intelligence, & Reasonix Engines
+# Directorial Studio, Video Intelligence, & Visual Verdict Engines
 # -------------------------------------------------------------------------
 
 @dataclass

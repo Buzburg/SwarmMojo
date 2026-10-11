@@ -1,4 +1,4 @@
-"""Command-Line Interface for SwarmMojo MetaHarness."""
+"""Command-Line Interface for Swarmojo MetaHarness."""
 from __future__ import annotations
 
 import argparse
@@ -22,7 +22,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     parser = argparse.ArgumentParser(
         prog="swarmmojo meta",
-        description="SwarmMojo MetaHarness: Multi-Agent & Multi-Model Orchestration Engine",
+        description="Swarmojo MetaHarness: Multi-Agent & Multi-Model Orchestration Engine",
     )
     subparsers = parser.add_subparsers(dest="command")
 
@@ -112,7 +112,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             print(json.dumps(report, indent=2))
         else:
             print(f"\n=======================================================")
-            print(f"SwarmMojo MetaHarness Execution: {report['team_name']}")
+            print(f"Swarmojo MetaHarness Execution: {report['team_name']}")
             print(f"Task: {report['task']}")
             print(f"Latency: {report['total_latency_ms']} ms | Mode: {report['mode']}")
             print(f"Participating Agents: {len(report['participating_agents'])}")

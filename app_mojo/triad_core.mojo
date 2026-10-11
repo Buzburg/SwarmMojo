@@ -2,7 +2,7 @@
 triad_core.mojo
 Native Mojo Pareto frontier dominance ranker and 3D multi-objective optimizer.
 Evaluates agent workflows across Reliability (pass rate), Duration (latency), and Cost (token expenditure).
-Adapted for Buzburg SwarmMojo.
+Adapted for Buzburg Swarmojo.
 """
 
 from std.collections import List

@@ -1,9 +1,9 @@
 # Sovereign Coding Engine & PTRM Reviewer Verification
 
-**SwarmMojo by Buzburg AI**  
+**Swarmojo by Buzburg AI**  
 *Maintainer:* Buzburg AI (`buzburgai@gmail.com`)
 
-This specification details the code review, symbol analysis, and patch validation architecture of the SwarmMojo coding guild.
+This specification details the code review, symbol analysis, and patch validation architecture of the Swarmojo coding guild.
 
 ---
 

@@ -1,4 +1,4 @@
-"""Automated Multi-Perspective Code Review Engine for SwarmMojo by Buzburg AI.
+"""Automated Multi-Perspective Code Review Engine for Swarmojo by Buzburg AI.
 
 Analyzes source code and git diffs across four dimensions:
 1. Security (injection, secret exposure, unconstrained execution, unsafe deserialization)

@@ -1,4 +1,4 @@
-"""High-Speed Desktop Automation Bridge for SwarmMojo by Buzburg AI.
+"""High-Speed Desktop Automation Bridge for Swarmojo by Buzburg AI.
 
 Deterministic desktop automation architecture by Buzburg AI:
 - Sub-50ms deterministic desktop interaction without expensive redundant AI visual calls

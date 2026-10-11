@@ -1,4 +1,4 @@
-"""Git Micro-Checkpoint Guard for SwarmMojo by Buzburg AI.
+"""Git Micro-Checkpoint Guard for Swarmojo by Buzburg AI.
 
 Zero-risk agent execution architecture by Buzburg AI:
 - Takes sub-millisecond git micro-checkpoints before agent edits or tool execution

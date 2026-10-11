@@ -1,4 +1,4 @@
-"""Unit tests for SwarmMojo sovereign engines and developer performance optimizations."""
+"""Unit tests for Swarmojo sovereign engines and developer performance optimizations."""
 from __future__ import annotations
 
 import os
@@ -166,9 +166,9 @@ def test_sovereign_terminal_press():
     press = TerminalPressEngine()
     card = press.format_box("Sovereign Fleet", ["All nodes synchronized."], width=60)
     assert "Sovereign Fleet" in card
-    kv = press.format_key_value({"Engine": "SwarmMojo", "Speed": "Sub-millisecond"})
+    kv = press.format_key_value({"Engine": "Swarmojo", "Speed": "Sub-millisecond"})
     assert "Engine" in kv
-    assert "SwarmMojo" in kv
+    assert "Swarmojo" in kv
 
 
 def test_parallel_tool_dispatcher():

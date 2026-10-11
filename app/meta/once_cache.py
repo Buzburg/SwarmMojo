@@ -1,4 +1,4 @@
-"""Execution deduplication cache compatibility module for SwarmMojo by Buzburg AI.
+"""Execution deduplication cache compatibility module for Swarmojo by Buzburg AI.
 
 All deduplication logic is maintained in `app.meta.dedup_cache`.
 This module provides backward-compatible exports.

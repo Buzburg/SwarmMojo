@@ -1,4 +1,4 @@
-"""Declarative Manifest schemas for SwarmMojo MetaHarness.
+"""Declarative Manifest schemas for Swarmojo MetaHarness.
 
 Enables building, exporting, validating, and sharing:
 - Agent manifests (specialist definitions, prompts, models, and tools)

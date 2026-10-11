@@ -1,8 +1,8 @@
 # Comprehensive Meta-Agent Architecture Comparison
 
-**SwarmMojo (Buzburg AI) vs. Conventional Cloud Orchestrators vs. Generic CLI Seat Wrappers**  
+**Swarmojo (Buzburg AI) vs. Conventional Cloud Orchestrators vs. Generic CLI Seat Wrappers**  
 *Author / Maintainer:* Buzburg AI (`buzburgai@gmail.com`)  
-*Repository:* [SwarmMojo](https://github.com/Buzburg/SwarmMojo)  
+*Repository:* [Swarmojo](https://github.com/Buzburg/Swarmojo)  
 *Date:* March 2026
 
 ---
@@ -12,13 +12,13 @@
 Autonomous agent architectures have evolved through three distinct paradigms:
 1. **Wave 1: Conventional Cloud Orchestrators:** Heavyweight web stacks wrapping LLMs with cloud databases, external ticketing workflows, and remote cloud bucket pipelines. While capable of high-level task tracking, they are burdened by 200–600ms network round-trip latencies, massive cloud dependencies, and zero mathematical safety verification.
 2. **Wave 2: Generic CLI Seat Wrappers:** Subprocess supervisors that spawn external terminal sessions in separate panes. Useful for basic process isolation, but fundamentally lacking token-level memory compression, real-time trajectory drift bounds, optimistic concurrency control, and transactional rollback.
-3. **Wave 3: Sub-Millisecond Native Meta-Harnesses (SwarmMojo by Buzburg AI):** A local-first, native Mojo SIMD-accelerated meta-harness driven by 17 specialized mathematical engines. SwarmMojo combines microsecond vector triage (`fastgate`), dual-weight neural associative memory (`titans`), 256-dimensional phase-space angular drift bounds (`mojo-drift`), optimistic concurrency control (`statefresh`), and microsecond transactional rollbacks (`mojo-agent-rewind`).
+3. **Wave 3: Sub-Millisecond Native Meta-Harnesses (Swarmojo by Buzburg AI):** A local-first, native Mojo SIMD-accelerated meta-harness driven by 17 specialized mathematical engines. Swarmojo combines microsecond vector triage (`fastgate`), dual-weight neural associative memory (`titans`), 256-dimensional phase-space angular drift bounds (`mojo-drift`), optimistic concurrency control (`statefresh`), and microsecond transactional rollbacks (`mojo-agent-rewind`).
 
 ---
 
 ## 2. High-Level Comparison Matrix
 
-| Architectural Dimension | **SwarmMojo (Buzburg AI)** | **Conventional Cloud Orchestrators** | **Generic CLI Seat Wrappers** |
+| Architectural Dimension | **Swarmojo (Buzburg AI)** | **Conventional Cloud Orchestrators** | **Generic CLI Seat Wrappers** |
 | :--- | :--- | :--- | :--- |
 | **Primary Philosophy** | Sub-millisecond local-first meta-harness with native Mojo SIMD acceleration | Cloud-hosted ticketing, multi-tier enterprise web app & remote deployment runner | Multi-seat terminal wrapper & basic CLI subprocess manager |
 | **Core Runtime** | **Mojo (SIMD v25+)** + **Python 3.11+** hybrid engine | Heavyweight Node.js, GraphQL, PostgreSQL web stacks | Basic Node/Python CLI subprocess supervisor |
@@ -38,8 +38,8 @@ Autonomous agent architectures have evolved through three distinct paradigms:
 
 ## 3. Deep-Dive Architectural Analysis
 
-### 3.1. SwarmMojo by Buzburg AI
-SwarmMojo was engineered from first principles to overcome the fundamental bottlenecks of autonomous systems:
+### 3.1. Swarmojo by Buzburg AI
+Swarmojo was engineered from first principles to overcome the fundamental bottlenecks of autonomous systems:
 
 1. **Sub-Millisecond System-1 Triage (`fastgate` & `micro-toolcall`):**
    Deterministic 256-dimensional phase embeddings evaluated in SIMD Mojo kernels (`fastgate_core.mojo`) triage tool candidates in under 50 microseconds without consuming LLM tokens.
@@ -65,7 +65,7 @@ SwarmMojo was engineered from first principles to overcome the fundamental bottl
 
 ## 4. Benchmark & Performance Summary
 
-| Metric | SwarmMojo (Buzburg AI) | Conventional Cloud Orchestrators | Generic CLI Seat Wrappers |
+| Metric | Swarmojo (Buzburg AI) | Conventional Cloud Orchestrators | Generic CLI Seat Wrappers |
 | :--- | :--- | :--- | :--- |
 | **Tool Triage Throughput** | **> 20,000 ops/sec** (Mojo SIMD) | ~ 20 ops/sec | ~ 50 ops/sec |
 | **Vector Similarity (256-dim)** | **~ 12 nanoseconds** | ~ 450 microseconds | ~ 320 microseconds |
@@ -79,7 +79,7 @@ SwarmMojo was engineered from first principles to overcome the fundamental bottl
 
 ## 5. Conclusion & Sovereign Autonomy
 
-SwarmMojo delivers what modern autonomous systems need:
+Swarmojo delivers what modern autonomous systems need:
 1. **Speed:** Microsecond-tier native Mojo compilation where it counts.
 2. **Reliability:** Zero-hallucination mathematical bounds ($\theta < 80^\circ$) preventing agent runaway.
 3. **Versatility:** Six sovereign specialist guilds operating inside the Herald HUD.

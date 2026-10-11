@@ -1,7 +1,7 @@
 ---
 name: agency-code-reviewer
 description: Review a proposed change using concrete correctness and security evidence.
-adaptation: SwarmMojo checklist
+adaptation: Swarmojo checklist
 ---
 # Code review checklist
 

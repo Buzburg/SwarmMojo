@@ -1,3 +1,3 @@
-"""SwarmMojo: RAG + OKF + MCP + Skills All-In-One Agentic Server."""
+"""Swarmojo: RAG + OKF + MCP + Skills All-In-One Agentic Server."""
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
