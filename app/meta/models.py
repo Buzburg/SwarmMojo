@@ -1,7 +1,7 @@
 """Multi-model router and provider client for SwarmMojo MetaHarness.
 
 Supports:
-- Local endpoints: Ollama, LM Studio, vLLM, SGLang / mSGL, RWKV-7
+- Local endpoints: Ollama, LM Studio, vLLM, Deep Reasoner, RWKV-7
 - Generic OpenAI-compatible endpoints (local or remote)
 - Deterministic mock execution for offline testing and bounded evaluations
 - Heterogeneous model routing: different agents can use different local models
@@ -20,7 +20,7 @@ import httpx
 class ModelConfig:
     """Configuration for an LLM model backend."""
     model_id: str
-    backend: str = "mock"  # "ollama", "lmstudio", "vllm", "sglang", "rwkv", "openai_compatible", "mock"
+    backend: str = "mock"  # "ollama", "lmstudio", "vllm", "rwkv", "openai_compatible", "mock"
     base_url: str = "http://localhost:11434/v1"
     api_key: str = "local"
     temperature: float = 0.2
@@ -76,11 +76,11 @@ DEFAULT_PROFILES: Dict[str, ModelConfig] = {
         base_url="http://localhost:8000/v1",
         api_key="vllm",
     ),
-    "sglang-local": ModelConfig(
+    "deep-reasoner-local": ModelConfig(
         model_id="default",
-        backend="sglang",
-        base_url="http://localhost:30000/v1",
-        api_key="sglang",
+        backend="openai_compatible",
+        base_url="http://localhost:18084/v1",
+        api_key="local",
     ),
     "rwkv-local": ModelConfig(
         model_id="rwkv7",

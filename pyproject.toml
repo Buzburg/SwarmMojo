@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "SwarmMojo"
 version = "1.0.0"
-description = "Full-fledged local-first AI agent harness combining ROMS, Swarm Mojo (Aeon specialist reviews, workflow rehearsal, mSGL), and PolyHarness."
+description = "Full-fledged local-first AI agent harness combining ROMS, Swarm Mojo (Aeon specialist reviews, workflow rehearsal), and PolyHarness."
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [

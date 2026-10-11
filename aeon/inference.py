@@ -80,35 +80,37 @@ Do not retry an unchanged failed action. No hidden tools, shell strings, or inve
 Tool definitions: """ + packed({k: {a: ("string[]" if t is list else "integer" if t is int else "string") for a,t in v.items()} for k,v in SPECS.items()})
 
 
-class SGLang:
+class NativeBackend:
+    """Standard native and chat completions backend for SwarmMojo."""
+
     def __init__(self, profile, timeout=120, max_tokens=2048):
         self.profile = profile
-        self.url = profile["endpoint"].rstrip("/")
+        self.url = profile.get("endpoint", "http://127.0.0.1:8000").rstrip("/")
         if self.url.endswith("/v1"):
             self.url = self.url[:-3]
         self.timeout, self.max_tokens = timeout, max_tokens
-        self.key = os.environ.get(profile.get("key_env", "SGLANG_API_KEY"), "")
+        self.key = os.environ.get(profile.get("key_env", "API_KEY"), "")
 
     def call(self, path, body=None):
-        return request_json(self.url+path, body, self.key, self.timeout)
+        return request_json(self.url + path, body, self.key, self.timeout)
 
     def info(self):
         return self.call("/model_info")
 
     def decide(self, goal, events, hints):
-        model = self.profile.get("served_model_name") or self.profile["model_path"]
+        model = self.profile.get("served_model_name") or self.profile.get("model_path")
         if not model:
             raise InferenceError("Configure an exact model_path for this profile")
         messages = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt_payload(goal, events, hints)}]
         if self.profile.get("transport", "native") == "native":
             info = self.info()
             if model not in {info.get("model_path"), info.get("served_model_name")}:
-                raise InferenceError("SGLang serves a different model; check profile or served_model_name")
+                raise InferenceError("Model endpoint serves a different model; check profile or served_model_name")
             tokenized = self.call("/v1/tokenize", {"model": model, "messages": messages,
                 "chat_template_kwargs": self.profile.get("chat_template_kwargs", {"enable_thinking": False})})
             tokens = tokenized.get("tokens")
-            if not isinstance(tokens, list) or not tokens or any(type(x) is not int or x<0 for x in tokens):
-                raise InferenceError("SGLang returned invalid token IDs")
+            if not isinstance(tokens, list) or not tokens or any(type(x) is not int or x < 0 for x in tokens):
+                raise InferenceError("Model returned invalid token IDs")
             limit = self.profile.get("context_length", 8192)
             reported = tokenized.get("max_model_len")
             if type(reported) is int and reported > 0:
@@ -119,16 +121,17 @@ class SGLang:
                 "temperature": 0, "max_new_tokens": self.max_tokens, "json_schema": packed(decision_schema())}})
             meta = result.get("meta_info", {})
             if not isinstance(meta, dict):
-                raise InferenceError("Invalid SGLang metadata")
+                raise InferenceError("Invalid model metadata")
             finish = meta.get("finish_reason") or {}
             if not isinstance(finish, dict):
-                raise InferenceError("Invalid SGLang finish reason")
+                raise InferenceError("Invalid model finish reason")
             if finish.get("type") in {"length", "abort"}:
                 raise InferenceError("Generation was truncated or aborted; no action executed")
             text = result.get("text")
             usage = {k: meta.get(k, 0) for k in ("prompt_tokens", "completion_tokens", "cached_tokens")}
-        elif self.profile["transport"] == "chat":
-            result = self.call("/v1/chat/completions", {"model": model, "messages": messages,
+        elif self.profile.get("transport") == "chat":
+            path = "/chat/completions" if self.url.endswith("/v1") else "/v1/chat/completions"
+            result = self.call(path, {"model": model, "messages": messages,
                 "temperature": 0, "max_tokens": self.max_tokens})
             try:
                 choice = result["choices"][0]
@@ -147,22 +150,24 @@ class SGLang:
         return decision, usage
 
 
+# Backward-compatible alias
+SGLang = NativeBackend
+
+
 def make_backend(profile: dict, timeout: int = 120, max_tokens: int = 2048):
     """Select a configured transport without changing its execution permissions."""
-    if profile.get("transport", "native") == "msgl":
-        from .msgl import MSGL
-        return MSGL(profile, timeout, max_tokens)
-    return SGLang(profile, timeout, max_tokens)
+    return NativeBackend(profile, timeout, max_tokens)
 
 
 def jev_choice(config, goal, candidates):
     """One batch of indexed choices, including abstention; no free-form actions."""
-    key = os.environ.get(config["key_env"], "")
+    key = os.environ.get(config.get("key_env", "API_KEY"), "")
     if not key:
         raise InferenceError("Jev enabled but its API key is missing")
     criteria = {str(i): candidate for i, candidate in enumerate(candidates)}
     criteria["abstain"] = "No exact match; needs open-ended reasoning or text generation"
-    result = request_json(config["endpoint"], {"model": "jev-latest", "state": {"goal": goal},
+    endpoint = config.get("endpoint") or (config.get("url", "") + "/route")
+    result = request_json(endpoint, {"model": "jev-latest", "state": {"goal": goal},
         "questions": {"route": {"type": "choice", "criteria": criteria,
             "instructions": "Choose only if the candidate fulfills the entire user goal; otherwise abstain."}}}, key, 20)
     try:
@@ -171,11 +176,12 @@ def jev_choice(config, goal, candidates):
         values = [*probabilities.values(), confidence]
         valid = (choice in criteria and set(probabilities) == set(criteria)
                  and all(type(n) in (int, float) and math.isfinite(n) and 0 <= n <= 1 for n in values)
-                 and abs(sum(probabilities.values())-1)<0.02
-                 and probabilities[choice] >= max(probabilities.values())-1e-6)
+                 and abs(sum(probabilities.values()) - 1) < 0.02
+                 and probabilities[choice] >= max(probabilities.values()) - 1e-6)
         if not valid:
             raise ValueError()
-        if choice == "abstain" or min(confidence, probabilities[choice]) < config["threshold"]:
+        threshold = config.get("threshold", 0.8)
+        if choice == "abstain" or min(confidence, probabilities[choice]) < threshold:
             return None
         return int(choice)
     except (KeyError, TypeError, ValueError):

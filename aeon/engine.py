@@ -7,7 +7,6 @@ from .inference import InferenceError, SGLang, SYSTEM, jev_choice, make_backend
 from .memory import compact, digest, packed
 from .planner import local_plan, resolve_local
 from .tools import READ_TOOLS, Tools, validate_action
-from .decisions import DecisionClient, route
 from .recovery import diagnose, redact, repeated_failure
 from . import supervisor
 from . import requirements as requirement_checks
@@ -103,16 +102,7 @@ class Harness:
         session = self.memory.session(sid)
         calls, steps = session["llm_calls"], session["steps"]
         judge = None
-        options = self.config.get('decisions', {})
-        if not offline and options.get('enabled') and isinstance(self.backend, SGLang) and self.backend.profile.get('transport', 'native') == 'native':
-            def count_decision():
-                used = self.memory.session(sid)['decision_calls']
-                if used >= options['max_calls']:
-                    raise InferenceError('Decision-call budget reached')
-                self.memory.update(sid, decision_calls=used+1)
-            judge = DecisionClient(self.backend, options['max_calls']-session['decision_calls'],
-                                   options['cache_seconds'], count_decision)
-        self.tools.judge = judge
+        self.tools.judge = None
 
         def finish(answer, verification='tool_results'):
             model_reported = verification == 'model_reported'
@@ -167,25 +157,6 @@ class Harness:
                 local, intent = True, None
             elif selected['source'] != 'model_required':
                 actions, local, intent = selected['actions'], True, selected['intent']
-            elif judge and options.get('routing') != 'off':
-                try:
-                    routed = route(judge, goal, options['threshold'], options['margin'])
-                    self.memory.event(sid, 'routing', {'source': 'local_sglang', 'mode': options['routing'], **routed})
-                    if routed['accepted'] and options['routing'] == 'auto':
-                        intent, actions = local_plan(routed['goal'])
-                        local = True
-                except (RuntimeError, ValueError) as exc:
-                    self.memory.event(sid, 'routing', {'source': 'local_sglang', 'error': str(exc)})
-            elif self.config["jev"]["enabled"] and not offline:
-                candidates = ["inspect project", "git status", "desktop status", "system status", "list files"]
-                try:
-                    index = jev_choice(self.config["jev"], goal, candidates)
-                    self.memory.event(sid, "routing", {"source": "jev", "choice": index})
-                    if index is not None:
-                        intent, actions = local_plan(candidates[index])
-                        local = True
-                except InferenceError as exc:
-                    self.memory.event(sid, "routing", {"source": "jev", "error": str(exc)})
         if local and steps + len(actions) > settings['max_steps']:
             return self.result(sid, 'budget_exhausted', 'The complete local plan exceeds the remaining tool-step budget; no remaining actions executed.')
         self.memory.update(sid, status="active")

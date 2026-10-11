@@ -15,18 +15,12 @@ from .tools import bounded_process
 
 def launch_plan(config, name):
     profile = config["models"][name]
-    if profile.get("transport") == "msgl":
-        return {"profile": name, "transport": "msgl", "argv": [],
-                "endpoint": profile.get("endpoint"), "external_runtime": True,
-                "issues": ["Start mSGL separately using its own runtime instructions; Swarm Mojo does not launch it"],
-                "note": "Experimental plain-text completions only; see docs/MSGL.md. No chat templates or native SGLang scoring."}
     memory = config["hardware"]
     raw_gib = profile["parameters_b"] * 1e9 * profile["weight_bits"] / 8 / 2**30
     available = memory["unified_memory_gib"] - memory["reserve_memory_gib"]
     endpoint = urlparse(profile["endpoint"])
-    argv = [sys.executable, "-m", "sglang.launch_server", "--model-path", profile["model_path"],
-            "--host", "127.0.0.1", "--port", str(endpoint.port or 30000),
-            "--context-length", str(profile["context_length"])] + profile.get("launch_args", [])
+    argv = [sys.executable, "-m", "vllm.entrypoints.openai.api_server", "--model", profile["model_path"],
+            "--host", "127.0.0.1", "--port", str(endpoint.port or 30000)] + profile.get("launch_args", [])
     if profile.get("served_model_name"):
         argv += ["--served-model-name", profile["served_model_name"]]
     issues = []
@@ -35,7 +29,7 @@ def launch_plan(config, name):
     if raw_gib >= available:
         issues.append("Raw weights exceed the configured memory budget; choose a supported quantized checkpoint or remote endpoint")
     if endpoint.hostname not in {"127.0.0.1", "localhost", "::1"}:
-        issues.append("This is a remote endpoint; launch SGLang on that server")
+        issues.append("This is a remote endpoint; launch server on that remote host")
     return {"profile": name, "argv": argv, "raw_weight_gib": round(raw_gib, 2),
             "available_budget_gib": available, "issues": issues,
             "note": profile.get("note", "Kernel and memory availability must be checked on the target machine"),
@@ -44,7 +38,7 @@ def launch_plan(config, name):
 
 def doctor():
     result = {"os": platform.system(), "python": platform.python_version(),
-              "sglang_installed": importlib.util.find_spec("sglang") is not None,
+              "vllm_installed": importlib.util.find_spec("vllm") is not None,
               "hyprctl": bool(shutil.which("hyprctl")), "rocminfo": bool(shutil.which("rocminfo")),
               "git": bool(shutil.which("git"))}
     if importlib.util.find_spec("torch"):

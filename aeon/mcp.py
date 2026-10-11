@@ -8,9 +8,14 @@ import tempfile
 import threading
 
 from . import __version__, evidence
-from .decisions import validate_question
 from .recovery import redact
 from .tools import Tools
+
+
+def validate_question(question):
+    if not isinstance(question, dict) or not set(question) <= {"id", "type", "question", "options"}:
+        raise ValueError("Question requires id, type, question, and optional options")
+    return question.get("options")
 
 VERSIONS = ('2025-11-25', '2025-06-18')
 MAX_MESSAGE = 131072

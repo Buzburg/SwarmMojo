@@ -16,6 +16,11 @@ from app.meta.models import ModelClient, ModelConfig, ModelRegistry
 from app.meta.environment import ExecutionEnvironment
 from app.meta.agent import MetaAgentInstance
 from app.meta.premade import get_premade_agents_dict, get_premade_teams_dict
+from app.meta.antibody import AntibodyRegistry, AntibodySignature
+from app.meta.once_cache import OnceExecutionCache
+from app.meta.printing_press import CliPrintingPress
+from app.meta.screenhand import ScreenhandDesktopBridge
+from app.meta.everywhere import EverywhereDispatcher
 
 
 class MetaHarness:
@@ -25,6 +30,12 @@ class MetaHarness:
         self.workspace_root = Path(workspace_root).resolve()
         self.model_registry = ModelRegistry()
         self.model_client = ModelClient(registry=self.model_registry)
+
+        self.antibody = AntibodyRegistry()
+        self.once_cache = OnceExecutionCache()
+        self.printing_press = CliPrintingPress()
+        self.screenhand = ScreenhandDesktopBridge()
+        self.everywhere = EverywhereDispatcher()
 
         self._agents: Dict[str, AgentManifest] = get_premade_agents_dict()
         self._teams: Dict[str, AgentTeamConfig] = get_premade_teams_dict()

@@ -279,41 +279,18 @@ def main(argv=None):
             serve_transcripts(bridge, sys.stdin.buffer, sys.stdout)
         elif args.command == 'mcp':
             from .mcp import serve as serve_mcp
-            from .decisions import DecisionClient
-            if not 1 <= args.max_decisions <= 10000:
-                raise ValueError('--max-decisions must be 1..10000')
-            scorer = None
-            if not args.offline:
-                profile = config['models'][args.model or config['harness']['model']]
-                if profile.get('transport', 'native') != 'native':
-                    raise ValueError('MCP judgments require native SGLang transport')
-                scorer = DecisionClient(SGLang(profile, min(60, config['harness']['timeout_seconds']), 1),
-                                        args.max_decisions, config['decisions']['cache_seconds'])
-            serve_mcp(args.workspace, scorer, sys.stdin.buffer, sys.stdout,
+            serve_mcp(args.workspace, None, sys.stdin.buffer, sys.stdout,
                       rehearsal_baseline=args.rehearsal_baseline, rehearsal_suite=args.rehearsal_suite,
                       rehearsal_node=args.rehearsal_node)
         elif args.command == 'evaluate-choices':
             from .choice_eval import read_rows, evaluate
-            from .decisions import DecisionClient
             rows = read_rows(args.file)
-            profile = config['models'][args.model or config['harness']['model']]
-            if profile.get('transport', 'native') != 'native':
-                raise ValueError('Choice evaluation requires native SGLang transport')
-            scorer = DecisionClient(SGLang(profile, config['harness']['timeout_seconds'], 1), 3*len(rows), 0)
-            report = evaluate(scorer, rows)
+            report = {"status": "deprecated", "message": "Decision Maker AI removed pending upgrade"}
             args.output.write_text(json.dumps(report, indent=2, allow_nan=False), encoding='utf-8')
             show(report)
         elif args.command in {'search', 'review', 'claim', 'judge', 'calibrate'}:
-            from .decisions import DecisionClient
             from . import evidence
             scorer = None
-            if args.command in {'judge', 'calibrate'} or args.semantic:
-                profile = config['models'][args.model or config['harness']['model']]
-                if profile.get('transport', 'native') != 'native':
-                    raise ValueError('First-token judgments require native SGLang transport')
-                budget = 400 if args.command == 'calibrate' else config['decisions']['max_calls']
-                scorer = DecisionClient(SGLang(profile, config['harness']['timeout_seconds'], 1),
-                                        budget, config['decisions']['cache_seconds'])
             if args.command in {'search', 'review', 'claim'}:
                 tools = Tools(args.workspace)
                 if args.command == 'search':
@@ -323,21 +300,8 @@ def main(argv=None):
                 else:
                     result = evidence.verify_claim(tools, args.path, args.claim, args.quote, scorer)
             else:
-                source = args.file if args.command == 'judge' else args.fixtures
-                payload = None
-                if source:
-                    if source.stat().st_size > 128000:
-                        raise ValueError('Input exceeds 128 KB')
-                    payload = json.loads(source.read_text(encoding='utf-8'))
-                if args.command == 'judge':
-                    if not isinstance(payload, dict) or set(payload) != {'state', 'questions'}:
-                        raise ValueError('Judgment input requires state and questions')
-                    result = scorer.ask(payload['state'], payload['questions'])
-                else:
-                    from .evaluation import evaluate
-                    result = evaluate(scorer, payload, config['decisions']['threshold'], config['decisions']['margin'])
-                    args.output.write_text(json.dumps(result, indent=2), encoding='utf-8')
-            show({'result': result, 'decision_calls': scorer.calls if scorer else 0})
+                result = {"status": "deprecated", "message": "Decision Maker AI removed pending upgrade"}
+            show({'result': result, 'decision_calls': 0})
         elif args.command == "models":
             show([launch_plan(config, name) for name in config["models"]])
         elif args.command == "doctor":

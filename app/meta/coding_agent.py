@@ -39,6 +39,9 @@ from app.engines import (
     FileVersionGuard,
     TriadEngine,
 )
+from app.engines.code_review import CodeReviewEngine
+from app.engines.reverse_engineering import ReverseEngineeringEngine
+from app.engines.code_ledger import CodeLedgerEngine
 from app.meta.models import ModelClient, ModelConfig, ModelRegistry
 
 
@@ -66,6 +69,9 @@ class PiCodingToolkit:
         self.rewind.init()
         self.guard = FileVersionGuard(root=str(self.root))
         self.symdex = SymdexIndex(root=str(self.root))
+        self.code_review = CodeReviewEngine()
+        self.rea = ReverseEngineeringEngine()
+        self.ledger = CodeLedgerEngine(workspace_root=self.root)
 
     def _resolve_safe_path(self, rel_path: str) -> Path:
         target = (self.root / rel_path).resolve()
@@ -244,6 +250,49 @@ class PiCodingToolkit:
             "callers": self.symdex.find_callers(symbol),
             "callees": self.symdex.find_callees(symbol),
         }
+
+    def review_code(self, rel_path: str = "", source_code: str = "", diff_text: str = "") -> Dict[str, Any]:
+        """Runs automated multi-perspective code review (security, performance, correctness)."""
+        if diff_text:
+            return self.code_review.review_diff(diff_text).to_dict()
+        if rel_path:
+            target = self._resolve_safe_path(rel_path)
+            content = target.read_text(encoding="utf-8", errors="replace")
+            return self.code_review.review_source(content, filename=rel_path).to_dict()
+        return self.code_review.review_source(source_code, filename="dynamic.py").to_dict()
+
+    def inspect_binary_or_bytecode(self, rel_path: str = "", source_code: str = "") -> Dict[str, Any]:
+        """Inspects executable magic headers or disassembles Python bytecode."""
+        if rel_path:
+            target = self._resolve_safe_path(rel_path)
+            return self.rea.identify_format(target).to_dict()
+        if source_code:
+            instrs = self.rea.disassemble_source_code(source_code)
+            return {"instructions": [i.to_dict() for i in instrs[:50]], "total": len(instrs)}
+        return {"error": "Specify rel_path or source_code"}
+
+    def repo_codemap(self, max_files: int = 100) -> Dict[str, Any]:
+        """Builds a repository-wide symbol and dependency codemap."""
+        return self.ledger.build_repo_codemap(max_files=max_files)
+
+    def transactional_refactor(self, description: str, edits: List[Dict[str, str]]) -> Dict[str, Any]:
+        """Executes an atomic multi-file refactoring transaction with automatic rollback on error."""
+        affected_files = [e["path"] for e in edits]
+        tx_id = self.ledger.begin_transaction(description, affected_files)
+        applied = []
+        try:
+            for edit in edits:
+                path = edit["path"]
+                content = edit["content"]
+                res = self.write_file_atomic(path, content)
+                if not res.get("success"):
+                    raise RuntimeError(f"Failed to write {path}: {res.get('error')}")
+                applied.append(path)
+            self.ledger.commit_transaction(tx_id)
+            return {"success": True, "tx_id": tx_id, "files_updated": applied}
+        except Exception as e:
+            self.ledger.rollback_transaction(tx_id)
+            return {"success": False, "error": str(e), "tx_id": tx_id, "rolled_back": True}
 
 
 class PrimeRecursionEngine:

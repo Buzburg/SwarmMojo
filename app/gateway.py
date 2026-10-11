@@ -100,7 +100,7 @@ async def list_models(request: Request) -> JSONResponse:
         "object": "list",
         "data": [
             {"id": "roms-swarmmojo-default", "object": "model", "owned_by": "buzburg"},
-            {"id": "roms-decision-engine", "object": "model", "owned_by": "buzburg"}
+            {"id": "roms-swarmmojo-core", "object": "model", "owned_by": "buzburg"}
         ]
     }, status_code=200)
 

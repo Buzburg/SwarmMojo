@@ -12,9 +12,42 @@ import stat
 from typing import Any
 
 from app import config
-from app.decisions import ROMSDecisionEngine
 from app.json_protocol import unique_object
 from app.safe_paths import markdown_path
+
+
+def _heuristic_decision(state: str, goal: str, options: Any) -> dict:
+    has_evidence = bool(state.strip())
+    opt_keys = list(options.keys()) if isinstance(options, dict) else list(options)
+    opt_texts = [options[k] if isinstance(options, dict) else k for k in opt_keys]
+
+    if not has_evidence:
+        uniform_p = round(1.0 / len(opt_keys), 4) if opt_keys else 0.0
+        probabilities = {k: uniform_p for k in opt_keys}
+        best_key = opt_keys[0] if opt_keys else None
+    else:
+        words = set(re.findall(r'[a-zA-Z0-9]+', (state + " " + goal).lower()))
+        raw_scores = {}
+        for k, text in zip(opt_keys, opt_texts):
+            opt_words = set(re.findall(r'[a-zA-Z0-9]+', text.lower()))
+            raw_scores[k] = float(len(words & opt_words) + 1)
+
+        total = sum(raw_scores.values()) or 1.0
+        probabilities = {k: round(v / total, 4) for k, v in raw_scores.items()}
+        best_key = max(opt_keys, key=lambda k: raw_scores[k]) if opt_keys else None
+
+    abstained = not has_evidence
+    reasons = ["evidence_missing"] if not has_evidence else []
+
+    return {
+        "engine": "SwarmMojo Decision Maker",
+        "choice": best_key,
+        "abstained": abstained,
+        "abstention_reasons": reasons,
+        "probabilities": probabilities,
+        "confidence": probabilities.get(best_key, 0.0),
+        "margin": 0.0,
+    }
 
 
 def decode_request(raw: str) -> dict:
@@ -216,16 +249,11 @@ def prepare_request(request: dict, *, db_path=None, skills_dir=None) -> dict[str
         skill['truncated'] = len(skill['content']) < len(original)
     texts = [observed['text'], *(source['excerpt'] for source in knowledge['sources'])]
     state = '\n'.join(text for text in texts if text.strip())
-    engine = ROMSDecisionEngine(persist_discovery=False)
-    decision = engine.decide_choice(state=state, question=value['goal'], options=value['options'])
-    has_evidence = bool(state.strip())
-    if not has_evidence:
-        decision['abstained'] = True
-        decision['abstention_reasons'] = list(dict.fromkeys([*decision.get('abstention_reasons', []), 'evidence_missing']))
+    decision = _heuristic_decision(state, value['goal'], value['options'])
     abstained = decision['abstained']
     return {'schema': 'roms.harness/v1', 'status': 'abstained' if abstained else 'review-required',
             'goal': value['goal'], 'decision': decision,
-            'proposed_next_step': None if abstained else value['options'][decision['choice']],
+            'proposed_next_step': None if abstained else (value['options'][decision['choice']] if isinstance(value['options'], dict) else decision['choice']),
             'context': {'evidence': observed, 'knowledge': knowledge, 'skills': skills,
                         'coverage': {'max_context_chars': value['max_context_chars'],
                                      'supplied_text_chars': value['max_context_chars'] - remaining,

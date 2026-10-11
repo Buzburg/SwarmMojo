@@ -1238,3 +1238,118 @@ body {{
             "html_length": len(hud_html),
         }
 
+
+# -------------------------------------------------------------------------
+# Photocraft Layered Canvas Engine & Liquid Glass Material System
+# -------------------------------------------------------------------------
+
+@dataclass
+class CanvasLayer:
+    layer_id: str
+    name: str
+    kind: str             # "background", "vector", "typography", "asset", "filter", "overlay"
+    x: int
+    y: int
+    width: int
+    height: int
+    opacity: float = 1.0  # [0.0, 1.0]
+    blend_mode: str = "normal"  # "normal", "multiply", "screen", "overlay", "soft_light"
+    z_index: int = 0
+    properties: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class LiquidGlassMaterial:
+    """Optical glassmorphism material specifications with dynamic refraction."""
+    blur_px: int = 24
+    transparency: float = 0.65
+    refraction_index: float = 1.48
+    specular_highlight: str = "rgba(255, 255, 255, 0.15)"
+    surface_tint: str = "rgba(17, 24, 39, 0.70)"
+    border_glow: str = "1px solid rgba(255, 255, 255, 0.12)"
+    shadow_profile: str = "0 8px 32px 0 rgba(0, 0, 0, 0.37)"
+
+    def to_css(self, class_name: str = "liquid-glass") -> str:
+        return f"""
+.{class_name} {{
+  background: {self.surface_tint};
+  backdrop-filter: blur({self.blur_px}px) saturate(180%);
+  -webkit-backdrop-filter: blur({self.blur_px}px) saturate(180%);
+  border: {self.border_glow};
+  box-shadow: {self.shadow_profile}, inset 0 1px 1px 0 {self.specular_highlight};
+  border-radius: 16px;
+}}
+"""
+
+
+class PhotocraftCanvasEngine:
+    """Layered digital canvas composer for UI assets, app icons, and marketing layouts."""
+
+    PRESETS = {
+        "app_icon": (1024, 1024, "iOS / macOS / Android Application Icon"),
+        "social_banner": (1200, 630, "OpenGraph Social Preview Banner"),
+        "hero_canvas": (1920, 1080, "High-Resolution 16:9 Hero Canvas"),
+        "card_asset": (800, 1000, "Vertical Product / Card Visual"),
+    }
+
+    def __init__(self, output_dir: str | Path = "workspace_design"):
+        self.output_dir = Path(output_dir).resolve()
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.layers: List[CanvasLayer] = []
+
+    def create_canvas(self, preset: str = "hero_canvas", custom_dimensions: Optional[Tuple[int, int]] = None) -> Dict[str, Any]:
+        w, h, desc = (custom_dimensions[0], custom_dimensions[1], "Custom Canvas") if custom_dimensions else self.PRESETS.get(preset, (1920, 1080, "Default"))
+        self.layers = [
+            CanvasLayer(
+                layer_id="layer_bg",
+                name="Deep Canvas Background",
+                kind="background",
+                x=0,
+                y=0,
+                width=w,
+                height=h,
+                blend_mode="normal",
+                z_index=0,
+                properties={"fill": "#0B0F19", "gradient": "linear-gradient(135deg, #0B0F19 0%, #111827 100%)"},
+            )
+        ]
+        return {"preset": preset, "width": w, "height": h, "description": desc, "layers": len(self.layers)}
+
+    def add_layer(
+        self,
+        name: str,
+        kind: str,
+        x: int,
+        y: int,
+        width: int,
+        height: int,
+        blend_mode: str = "normal",
+        opacity: float = 1.0,
+        properties: Optional[Dict[str, Any]] = None,
+    ) -> CanvasLayer:
+        layer = CanvasLayer(
+            layer_id=f"layer_{len(self.layers) + 1}",
+            name=name,
+            kind=kind,
+            x=x,
+            y=y,
+            width=width,
+            height=height,
+            opacity=opacity,
+            blend_mode=blend_mode,
+            z_index=len(self.layers),
+            properties=properties or {},
+        )
+        self.layers.append(layer)
+        return layer
+
+    def export_spec(self, title: str = "Photocraft Spec") -> Dict[str, Any]:
+        return {
+            "title": title,
+            "total_layers": len(self.layers),
+            "layers": [l.to_dict() for l in sorted(self.layers, key=lambda l: l.z_index)],
+        }
+

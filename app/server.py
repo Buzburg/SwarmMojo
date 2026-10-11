@@ -457,56 +457,7 @@ def roms_prompt_lookup(history_csv: str, window: int = 2, limit: int = 4) -> str
 
 
 # ============================================================================
-# DECISION MAKER — HEURISTIC ADVICE, NOT EXECUTION AUTHORITY
-# ============================================================================
 
-from app.decisions import ROMSDecisionEngine as _ROMSDecisionEngine
-
-
-@mcp.tool()
-def roms_decide(state: str, question: str, options_json: str, threshold: float = 0.45, min_margin: float = 0.08) -> str:
-    """Rank 2–26 options using local heuristic text scores, with abstention. Scores are not calibrated factual confidence or permission to act."""
-    import json
-    try:
-        opts = json.loads(options_json)
-    except Exception:
-        opts = [x.strip() for x in options_json.split(",") if x.strip()]
-    res = _ROMSDecisionEngine(threshold=threshold, min_margin=min_margin).decide_choice(
-        state=state, question=question, options=opts
-    )
-    return json.dumps(res, indent=2)
-
-
-@mcp.tool()
-def roms_noul(state: str, question: str, threshold: float = 0.45, min_margin: float = 0.08) -> str:
-    """Return heuristic yes/no advice or abstain on supplied text. Not a factual verifier, test runner or approval gate."""
-    import json
-    res = _ROMSDecisionEngine(threshold=threshold, min_margin=min_margin).decide_noul(
-        state=state, question=question
-    )
-    return json.dumps(res, indent=2)
-
-
-@mcp.tool()
-def roms_score(state: str, question: str, rubric_csv: str = "Poor,Fair,Good,Excellent", threshold: float = 0.35, min_margin: float = 0.05) -> str:
-    """Score 2–10 ordered rubric levels using local text heuristics. The result is advisory and not model-calibrated."""
-    import json
-    rubric = [x.strip() for x in rubric_csv.split(",") if x.strip()]
-    res = _ROMSDecisionEngine(threshold=threshold, min_margin=min_margin).decide_score(
-        state=state, question=question, rubric=rubric
-    )
-    return json.dumps(res, indent=2)
-
-
-@mcp.tool()
-def roms_bertopic_discover(document: str = "") -> str:
-    """Group supplied text into local topic suggestions. Legacy tool ID retained; this does not run the BERTopic package or authorize new options."""
-    import json
-    engine = _ROMSDecisionEngine()
-    if document.strip():
-        added = engine.bertopic.add_document(document.strip())
-        return json.dumps({"assigned_topic": added, "catalog": engine.bertopic.summary()}, indent=2)
-    return json.dumps(engine.bertopic.summary(), indent=2)
 
 
 # ============================================================================

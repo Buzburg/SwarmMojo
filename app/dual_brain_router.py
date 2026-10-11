@@ -1,10 +1,10 @@
-"""Dual-Brain Cognitive Router: RWKV-7 Reflex + MSGL Oracle.
+"""Dual-Brain Cognitive Router: RWKV-7 Reflex + Deep Reasoner Oracle.
 
 Coordinates the two inference engines:
 1. Reflex Brain (RWKV-7 2.9B on 127.0.0.1:18080):
    - Fast sub-15ms O(1) recurrent token streaming
    - Optimal for interactive shell commands, tool dispatch, formatting, and single-turn chat
-2. Oracle Brain (MSGL / VibeThinker / Qwen on 127.0.0.1:18084):
+2. Oracle Brain (Deep Deductive Reasoner / Qwen on 127.0.0.1:18084):
    - Deep deductive reasoning, multi-file refactoring, security audits
    - Enforces GBNF grammar constraints for strictly valid JSON / code ASTs
 
@@ -26,7 +26,7 @@ from app.nest_soul import default_omarchy_soul
 
 class BrainType(str, Enum):
     REFLEX = "REFLEX"  # RWKV-7 2.9B
-    ORACLE = "ORACLE"  # MSGL / Deep Deductive Engine
+    ORACLE = "ORACLE"  # Deep Deductive Engine
 
 
 @dataclass

@@ -23,7 +23,7 @@ def register_meta_tools(server: FastMCP) -> None:
 
     @server.tool()
     def meta_list_models() -> str:
-        """Lists all registered local and remote model profiles (Ollama, LM Studio, vLLM, SGLang, mock)."""
+        """Lists all registered local and remote model profiles (Ollama, LM Studio, vLLM, Deep Reasoner, mock)."""
         return json.dumps(harness.list_models(), indent=2)
 
     @server.tool()
@@ -175,4 +175,67 @@ def register_meta_tools(server: FastMCP) -> None:
         """Calculates angular drift from session goal (warns >=65°, blocks >=80°)."""
         from app.engines import evaluate_drift
         return json.dumps(evaluate_drift(goal, action), indent=2)
+
+    @server.tool()
+    def coding_review_code(code: str, file_path: str = "snippet.py") -> str:
+        """Performs multi-criteria security, performance, and reliability static code review."""
+        from app.engines.code_review import CodeReviewEngine
+        engine = CodeReviewEngine()
+        report = engine.review_source(code, filename=file_path)
+        return json.dumps(report.to_dict(), indent=2)
+
+    @server.tool()
+    def coding_inspect_binary(file_path: str) -> str:
+        """Inspects binary magic headers, architecture, entry point, and structure."""
+        from app.engines.reverse_engineering import ReverseEngineeringEngine
+        engine = ReverseEngineeringEngine()
+        info = engine.identify_format(file_path)
+        return json.dumps(info.to_dict(), indent=2)
+
+    @server.tool()
+    def coding_repo_codemap(workspace_root: str = ".", max_files: int = 50) -> str:
+        """Extracts hierarchical repository codemap with symbol nodes and imports."""
+        from app.engines.code_ledger import CodeLedgerEngine
+        engine = CodeLedgerEngine(workspace_root=workspace_root)
+        codemap = engine.build_repo_codemap(max_files=max_files)
+        return json.dumps(codemap, indent=2)
+
+    @server.tool()
+    def meta_antibody_check(error_text: str) -> str:
+        """Scans error text against fleet herd immunity memory to retrieve instant remedies."""
+        from app.meta.antibody import AntibodyRegistry
+        registry = AntibodyRegistry()
+        matches = registry.check_immunity(error_text)
+        return json.dumps([m.to_dict() for m in matches], indent=2)
+
+    @server.tool()
+    def meta_once_run(command: str, cwd: str = ".", ttl_seconds: float = 60.0) -> str:
+        """Executes deduplicated shell command with memory-cached TTL deduplication."""
+        from app.meta.once_cache import OnceExecutionCache
+        cache = OnceExecutionCache(default_ttl_seconds=ttl_seconds)
+        res = cache.get_or_run(command, cwd=cwd, ttl_seconds=ttl_seconds)
+        return json.dumps(res, indent=2)
+
+    @server.tool()
+    def meta_screenhand_action(action_type: str, x: int = 0, y: int = 0, text: str = "", dry_run: bool = True) -> str:
+        """Dispatches high-speed desktop automation action (click, move, type) with safety bounds."""
+        from app.meta.screenhand import ScreenhandDesktopBridge
+        bridge = ScreenhandDesktopBridge(dry_run=dry_run)
+        if action_type == "click":
+            res = bridge.click(x, y)
+        elif action_type == "type":
+            res = bridge.type_text(text)
+        elif action_type == "focus":
+            res = bridge.focus_window(text)
+        else:
+            res = {"status": "unsupported", "action_type": action_type}
+        return json.dumps(res, indent=2)
+
+    @server.tool()
+    def meta_everywhere_dispatch(action_id: str, context_text: str = "") -> str:
+        """Dispatches omnipresent desktop action (explain_code, review_diff, humanize_prose, etc.)."""
+        from app.meta.everywhere import EverywhereDispatcher
+        dispatcher = EverywhereDispatcher()
+        res = dispatcher.dispatch_action(action_id, context_text=context_text or None)
+        return json.dumps(res, indent=2)
 

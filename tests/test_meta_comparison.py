@@ -51,6 +51,9 @@ def test_native_mojo_kernels_exist():
         ("workflowproof_core.mojo", "verify_step_transition"),
         ("triad_core.mojo", "dominates"),
         ("localdoc_core.mojo", "score_bm25_term"),
+        ("antibody_core.mojo", "hash_error_signature"),
+        ("once_core.mojo", "hash_command_key"),
+        ("screenhand_core.mojo", "clip_coordinate_to_bounds"),
     ]
 
     for fname, expected_sym in expected_kernels:

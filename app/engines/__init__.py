@@ -32,6 +32,11 @@ from .mojo_memory import MojoMemoryEngine
 from .studio import StudioAgentEngine, StudioPromptCompiler, StoryboardDirector, ComfyUIBridge
 from .design import DesignAgentEngine, DesignTokens, UIComponentRegistry
 from .writer import WriterAgentEngine, ProseHumanizer, BookOutlinePlanner
+from .code_review import CodeReviewEngine, ReviewFinding, CodeReviewReport
+from .reverse_engineering import ReverseEngineeringEngine, BinaryHeaderInfo
+from .code_ledger import CodeLedgerEngine, FileCodemap, LedgerTransaction
+from .design import PhotocraftCanvasEngine, CanvasLayer, LiquidGlassMaterial
+from .studio import DirectorBoardEngine, DirectorShot, VideoTimelineEngine, TimelineClip, ReasonixVerdictEngine
 
 __all__ = [
     "SymdexIndex",
@@ -64,12 +69,28 @@ __all__ = [
     "StudioPromptCompiler",
     "StoryboardDirector",
     "ComfyUIBridge",
+    "DirectorBoardEngine",
+    "DirectorShot",
+    "VideoTimelineEngine",
+    "TimelineClip",
+    "ReasonixVerdictEngine",
     "DesignAgentEngine",
     "DesignTokens",
     "UIComponentRegistry",
+    "PhotocraftCanvasEngine",
+    "CanvasLayer",
+    "LiquidGlassMaterial",
     "WriterAgentEngine",
     "ProseHumanizer",
     "BookOutlinePlanner",
+    "CodeReviewEngine",
+    "ReviewFinding",
+    "CodeReviewReport",
+    "ReverseEngineeringEngine",
+    "BinaryHeaderInfo",
+    "CodeLedgerEngine",
+    "FileCodemap",
+    "LedgerTransaction",
 ]
 
 
