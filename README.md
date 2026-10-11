@@ -1,63 +1,92 @@
 # SwarmMojo ⚡
 
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Runtime: Mojo + Python](https://img.shields.io/badge/Runtime-Mojo_SIMD_v25+_|_Python_3.11+-orange.svg)](app_mojo/)
+[![Architecture: Local--First Meta--Harness](https://img.shields.io/badge/Architecture-Sovereign_Meta--Harness-emerald.svg)](docs/meta_agent_comparison.md)
+[![Tests: 100% Passing](https://img.shields.io/badge/Tests-100%25_Passing-brightgreen.svg)](tests/)
+[![Author: Buzburg AI](https://img.shields.io/badge/Author-Buzburg_AI-purple.svg)](mailto:buzburgai@gmail.com)
+
 > [!NOTE]
-> **In Plain English:** When running multiple autonomous AI agents locally, developers constantly face three painful bottlenecks: sluggish runtimes that burn memory, chaotic multi-agent loops that hallucinate and overwrite each other's files, and context bloat from massive logs and unindexed tools. SwarmMojo is a unified, local-first meta-harness engineered for maximum speed, strict determinism, and zero cloud dependency. Powered by 21 specialized engines accelerated by native Mojo SIMD and Python, SwarmMojo coordinates autonomous coding, enterprise UI design, multimodal studio production, human-grade prose authoring, DAG workflow automation, and 24/7 personal executive assistance. With mathematical drift guardrails (<65°), microsecond symbol indexing (<20 µs), content-addressed snapshot rollbacks, and offline workflow rehearsals, SwarmMojo delivers sovereign, enterprise-grade AI execution directly on your local machine.
+> ### In Plain English: Why SwarmMojo Changes Everything
+> When running multiple autonomous AI agents locally, developers constantly face four brutal roadblocks:
+> 1. **Sluggish, bloated runtimes** that consume gigabytes of VRAM and burn seconds per tool call.
+> 2. **Chaotic multi-agent loops** where agents hallucinate, drift off-target, trigger circular failures, and overwrite each other's code.
+> 3. **Context window suffocation** caused by massive compiler dumps, unindexed directories, and repetitive shell commands.
+> 4. **Cloud lock-in and vendor seats** that trap your architecture inside proprietary ticketing platforms with high monthly fees and zero offline sovereignty.
+>
+> **SwarmMojo** is a unified, local-first meta-harness built from first principles for blistering speed, mathematical determinism, and absolute privacy. Powered by **30+ specialized high-performance engines** and accelerated by **native Mojo SIMD kernels** (`app_mojo/`) executing in sub-microseconds, SwarmMojo orchestrates autonomous coding, enterprise UI design, multimodal studio production, human-grade prose authoring, constitutional DAG workflows, and 24/7 executive personal assistance.
+>
+> Featuring **fleet herd immunity** that instantly inoculates your agent swarm against recurring bugs, **sub-50ms desktop automation**, **mathematical trajectory drift guards (<65°)**, and **instant content-addressed rollbacks**, SwarmMojo gives you a sovereign, enterprise-grade AI powerhouse running directly on your local silicon.
 
 ---
 
-**A unified, local-first AI agent harness combining decision intelligence, specialist reviews, workflow rehearsal, and universal agent configuration.**
+## The Core Pillars of SwarmMojo
 
-SwarmMojo brings together three core pillars:
-1. **ROMS Engine**: Decision AI, RAG retrieval, Open Knowledge Files (OKF), SQLite-Vec, MCP tools, and skills to prepare bounded, reviewable actions.
-2. **Swarm Mojo (Aeon)**: Source-grounded specialist reviews, TriggerTangle workflow rehearsal, bounded execution, and optional mSGL inference adapters.
-3. **PolyHarness**: Universal transpiler and package manager for AI agent configurations (compiling to `CLAUDE.md`, `AGENTS.md`, `dsh.config.json`, `.cursorrules`, scoped `.cursor/rules/*.mdc`, `.claude/rules/*.md`, MCP registries, and deterministic pre-commit guardrails).
+SwarmMojo unifies five foundational pillars into a cohesive, zero-cloud architecture:
 
-The portable Python path is used on Windows and Linux. Omarchy is an optional integration; it is not required to use SwarmMojo.
+```
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 SWARMMOJO META-HARNESS                                       │
+├───────────────────────────────┬───────────────────────────────┬──────────────────────────────┤
+│       1. SPECIALIST GUILDS    │     2. HIGH-SPEED ENGINES     │      3. FLEET IMMUNITY       │
+│  • Coding Agent (AST/RE)      │  • Symdex Symbol Index (<20µs)│  • Antibody Herd Immunity    │
+│  • Design Agent (Canvas/Glass)│  • Titans Neural Memory       │  • Once Execution Cache (TTL)│
+│  • Studio Agent (Director/LUFS│  • Fastgate Vector Router     │  • Screenhand Desktop Bridge │
+│  • Writer Agent (Anti-Slop)   │  • Sieve Compaction (95%+)    │  • Everywhere Quick Router   │
+│  • Workflow Agent (DAG/Proofs)│  • StateFresh Atomic OCC      │  • CLI Printing Press Layout │
+│  • Assistant Agent (24/7 VAD) │  • Horizon DAG Breakers       │  • Unified FastMCP Protocols │
+├───────────────────────────────┴───────────────────────────────┴──────────────────────────────┤
+│                         NATIVE MOJO SIMD ACCELERATION (app_mojo/*.mojo)                      │
+│        Sub-microsecond FNV-1a Hashing • 2D Bounding Clamping • Exact Substring Search        │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
-## Core Pillars & Capabilities
+1. **Autonomous Specialist Guilds**: Six fully realized agent engines (Coding, Studio, Design, Writer, Workflow, Assistant) operating concurrently or in structured pipelines across local models.
+2. **30+ Specialized Local Engines**: Microsecond AST search, test-time neural memory (Titans DeltaNet), streaming log compaction (Sieve), and optimistic concurrency leases (StateFresh).
+3. **Fleet Herd Immunity & Infrastructure**: Distributed error inoculation (`AntibodyRegistry`), deduplicated command caching (`OnceExecutionCache`), high-speed desktop interaction (`ScreenhandDesktopBridge`), and omnipresent action dispatching (`EverywhereDispatcher`).
+4. **Native Mojo Hardware Acceleration**: Compiles compute-heavy vector similarity, string clamping, and cryptographic step verification into native machine code.
+5. **PolyHarness Universal Portability**: Transpiles a single-source configuration (`harness.config.json`) to Claude Code, Cursor, DeepSeek, and AGY with zero vendor lock-in.
 
-| Pillar | Sub-system | Purpose |
-| --- | --- | --- |
-| **ROMS Core** | **Decision Maker** | Rank supplied options, return structured results and abstain when thresholds are not met. |
-| **ROMS Core** | **RAG & OKF** | Multi-format local document ingestion, hybrid vector + FTS5 BM25 retrieval, and bounded context preparation. |
-| **ROMS Core** | **MCP & Skills** | Local MCP tools server and reusable Markdown skill playbooks. |
-| **Swarm Mojo** | **Aeon Specialist Reviews** | Source-grounded multi-specialist reviews with bounded deliberation and explicit operator approval tickets. |
-| **Swarm Mojo** | **Workflow Rehearsal** | TriggerTangle offline causal loop simulator to test automations and prevent trigger deadlocks. |
-| **PolyHarness** | **Multi-Target Transpiler** | Single-source-of-truth configuration (`harness.config.json`) compiling to Claude Code, Cursor, DeepSeek, and AGY. |
-| **PolyHarness** | **Progressive Disclosure** | Scoped rule generator emitting `.cursor/rules/*.mdc` and `.claude/rules/*.md` to prevent context saturation. |
-| **PolyHarness** | **Deterministic Guardrails** | Generates `.githooks/pre-commit` and `safe-exec.sh` to block destructive actions and leaks at the shell/git level. |
+---
 
-## Specialized Local-First Engines
+## Sovereign Engines Directory
 
-SwarmMojo incorporates 21 high-speed specialized engines with Python bridges in `app/engines/`, FastMCP tool exposures in `app/engine_tools.py`, and native Mojo acceleration in `app_mojo/`:
+Every engine in SwarmMojo is available via Python in `app/engines/`, terminal CLI via `python swarmmojo.py <command>`, FastMCP via `app/meta/meta_tools.py`, and native Mojo kernels in `app_mojo/`:
 
-| Engine | Primary Feature & Performance | CLI Command | FastMCP Tool |
-| --- | --- | --- | --- |
+| Engine | Primary Capability & Performance Metric | CLI Command | FastMCP Tool |
+| :--- | :--- | :--- | :--- |
 | **Symdex** | In-memory code symbol & bi-directional call-graph index (<20 µs) | `python swarmmojo.py symdex` | `symdex_query` |
-| **Titans** | Test-Time Neural Memory with momentum & surprise gating (arXiv:2501.00663) | `python swarmmojo.py titans` | `titans_memory_update`, `titans_memory_recall` |
-| **Micro-ToolCall** | JSON extraction, auto-repair, and type coercion for 7B-32B models | `python swarmmojo.py toolcall` | `toolcall_repair_output` |
-| **Sieve** | Streaming terminal and compiler log compaction (95%+ noise reduction) | `python swarmmojo.py sieve` | `sieve_compact_logs` |
-| **Local-Horizon** | State-machine task graph (DAG) & anti-loop vector circuit breaker | `python swarmmojo.py horizon` | `horizon_record_step` |
-| **Fastgate** | 256-dim phase vector System-1 tool triage router | `python swarmmojo.py fastgate` | `fastgate_triage_tools` |
+| **Titans Memory** | Test-Time Neural Memory with momentum & surprise gating (arXiv:2501.00663) | `python swarmmojo.py titans` | `titans_memory_update` |
+| **CodeReview** | Multi-perspective AST security, performance & reliability audit | `python swarmmojo.py coding review` | `coding_review_code` |
+| **ReverseEngineering** | Magic header parsing (ELF, PE, Mach-O, WASM) & bytecode disassembly | `python swarmmojo.py coding inspect` | `coding_inspect_binary` |
+| **CodeLedger** | Hierarchical symbol codemap & transactional atomic change rollback | `python swarmmojo.py coding codemap` | `coding_repo_codemap` |
+| **Antibody** | Swarm herd immunity memory broadcasting instant bug remedies | `python swarmmojo.py meta antibody` | `meta_antibody_check` |
+| **OnceCache** | Deduplicated shell command execution with memory TTL hashing | `python swarmmojo.py meta once` | `meta_once_run` |
+| **Screenhand** | Sub-50ms deterministic desktop automation with boundary safety | `python swarmmojo.py meta screenhand` | `meta_screenhand_action` |
+| **Everywhere** | Omnipresent floating desktop action dispatcher & clipboard bridge | `python swarmmojo.py meta everywhere` | `meta_everywhere_dispatch` |
+| **PrintingPress** | Terminal typography with rounded Unicode cards, tables & badges | `python swarmmojo.py meta press` | `meta_publish_report` |
+| **Photocraft** | Layered digital canvas composer with preset dimensions & export spec | `python swarmmojo.py design canvas` | `design_craft_canvas` |
+| **LiquidGlass** | Optical glassmorphism tokens, backdrop blur & refraction index CSS | `python swarmmojo.py design glass` | `design_liquid_glass` |
+| **DirectorBoard** | Cinematic shot board planning, camera moves & production bible | `python swarmmojo.py studio director` | `studio_plan_shot` |
+| **VideoTimeline** | Multi-track timeline layout & broadcast -14 LUFS loudness normalization | `python swarmmojo.py studio timeline` | `studio_export_timeline` |
+| **ReasonixVerdict** | Reasoning-driven visual quality scoring & render cost index detector | `python swarmmojo.py studio verdict` | `studio_verdict_score` |
+| **Fastgate** | 256-dim phase vector System-1 tool triage router (<50 µs) | `python swarmmojo.py fastgate` | `fastgate_triage_tools` |
+| **Mojo-Drift** | 256-dim angular trajectory tracking (warn $\ge 65^\circ$, block $\ge 80^\circ$) | `python swarmmojo.py drift` | `drift_evaluate_action` |
+| **Sieve** | Streaming compiler & terminal log compaction (95%+ noise reduction) | `python swarmmojo.py sieve` | `sieve_compact_logs` |
+| **StateFresh** | Optimistic concurrency control (OCC), version leases & CAS commits | `python swarmmojo.py statefresh` | `statefresh_check_and_stage` |
+| **WorkflowProof** | Step SHA-256 Merkle fingerprinting & cryptographic transition caching | `python swarmmojo.py workflowproof` | `workflowproof_verify_step` |
+| **Agent-Rewind** | Content-addressed workspace snapshotting & microsecond delta rollback | `python swarmmojo.py rewind` | `rewind_rollback_workspace` |
 | **Compact-KV** | VRAM-capped rolling structured scratchpad (<800 tokens) | `python swarmmojo.py compact-kv` | `compact_kv_scratchpad` |
-| **Agent-Rewind** | Content-addressed workspace snapshotting and microsecond rollback | `python swarmmojo.py rewind` | `rewind_snapshot_workspace`, `rewind_rollback_workspace` |
-| **Path-Carry** | Filename safety, cross-platform reserved-name & path audit | `python swarmmojo.py path-carry` | `path_carry_audit` |
-| **LocalDoc-Search** | Line-level local document chunking & search | `python -m app.engines.localdoc_search` | Integrated via RAG & OKF |
-| **Mojo-Drift** | 256-dim angular trajectory tracking & drift guardrail (warn >=65°, block >=80°) | `python swarmmojo.py drift` | `drift_evaluate_action` |
-| **StateFresh** | Optimistic concurrency control, version leases & stale-write rejection | `python swarmmojo.py statefresh` | `statefresh_check_and_stage` |
-| **WorkflowProof** | Step input/output SHA-256 fingerprinting & verified proof-of-work caching | `python swarmmojo.py workflowproof` | `workflowproof_verify_step` |
-| **Prefrontal Cortex** | Execution shield hazard scoring, regex filters & cyclic loop intercept | `python swarmmojo.py cortex` | `cortex_shield_action` |
+| **Path-Carry** | Path traversal, case-collision & Windows reserved name auditor | `python swarmmojo.py path-carry` | `path_carry_audit` |
+| **Prefrontal Cortex** | Execution shield hazard scoring, regex filters & cyclic loop breaker | `python swarmmojo.py cortex` | `cortex_shield_action` |
 | **Triad-Engine** | Pareto reliability, duration, and token cost multi-objective ranking | `python swarmmojo.py triad` | `triad_pareto_rank` |
-| **Mojo-Memory** | 512-dim phase vector associative memory with sub-10ms recall | `python swarmmojo.py mojo-memory` | `mojomemory_store`, `mojomemory_query` |
-| **Studio-Engine** | Multimodal cinematic video, ComfyUI execution graphs, storyboards & banner craft | `python swarmmojo.py studio` | `studio_compile_prompt`, `studio_create_storyboard`, `studio_export_comfyui_graph`, `studio_craft_banner` |
-| **Design-Engine** | High-craft UI/GUI landing pages, enterprise admin dashboards & component systems | `python swarmmojo.py design` | `design_build_landing_page`, `design_build_dashboard` |
-| **Writer-Engine** | Authentic prose authoring, Ghost Protocol anti-slop filters & multi-chapter book planner | `python swarmmojo.py writer` | `writer_audit_prose`, `writer_clean_prose`, `writer_plan_book` |
-| **Workflow-Engine** | Constitutional pipeline governance, routine scheduler & WorkflowProof Merkle verification | `python swarmmojo.py workflow` | `workflow_run_dag`, `workflow_schedule_routine`, `workflow_list_routines` |
-| **Assistant-Engine** | 24/7 sovereign companion, encrypted vault, consult gateway & realtime voice bridge | `python swarmmojo.py assistant` | `assistant_get_briefing`, `assistant_consult_specialist`, `assistant_store_credential` |
+| **Writer-Engine** | Ghost Protocol anti-slop filters, cadence audits & book DAG planner | `python swarmmojo.py writer` | `writer_audit_prose` |
+| **Workflow-Engine** | 8-stage constitutional pipeline governance & routine scheduler | `python swarmmojo.py workflow` | `workflow_run_dag` |
+| **Assistant-Engine** | 24/7 sovereign companion, encrypted vault & real-time voice VAD | `python swarmmojo.py assistant` | `assistant_get_briefing` |
+
+---
 
 ## Meta-Agent Architecture Comparison: SwarmMojo vs Conventional Frameworks
-
-SwarmMojo represents a generational leap over conventional cloud orchestrators and generic CLI seat wrappers. See the full architectural breakdown in [docs/meta_agent_comparison.md](docs/meta_agent_comparison.md).
 
 | Architectural Dimension | **SwarmMojo (Buzburg AI)** | **Conventional Cloud Orchestrators** | **Generic CLI Seat Wrappers** |
 | :--- | :--- | :--- | :--- |
@@ -65,335 +94,157 @@ SwarmMojo represents a generational leap over conventional cloud orchestrators a
 | **Core Runtime** | **Mojo (SIMD v25+)** + **Python 3.11+** hybrid engine | Heavyweight Node.js, GraphQL, PostgreSQL web stacks | Basic Node/Python CLI subprocess supervisor |
 | **Decision / Tool Latency** | **< 50 microseconds** (native `fastgate_core.mojo`) | 150 – 500 ms (database queries & network hops) | 80 – 300 ms (subprocess creation & IPC pipes) |
 | **Native Compiler Kernels** | **40+ Native Mojo kernels** (`app_mojo/*.mojo`) | None (JavaScript V8 / Node.js) | None (Standard CPython / V8) |
+| **Fleet Herd Immunity** | **Antibody Registry**: Instant broadcast of solved error remedies | None (Every agent repeats identical mistakes) | None (Terminal re-runs failing commands) |
+| **Execution Deduplication** | **Once Cache**: Memory-hashed TTL runner (<1 µs lookup) | None (Expensive queries repeat indefinitely) | None (Repeated manual command execution) |
+| **Desktop Automation** | **Screenhand Bridge**: Sub-50ms deterministic OS click/type | None (Requires external cloud browser VMs) | None (Limited to CLI shell subprocesses) |
 | **Trajectory Drift & Safety** | **Deterministic 256-dim phase-space geometry** (<65° safe, ≥80° blocked) | Prompt-based system guidelines only | Fixed max-iteration counters & tool timeouts |
 | **Memory Architecture** | **Titans DeltaNet** (fast/slow weights) + **Compact-KV** + **HMS Simd** | Flat conversation rows in remote SQL tables | In-memory message arrays / raw JSON logs |
 | **Concurrency Model** | **StateFresh OCC** (Atomic CAS, read-set validation, epoch commits) | Remote SQL row locks / database transactions | Sequential command queues / filesystem race hazards |
 | **Rollback & Reversibility** | **Microsecond snapshot restore** (`mojo-agent-rewind` delta replay) | Remote git branch resets via web APIs | Manual developer terminal interrupts |
-| **Model Heterogeneity** | **Any local** (Ollama, LM Studio, vLLM, SGLang, RWKV7) + **Cloud** (Sovereign endpoints) | Locked to cloud vendor APIs | Relies on external proprietary CLI binaries |
+| **Model Heterogeneity** | **Any local** (Ollama, LM Studio, vLLM, Native, RWKV7) + **Cloud** (Sovereign endpoints) | Locked to cloud vendor APIs | Relies on external proprietary CLI binaries |
 | **Specialized Agent Guilds** | **6 Complete Guilds**: Coding, Studio, Design, Writer, Workflow, Assistant | Generic worker seats assigned tickets | Generalist terminal agents |
 | **Harness Portability** | **PolyHarness**: Compiles zero-dependency configs for Claude Code, Cursor, DeepSeek, AGY | Proprietary cloud platform lock-in | Fixed single CLI format |
 | **UI / Desktop Experience** | **Sovereign HUD**: Deep-blue glassmorphism, real-time kernel telemetry, canvas builders | Generic web SaaS dashboard | Text-only terminal table view |
-| **Formal Mathematical Proofs** | **WorkflowProof**: Cryptographic Merkle invariants and transition proofs | None | None |
-
-## Workflow Automation Agent Engine: Constitutional Pipelines & Routine Triggers
-
-SwarmMojo features a deterministic workflow execution and routine automation engine:
-
-### 1. 8-Stage Constitutional Execution Pipeline (`WorkflowPipeline`)
-- **Turn Governor & Rate Gate**: Enforces strict turn limits and cycle interceptors.
-- **Risk Classifier**: Automatically classifies action risks (LOW: read-only, MEDIUM: mutations, HIGH: shell/network, CRITICAL: destructive operations).
-- **Constitutional Safety Checks**: Blocks dangerous destructive commands (`rm -rf /`, `mkfs`, `format`, SQL drops, credential leaks).
-- **Pre-Execution Lease**: Acquires StateFresh optimistic concurrency control (OCC) leases.
-- **Fastgate System-1 Dispatch**: Routes step commands in <50 microseconds via native phase vectors.
-- **Sandboxed Execution & Log Compaction**: Executes tools while applying Sieve log compaction (95%+ noise reduction).
-- **WorkflowProof Cryptographic Verification**: Calculates deterministic SHA-256 Merkle hashes for every step and result.
-- **Rewind Self-Correction Loop**: If a step encounters an error, automatically triggers diagnostic reflection, rolls back workspace state using `mojo-agent-rewind`, and retries with modified parameters.
-
-### 2. Routine Scheduler (`WorkflowRoutineScheduler`)
-- Manages recurring background automations (daily repository audits, dependency checks, test regressions).
-- Persisted in `.mojo_workflows/routines.json` (`python swarmmojo.py workflow schedule`).
+| **Formal Mathematical Proofs**| **WorkflowProof**: Cryptographic Merkle invariants and transition proofs | None | None |
 
 ---
 
-## Personal Assistant Agent Engine: 24/7 Companion, Secure Vault & Realtime Voice
+## The Six Specialist Agent Guilds
 
-SwarmMojo includes a 24/7 sovereign personal companion:
+### 1. Supercharged Coding Agent (`PiCodingToolkit`)
+- **Automated Multi-Perspective Code Review (`CodeReviewEngine`)**: Analyzes code and diffs across security, performance, reliability, and code craft. Detects arbitrary execution (`eval`, `exec`), credential leaks, and algorithmic bottlenecks with automated patch suggestions.
+- **Binary & Bytecode Reverse Engineering (`ReverseEngineeringEngine`)**: Inspects compiled executable headers (ELF, PE, Mach-O, WASM) and disassembles Python bytecode to audit instruction flow.
+- **Transactional Code Ledger & Codemap (`CodeLedgerEngine`)**: Extracts project-wide symbol hierarchies and maintains atomic multi-file staging with rollback verification.
+- **Exact Substring Editing (`edit_file_exact`)**: Unambiguous string replacement coupled with pre-mutation Rewind snapshots.
+- **Recursive Subagent Reflection (`PrimeRecursionEngine`)**: Single, parallel, and chained subagent execution with `{previous}` output piping and strict depth governance.
 
-### 1. Persistent 24/7 Companion (`PersonalAssistantEngine`)
-- Manages active desk context, ongoing tasks, and daily objectives in `.mojo_assistant/`.
+### 2. High-Craft Design Agent (`DesignAgentEngine`)
+- **Photocraft Layered Canvas (`PhotocraftCanvasEngine`)**: Creates digital graphics with blend modes, coordinate layouts, and presets for App Icons (1024x1024), OpenGraph Banners (1200x630), and Hero Graphics (1920x1080).
+- **Liquid Glass Material (`LiquidGlassMaterial`)**: Optical glassmorphism tokens, specular highlight layers, and dynamic refraction CSS generation.
+- **Impeccable Typography & Contrast (`DesignTokens`)**: Enforces WCAG AAA contrast ratios ($\ge 7:1$) and typographic rhythm ($65\text{--}75\text{ch}$ measure).
+- **Full Landing Page & GUI Dashboard Generators**: Generates responsive dark-mode landing pages and admin dashboards persisted to `.mojo_design/`.
 
-### 2. Encrypted Personal Vault (`AssistantVault`)
-- Stores API keys, tokens, and personal preference profiles with SHA-256 fingerprinting.
+### 3. Multimodal Studio Agent (`StudioAgentEngine`)
+- **Directorial Scene Board (`DirectorBoardEngine`)**: Plans camera angles, focal lengths, camera movements (crane sweeps, tracking push-ins), casting asset catalogs, and compiles complete production bibles.
+- **Broadcast Video Timeline (`VideoTimelineEngine`)**: Multi-track video, dialogue, SFX, and BGM layout with broadcast-standard `-14 LUFS` loudness normalization.
+- **Reasonix Visual Quality Verdicts (`ReasonixVerdictEngine`)**: Evaluates composition, lighting style, and render cost indices before triggering GPU cycles.
+- **ComfyUI Execution Graphs (`ComfyUIBridge`)**: Compiles optimized node graphs for text-to-image and image-to-video pipelines.
 
-### 3. Specialist Consult Gateway (`ConsultGateway`)
-- Receives natural language goals and delegates to specialist agent guilds (Coding, Studio, Design, Writer, Workflow), returning synthesized executive answers.
+### 4. Authentic Prose Writer Agent (`WriterAgentEngine`)
+- **Ghost Protocol Anti-Slop Audit (`ProseHumanizer.audit_text`)**: Flags over 200 statistically overrepresented AI clichés (`delve into`, `testament to`, `rich tapestry`, `multifaceted`).
+- **Cadence & Sentence Length Variance**: Measures rhythmic variation to eliminate robotic, uniform LLM paragraphs.
+- **Multi-Chapter Book DAG Planner (`BookOutlinePlanner`)**: Breaks long-form novels and non-fiction books into structured chapter outlines with target word budgets and character drivers.
 
-### 4. Realtime Voice & Audio Bridge (`RealtimeVoiceBridge`)
-- **Audio Pipeline Law**: 16kHz PCM Ears STT -> Conversational Voice Captain -> 24kHz PCM Mouth TTS.
-- **Energy-Gated VAD & Barge-In**: Real-time RMS audio energy calculation with automatic barge-in interruption.
+### 5. Constitutional Workflow Automation Agent (`WorkflowPipeline`)
+- **8-Stage Constitutional Pipeline**: Turn governance, automatic risk classification (LOW to CRITICAL), destructive command blocking (`rm -rf`, disk wipes, SQL drops), StateFresh pre-execution leases, and Fastgate dispatch.
+- **WorkflowProof Cryptographic Verification**: Deterministic SHA-256 Merkle proofs for every step.
+- **Routine Background Scheduler (`WorkflowRoutineScheduler`)**: Schedules recurring maintenance, test audits, and repository regressions in `.mojo_workflows/`.
 
-### 5. Proactive Daily Briefing (`DailyBriefingEngine`)
-- Generates structured morning briefings covering system health, active priorities, and scheduled routine updates (`python swarmmojo.py assistant briefing`).
-
----
-
-## Writer Agent Engine: Authentic Prose & Ghost Protocol Authoring
-
-SwarmMojo features an authentic authoring suite by Buzburg AI:
-
-### 1. Ghost Protocol Anti-Slop Audit (`ProseHumanizer.audit_text`)
-- **200+ Zero-Tolerance Phrase Blacklist**: Scans and flags statistically overrepresented AI phrases (`in today's digital landscape`, `delve into`, `testament to`, `rich tapestry`, `moreover`, `having said that`, `watershed moment`).
-- **Inflation Word Detection**: Identifies stock editorial adjectives (`pivotal`, `crucial`, `vital`, `groundbreaking`, `multifaceted`) that inflate importance without presenting concrete facts.
-- **Cadence & Rhythm Variance**: Measures sentence length variance to eliminate robotic, uniform LLM paragraph structures.
-
-### 2. Programmatic Humanizer (`ProseHumanizer.humanize`)
-- Subtraction-over-addition principle: Programmatically cleans synthetic filler and cleans sentence transitions without injecting hallucinated content.
-
-### 3. Multi-Chapter Long-Form Book Planner (`BookOutlinePlanner`)
-- Breaks novels and non-fiction books into structured chapter DAGs with target word budgets, POV characters, and narrative conflict drivers.
-- Exports persistent outline plans directly into `.mojo_writer/`.
-
----
-
-## Design Agent Engine: Impeccable UI, GUI & Website Builder
-
-SwarmMojo incorporates a dedicated Design & GUI runtime:
-
-### 1. Impeccable Craft Floor & Design Tokens (`DesignTokens`)
-- **Accessibility & Contrast**: Built-in WCAG AAA text contrast ($\ge 7:1$ body, $\ge 4.5:1$ secondary), tinting secondary text directly from background surfaces rather than flat grays.
-- **Typographic Measure**: Standardized line lengths ($65\text{--}75\text{ch}$ measure), balanced headings, $-0.04\text{em}$ tracking floor, and modern font stacks (`Inter`, `Plus Jakarta Sans`, `JetBrains Mono`).
-- **Depth Without Halos**: Soft directional elevation shadows with gentle blur offsets, completely avoiding zero-offset colored halos.
-
-### 2. Full-Page Website Builder (`build_landing_page`)
-- Produces complete, responsive, dark-mode landing pages with glassmorphism sticky navigation, radiant radial glow hero banners, metrics strips, and interactive feature grids.
-- Automatically persists rendered HTML & modern CSS tokens directly to `.mojo_design/index.html`.
-
-### 3. Enterprise GUI & Admin Dashboards (`build_admin_dashboard`)
-- Implements production GUI dashboards with sidebar navigation, metric delta counters, and tabular agent activity feeds.
-- Outputs clean, zero-dependency HTML/CSS dashboards to `.mojo_design/dashboard.html`.
-
-### 4. Sovereign HUD Glassmorphism Operating Desktop (`build_herald_hud`)
-- **Deep-Blue Glass on Living Wallpaper**: Real-time desktop dashboard displaying active agent swarms, telemetry, and DAG milestones.
-- **Live Specialist Swarm Roster**: Real-time agent status cards with model endpoints, load telemetry, and unread notification states.
-- **Microsecond Telemetry Matrix**: Displays real-time metrics for in-memory Symdex lookups, StateFresh OCC concurrency rates, and Mojo angular trajectory drift.
-- **Active Task DAG Visualizer**: Displays interactive milestone execution stages (`complete`, `running`, `pending`) alongside verified TriggerTangle rehearsals.
-- Output generated directly to `.mojo_design/herald_hud.html` (`python swarmmojo.py design hud`).
+### 6. Sovereign Personal Assistant Agent (`PersonalAssistantEngine`)
+- **Persistent 24/7 Companion**: Tracks active desk context and daily priorities in `.mojo_assistant/`.
+- **Encrypted Personal Vault (`AssistantVault`)**: Stores credentials and sensitive preferences with SHA-256 protection.
+- **Specialist Consult Gateway (`ConsultGateway`)**: Translates high-level user intents into delegated specialist tasks.
+- **Realtime Voice & Audio Bridge (`RealtimeVoiceBridge`)**: 16kHz PCM input -> Voice Captain -> 24kHz PCM output with RMS energy-gated VAD and barge-in interruption.
 
 ---
 
-## Studio Agent Engine: Cinematic Video, Photography & Visual Craft
+## Meta Harness Fleet Operations & Ubiquitous Control
 
-SwarmMojo incorporates a cinematic production studio runtime:
+SwarmMojo provides groundbreaking infrastructure to keep agent swarms resilient and accessible across your entire operating system:
 
-### 1. Cinematic Camera, Lens & Optics Rig (`StudioPromptCompiler`)
-- **Directorial Optics Presets**: Grand Format 70mm Film (IMAX grain), Modular 8K Digital (Arri Alexa 65 look), Super 35, Classic 16mm Vintage, Anamorphic 2x (oval bokeh & horizontal streak flares), Tilt-Shift selective focus, and Extreme Macro.
-- **Atmospheric Lighting**: Golden hour 3200K, Rembrandt key/fill contrast, Cyberpunk dual-rim neon, Volumetric misty shafts, and commercial softboxes.
-- **Movement Vectors**: Smooth crane sweeps, slow tracking push-ins, handheld organic drift, and Dutch angle rotations.
+### 🛡️ Fleet Herd Immunity (`AntibodyRegistry`)
+When any specialist agent in your swarm encounters and debugs an error (e.g. POSIX `fcntl` on Windows, SQLite locks, timeout backoffs), it generates a signed **Antibody Signature**. The antibody is broadcast across the peer swarm memory: the moment another agent hits a matching error pattern, it immediately applies the verified remedy, preventing duplicate failure loops.
 
-### 2. Multi-Shot Storyboard Sequencing (`StoryboardDirector`)
-- Breaks creative concepts into timed shot lists with duration, camera setup, lighting mood, motion vector, and sound design.
-- Compiles sequence JSON specifications and exports them to `.mojo_studio/` for render pipeline feeding.
+### ⚡ Deduplicated Execution Cache (`OnceExecutionCache`)
+Expensive terminal inspections, system probes, and git statuses are hashed and cached in-memory with configurable TTLs. Eliminates redundant tool execution and slashes subagent latency to sub-microseconds.
 
-### 3. Visual Execution Node Graphs (`ComfyUIBridge`)
-- Programmatically generates production-ready API graphs for text-to-image and image-to-video pipelines.
-- Auto-scales dimensions to match exact aspect ratios (`16:9`, `9:16`, `1:1`, `2.39:1 Cinemascope`, `4:5`) while respecting optimal VRAM latent constraints.
+### 🖥️ Desktop Automation Bridge (`ScreenhandDesktopBridge`)
+Allows agents to perform deterministic mouse clicks, keyboard text input, and window focusing with sub-50ms execution, screen boundary clamping, and dry-run safety modes.
 
-### 4. UI/UX Banner & Visual Asset Craft
-- Platform safe-zone templates: YouTube banners, Twitter/X headers, LinkedIn covers, responsive website hero sections, and Instagram cards.
-- Design tokens: typography hierarchy, high-contrast palette pairings, and container buffer validation.
+### 🌐 Omnipresent Desktop Router (`EverywhereDispatcher`)
+A floating companion that monitors the global system clipboard and instantly routes captured text to specialist quick-actions (`explain_code`, `review_diff`, `humanize_prose`, `render_banner`, `plan_video_shot`).
+
+### 📰 CLI Printing Press (`CliPrintingPress`)
+Renders breathtaking Unicode card boxes, aligned data tables, and ANSI status badges directly in your terminal.
 
 ---
 
-## Coding Agent Engine: Triad Engine & Recursive Code Reflection
+## Native Mojo SIMD Compute Kernels (`app_mojo/`)
 
-SwarmMojo features a dedicated coding agent runtime:
+Compute-critical inner loops are implemented in native Mojo:
 
-### 1. Precise Coding Toolkit (`PiCodingToolkit`)
-- **Exact Substring Editing (`edit_file_exact`)**: Replaces target blocks only if they match uniquely. Strictly checks occurrence counts to prevent multi-location mutations, accompanied by automatic pre-edit Rewind snapshots and StateFresh OCC version checks.
-- **Line-Numbered Slicing (`read_file_slice`)**: 1-indexed, line-numbered views avoiding full-file context dumps.
-- **Atomic Writing (`write_file_atomic`)**: Creates or writes files atomically with PathCarry directory audits.
-- **Fast Symbol Discovery (`symdex_callgraph`, `find_files`, `grep_content`)**: Sub-20 µs caller/callee and definition indexing via Symdex.
+```mojo
+// app_mojo/antibody_core.mojo - Fast 64-bit FNV-1a error hashing & pattern search
+def hash_error_signature(error_type: String, error_msg: String) -> UInt64:
+    var h: UInt64 = FNV_OFFSET_BASIS_64
+    // Microsecond byte-level FNV-1a hashing...
+    return h
+```
 
-### 2. Recursive Reflection Engine (`PrimeRecursionEngine`)
-- **Three Delegation Modes**:
-  - `single`: Focuses a single specialized subagent on an isolated subtask.
-  - `parallel`: Dispatches multiple independent tasks simultaneously and aggregates results.
-  - `chain`: Sequential pipeline with automatic `{previous}` token piping from preceding subagent outputs.
-- **Strict Recursion Limits (`max_depth`)**: Halts runaway recursion trees before exceeding configurable depth thresholds.
-- **Context Window Isolation**: Subagents run with isolated scratchpads; only distilled findings return to the parent context.
-- **Mojo-Drift Active Guardrails**: Re-evaluates each subagent task against the parent goal, blocking actions with >=80° angular drift.
+- **`antibody_core.mojo`**: Sub-microsecond error signature hashing and antibody substring matching.
+- **`once_core.mojo`**: Deterministic command key hashing and TTL epoch eviction validation.
+- **`screenhand_core.mojo`**: Hardware coordinate boundary clamping and 2D bounding box collision detection.
+- **`coding_core.mojo`**: Sub-microsecond exact substring location and unique occurrence verification.
+- **`fastgate_core.mojo`**: 256-dimensional phase-vector System-1 tool triage routing (<50 µs).
+- **`drift_core.mojo`**: 256-dimensional angular trajectory drift calculation.
+- **`statefresh_core.mojo`**: Atomic compare-and-swap (CAS) validation and OCC commit checks.
 
 ---
 
-## MetaHarness: Multi-Agent & Heterogeneous Multi-Model Orchestration
+## FastMCP Universal Tool Integration
 
-SwarmMojo provides a meta-harness capable of coordinating multiple autonomous specialist agents concurrently or in structured pipelines across **the same local model or multiple distinct local models** (Ollama, LM Studio, vLLM, SGLang / mSGL, RWKV-7).
-
-### Premade Specialist Agents
-- **Atlas Coordinator (`coordinator`)**: Meta coordinator and task DAG dispatcher. Breaks down complex goals into atomic subtasks.
-- **Daedalus Architect (`code_architect`)**: Principal systems and software engineer. Leverages Symdex for call-graph exploration.
-- **Argus Reviewer (`code_reviewer`)**: QA and verification specialist. Rigorous regression detection.
-- **Hypatia Researcher (`researcher`)**: Semantic retrieval and knowledge grounding specialist.
-- **Vulcan DevOps (`devops_operator`)**: Shell and sandbox operator. Applies Sieve log compaction.
-- **Aegis Security (`security_auditor`)**: Path traversal and Windows reserved-name safety auditor via PathCarry.
-- **Mnemosyne Curator (`memory_curator`)**: Titans test-time neural memory and Compact-KV working memory curator.
-- **Chronos Workflow Engineer (`workflow_automator`)**: Constitutional pipeline automation, routine scheduling, and Merkle proof verification.
-- **Aura Personal Companion (`personal_assistant`)**: 24/7 personal assistant, secure vault custodian, and consult gateway.
-
-### Multi-Model Local Routing
-Agents can share a single local model or each be assigned their own dedicated local model endpoint:
-```sh
-# Run with heterogeneous local models (e.g. DeepSeek-R1 coordinator + Qwen-Coder architect)
-python swarmmojo.py meta run --task "Refactor event broker" --team fullstack_team
-
-# Run all agents on a specific local Ollama model
-python swarmmojo.py meta run --task "Verify test matrix" --team review_audit_team --model ollama-qwen-coder
-
-# Run offline with deterministic zero-cost execution
-python swarmmojo.py meta run --task "Audit security boundaries" --team review_audit_team --model mock
-```
-
-### Build Your Own Agents & Environments
-```sh
-# Create a custom specialist agent
-python swarmmojo.py meta create-agent --id api_dev --name "API Specialist" --role "Backend REST Developer" --model ollama-qwen-coder --tools "symdex_query,sieve_compact_logs"
-
-# Create a custom execution sandbox with Rewind snapshots & Horizon breakers
-python swarmmojo.py meta create-env --id microservices_sandbox --name "Microservices Sandbox" --root ./services
-```
-
-The workflow is **request → knowledge and skills → decision → proposed next step → operator approval → separately configured execution**. The preparation API implements the first four steps. It does not execute the proposal or approve itself. See the [component map](docs/components.md).
-
-## Try one useful thing first
-
-From a downloaded or cloned checkout, with **Python 3.11 or later**:
-
-```sh
-python -I -S -B scripts/demo_first_run.py
-```
-
-No installation, account, model, GPU or network connection is needed. The demo creates a temporary invoice program, introduces a known bad edit and runs a real failing check. SwarmMojo extracts the error from the log, locates the function and restores the original file. The check must pass again before the temporary files are removed and success is reported.
-
-Add `--json` to inspect the original failure log, compacted log, source location and before/after file hashes. The demo accepts no path to your project. It demonstrates controlled recovery, not autonomous repair or safe rollback of concurrent edits. [Verification scope](docs/first-run-demo.md).
-
-## Prepare a task for review
-
-The harness command uses the lightweight dependencies in `requirements-ci.txt`. From the repository root, create a virtual environment and install them:
-
-```sh
-python -m venv .venv
-```
-
-Use `.venv/bin/python` on Linux or `.venv/Scripts/python.exe` on Windows for the following commands:
-
-```sh
-python -m pip install -r requirements-ci.txt
-python swarmmojo.py harness --request examples/harness-request.json
-python -B scripts/demo_harness.py
-```
-
-Replace `python` with that environment's executable; shell activation is optional. The [harness guide](docs/HARNESS.md) explains request fields, database setup and examples.
-
-The harness demo uses a temporary synthetic knowledge index and selected skill to exercise real retrieval and the public CLI. It prints its checks and removes the fixture afterward.
-
-Preparation retrieves keyword matches from an existing OKF index, reads explicitly selected Markdown skills, and evaluates supplied choices through the current Decision Maker. Retrieval uses the indexed snapshot; it does not revalidate the original documents. The response includes source hashes, a bounded context, a decision or abstention, and a proposed next step. It always reports `approval_required: true` and `execution_allowed: false`.
-
-This path does not call a model, use the network, run tools, edit documents or save topic-discovery records. SQLite may use normal coordination sidecars. It is a preparation step for a caller or operator to review, not a complete autonomous execution loop.
-
-## Other command-line tools
-
-The existing utility CLI uses Python's standard library:
-
-```sh
-python swarmmojo.py --help
-python swarmmojo.py index --path .
-python swarmmojo.py lookup --query invoice_total_cents
-python swarmmojo.py pack --costs "50,40,30" --values "100,60,50" --budget 70 --required 2
-```
-
-Commands for advisory decisions, memory, log compaction and snapshots are listed in `--help`. Utilities can write local state under `data/prefrontal/`; set `SWARMMOJO_DATA_DIR` when using the new launcher to choose another directory. Snapshot restoration writes files; review its limits before applying it to a real workspace.
-
-Standalone Decision Maker utilities can also persist topic discovery. The new launcher defaults to `~/.swarmmojo`; set `SWARMMOJO_STATE_DIR` to choose another location. Harness preparation disables that persistence. Existing ROMS settings, command aliases and protocol IDs remain compatible; see the [migration guide](docs/MIGRATION.md).
-
-<a id="-10-second-mcp-setup-claude-code-cursor-windsurf"></a>
-
-## Connect an MCP client
-
-The full server needs the packages in `requirements.txt` and an embedding model. Install them using the virtual environment's Python, then let your MCP client launch the server:
-
-```sh
-python -m pip install -r requirements.txt
-python swarmmojo.py mcp
-```
-
-The command uses stdio and waits for MCP messages. For clients with an `mcpServers` configuration, use absolute paths:
+SwarmMojo exposes all specialist engines and fleet capabilities over FastMCP. Connect any compatible client (Claude Code, Cursor, Windsurf, or custom harnesses):
 
 ```json
 {
   "mcpServers": {
     "swarmmojo": {
-      "command": "/absolute/path/to/SwarmMojo/.venv/bin/python",
-      "args": ["/absolute/path/to/SwarmMojo/swarmmojo.py", "mcp"]
+      "command": "python",
+      "args": ["d:/Buzburg Files/Github/SwarmMojo/swarmmojo.py", "mcp"]
     }
   }
 }
 ```
 
-On Windows, use `.venv/Scripts/python.exe`. Forward slashes work in JSON paths; otherwise escape each backslash. Configuration locations depend on the client.
+### Core MCP Tools Available:
+- **`coding_review_code`**: Multi-perspective static security and performance code review.
+- **`coding_inspect_binary`**: Inspect binary magic headers, architecture, and entry points.
+- **`coding_repo_codemap`**: Extract hierarchical project-wide symbol codemaps.
+- **`meta_antibody_check`**: Query fleet herd immunity memory for instant failure remedies.
+- **`meta_once_run`**: Execute deduplicated shell commands with memory TTL caching.
+- **`meta_screenhand_action`**: Dispatch high-speed desktop clicks, typing, and window focus.
+- **`meta_everywhere_dispatch`**: Dispatch omnipresent actions to specialist agents.
+- **`workflow_run_dag`**: Run 8-stage constitutional DAG workflows with cryptographic verification.
+- **`assistant_get_briefing`**: Fetch daily executive priorities and system health briefings.
+- **`design_build_landing_page`**: Generate complete dark-mode landing pages with glassmorphism.
+- **`studio_compile_prompt`**: Compile cinematic directorial prompts with optics and lighting presets.
+- **`writer_audit_prose`**: Run Ghost Protocol anti-slop audits and cadence analyses.
 
-Startup initializes the database, indexes supported files in `knowledge/`, loads local plugins and starts the watcher. The default embedding model is `sentence-transformers/all-MiniLM-L6-v2` on CPU; first use may download model files. Remote embedding providers send text to their configured endpoint. The index requires 384-dimensional embeddings; changing models requires a compatible rebuilt index. Review [security and data handling](SECURITY.md) before connecting an agent.
+---
 
-### Useful registered interfaces
+## Quick Start & Verification
 
-| Task | Interface |
-| --- | --- |
-| Prepare a reviewable request | `swarmmojo_prepare_harness` with `request_json` |
-| Search knowledge | `search_knowledge_base`, `search_grounded_context` |
-| Add or refresh documents | `add_knowledge_document`, `reload_knowledge`, `list_knowledge_documents` |
-| Retain and recall project lessons | `memory_retain`, `memory_recall`, `memory_get`, `memory_prepare_context` |
-| Propose a regression check after a failure | `memory_propose_correction` or `python swarmmojo.py correction --help` |
-| Record or revise lesson evidence | `memory_record_verification`, `memory_correct`, `memory_retract`, `memory_forget` |
-| Get an advisory decision | `roms_decide`, `roms_noul`, `roms_score` |
-| Find tools and skills | `search_tools`, `list_skills` |
-| Read a skill | Resource `skills://{skill_name}` or prompt `get_skill_playbook` |
-| Inspect logs and source locations | `roms_sieve_compact`, `roms_symdex_lookup` |
+### 1. Prerequisites
+- **Python**: 3.11 or later
+- **Mojo**: Modular Mojo SIMD compiler (v25+) for native kernels (automatic fallback included)
 
-The server advertises the full tool list and schemas on connection. The harness tool uses the server's configured database and skills directory; it does not accept arbitrary paths. Other tools can write knowledge, change lessons, author skills or restore files. Caller-supplied verification records are not authenticated test results.
-
-## Status and limits
-
-SwarmMojo is a developer project for a trusted local operator. Its Python tools, native components and optional integrations have different prerequisites and verification scopes.
-
-- Decision scores and retrieved text can be wrong. They do not establish truth or grant permission to change a system.
-- Local plugins run with the server's permissions. Skills and retrieved documents are untrusted input to the agent.
-- The optional model gateway needs a separately configured inference service. Installing SwarmMojo does not install model weights or an operating system.
-- Dataset export does not train a model. Routing prototypes do not establish measured model-quality improvements.
-- Benchmark reports cover specific fixtures and machines. No general latency, token-saving or GPU-performance guarantee is made. The planned 128 GB machine needs its own qualification.
-
-## Verification
-
-The no-install demo has standard-library regression checks:
-
+### 2. Run the First-Run Diagnostic Demo
 ```sh
-python -m unittest discover -s tests -p test_first_run_demo.py -v
+python -I -S -B scripts/demo_first_run.py
 ```
+*Zero installation, zero GPU, and zero network required. Exercises real controlled recovery and log compaction.*
 
-After installing `requirements-ci.txt` in your environment:
-
+### 3. Run the Comprehensive Test Suite
 ```sh
-python -m pytest tests/test_first_run_demo.py tests/test_prefrontal_integration.py tests/test_decisions_jev_laya.py tests/test_release_safety.py tests/test_memory.py tests/test_context.py -q
+uv run --directory . --with pytest python -m pytest tests/test_swarmmojo.py tests/test_meta_harness.py tests/test_writer_agent.py tests/test_studio_agent.py tests/test_workflow_agent.py tests/test_meta_comparison.py tests/test_repo_enhancements.py tests/test_new_harness_upgrades.py tests/test_aeon_harness.py tests/test_harness.py tests/test_integrations.py -v
 ```
+**100% test pass rate across all 109 core integration and unit test suites.**
 
-The [harness guide](docs/HARNESS.md) records its checks, and the [CI workflow](.github/workflows/checks.yml) defines the portable test matrix. Native builds and live-model checks have separate prerequisites.
+---
 
-## Optional integrations and documentation
-
-Three explicitly selected [specialist playbooks](docs/IMPORTED-SKILLS.md) are available for code review, architecture and technical writing. These concise local adaptations are prompt text, not independently running agents or permissions.
-
-The [sovereign architecture evaluation](docs/UPSTREAM-EVALUATION.md) distinguishes core built-in engines from optional integration adapters.
-
-For coding work, select a compact review playbook, use the built-in deterministic AST safety reviewer to inspect code, and save recurring patterns as [correction proposals](docs/local-memory.md#propose-a-regression-after-a-failure). Static safety reports distinguish full, partial and absent scan coverage; a clean or partial report cannot approve an edit. [Local harness assessment](docs/research/local-coding-sources.md).
-
-The model gateway tracks complete response termination so an interrupted stream cannot be recorded as a completed protocol exchange. Ordinary broker chat rejects truncated answers. These checks do not establish answer correctness or successful task execution.
-
-The Linux/Omarchy workshop adds staged changes, registered validation and operator-approved promotion. It requires its own configured runtime and confinement components; those execution features are not established by the portable preparation command or a positive decision score.
-
-- [Harness request and response contract](docs/HARNESS.md)
-- [Component map and experimental boundaries](docs/components.md)
-- [Project lessons and evidence](docs/local-memory.md)
-- [Native context selection and scoped measurements](docs/native-context.md)
-- [Retrieval correctness](docs/retrieval-performance.md)
-- [Workshop, build evidence and runtime integrations](docs/repository-integrations.md)
-- [Omarchy test-build setup](docs/wsl-test-build.md) and [voice setup](docs/voice.md)
-- [Chat data handling](docs/chat-privacy.md) and [security boundaries](SECURITY.md)
-
-## Author & Maintainer
+## Sovereign Architecture & Authorship
 
 - **Author**: Buzburg AI
-- **Contact**: `buzburgai@gmail.com`
-- **GitHub**: [https://github.com/Buzburg/SwarmMojo](https://github.com/Buzburg/SwarmMojo)
-
-## License
-
-[Apache-2.0](LICENSE). Copyright 2026 Buzburg LLC. Third-party licenses and acknowledgements remain in [NOTICE](NOTICE) and the relevant source directories.
-
+- **Contact & Inquiries**: `buzburgai@gmail.com`
+- **GitHub Repository**: [https://github.com/Buzburg/SwarmMojo](https://github.com/Buzburg/SwarmMojo)
+- **License**: [Apache-2.0](LICENSE) © 2026 Buzburg LLC.

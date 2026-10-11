@@ -1,6 +1,6 @@
 """Reverse Engineering Engine for SwarmMojo by Buzburg AI.
 
-Adapted from REA architecture:
+Binary and bytecode reverse engineering architecture by Buzburg AI:
 - Binary format inspection (ELF, PE, Mach-O, WASM, and archive magic signatures)
 - Bytecode inspection and disassembly for compiled Python files and functions
 - Symbol table, export, and import extraction

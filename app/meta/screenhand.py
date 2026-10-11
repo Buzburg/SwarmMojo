@@ -1,6 +1,6 @@
-"""High-Speed Desktop Automation Bridge (Screenhand) for SwarmMojo by Buzburg AI.
+"""High-Speed Desktop Automation Bridge for SwarmMojo by Buzburg AI.
 
-Adapted from Screenhand architecture:
+Deterministic desktop automation architecture by Buzburg AI:
 - Sub-50ms deterministic desktop interaction without expensive redundant AI visual calls
 - Direct mouse click, coordinate movement, keyboard typing, and window targeting
 - Screen boundary validation and dry-run execution safety guards

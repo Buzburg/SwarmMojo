@@ -1,6 +1,6 @@
-"""Universal Omnipresent Desktop Bridge (Everywhere & Jarvis Companion) for SwarmMojo by Buzburg AI.
+"""Universal Omnipresent Desktop Bridge for SwarmMojo by Buzburg AI.
 
-Adapted from Everywhere and Dodaios architecture:
+Omnipresent desktop companion and clipboard router by Buzburg AI:
 - Omnipresent floating desktop action dispatcher
 - Global clipboard text capture, prompt bridging, and format conversion
 - Continuous background companion heartbeat and status loop

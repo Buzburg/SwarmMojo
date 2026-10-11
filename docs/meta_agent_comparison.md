@@ -28,7 +28,7 @@ Autonomous agent architectures have evolved through three distinct paradigms:
 | **Memory Architecture** | **Titans DeltaNet** (fast/slow weights) + **Compact-KV** + **HMS Simd** | Flat conversation rows in remote SQL tables | In-memory message arrays / raw JSON logs |
 | **Concurrency Model** | **StateFresh OCC** (Atomic CAS, read-set validation, epoch commits) | Remote SQL row locks / database transactions | Sequential command queues / filesystem race hazards |
 | **Rollback & Reversibility** | **Microsecond snapshot restore** (`mojo-agent-rewind` delta replay) | Remote git branch resets via web APIs | Manual developer terminal interrupts |
-| **Model Heterogeneity** | **Any local** (Ollama, LM Studio, vLLM, SGLang, RWKV7) + **Cloud** (Sovereign endpoints) | Locked to cloud vendor APIs | Relies on external proprietary CLI binaries |
+| **Model Heterogeneity** | **Any local** (Ollama, LM Studio, vLLM, Native, RWKV7) + **Cloud** (Sovereign endpoints) | Locked to cloud vendor APIs | Relies on external proprietary CLI binaries |
 | **Specialized Agent Guilds** | **6 Complete Guilds**: Coding, Studio, Design, Writer, Workflow, Assistant | Generic worker seats assigned tickets | Generalist terminal agents |
 | **Harness Portability** | **PolyHarness**: Compiles zero-dependency configs for Claude Code, Cursor, DeepSeek, AGY | Proprietary cloud platform lock-in | Fixed single CLI format |
 | **UI / Desktop Experience** | **Herald HUD**: Deep-blue glassmorphism, real-time kernel telemetry, canvas builders | Generic web SaaS dashboard | Text-only terminal table view |

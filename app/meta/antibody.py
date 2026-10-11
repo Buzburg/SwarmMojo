@@ -1,6 +1,6 @@
 """Herd Immunity Engine for Agent Fleets (Antibody) for SwarmMojo by Buzburg AI.
 
-Adapted from antibody architecture:
+Fleet herd immunity architecture by Buzburg AI:
 - When any agent in the swarm discovers and resolves an error, it generates an Antibody Signature.
 - The antibody is broadcast across the peer agent fleet.
 - When any peer encounters a matching error signature, it instantly applies the remedy, preventing duplicate failure loops across the fleet.

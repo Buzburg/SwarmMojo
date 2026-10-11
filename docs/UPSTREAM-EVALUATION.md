@@ -54,5 +54,5 @@ SwarmMojo enforces five foundational architectural invariants:
 
 SwarmMojo is 100% locally sovereign:
 - Operates fully air-gapped without external cloud telemetries or databases.
-- Supports heterogeneous local model inference (Ollama, LM Studio, vLLM, SGLang, RWKV7).
+- Supports heterogeneous local model inference (Ollama, LM Studio, vLLM, Native, RWKV7).
 - Preserves all licenses, proofs, and developer artifacts on the operator's machine.

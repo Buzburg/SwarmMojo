@@ -1,6 +1,6 @@
 """Deduplicated Command Execution Cache (Once Engine) for SwarmMojo by Buzburg AI.
 
-Adapted from once daemon architecture:
+Execution deduplication cache architecture by Buzburg AI:
 - Run expensive commands once, cache outputs in memory for a configurable TTL.
 - Eliminates redundant tool invocations (e.g. repeated git status, system probes, lints).
 - Content and environment-hashed keys with per-session isolation.

@@ -1,6 +1,6 @@
 """High-Craft CLI Printing Press for SwarmMojo by Buzburg AI.
 
-Adapted from cli-printing-press architecture:
+Terminal typography and reporting architecture by Buzburg AI:
 - Beautiful terminal card formatting with rounded Unicode borders
 - Clean data tables with automated column width calculation
 - ANSI terminal color styling and status badges

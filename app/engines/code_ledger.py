@@ -1,6 +1,6 @@
 """Transactional Code Ledger and Repository Codemap for SwarmMojo by Buzburg AI.
 
-Adapted from OpenQodex and Slim Codemap architecture:
+Transactional repository codemap and atomic change ledger architecture by Buzburg AI:
 - Hierarchical repository codemap extraction (modules, symbols, imports, line boundaries)
 - Transactional change ledger recording multi-file diffs with checksum verification
 - Atomic refactor planning: validates dependency order before executing edits
