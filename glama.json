@@ -4,7 +4,7 @@
     "Buzburg"
   ],
   "name": "Swarmojo",
-  "description": "Full-fledged local-first AI agent harness combining ROMS (RAG, Open Knowledge Files, MCP, Skills), Decision AI, correction memory, and reviewable workflow preparation.",
+  "description": "The blazing-fast, local-first AI agent meta-harness. Run sovereign multi-agent super-swarms on your own silicon with sub-microsecond Mojo SIMD speed (<50µs), fleet herd immunity, self-healing Git rollbacks, and zero cloud lock-in.",
   "categories": [
     "memory",
     "developer-tools",

@@ -2,7 +2,7 @@
 <!-- Generated automatically by polyharness v0.1.0 — DO NOT EDIT DIRECTLY -->
 
 ## Project Overview
-Full-fledged local-first AI agent harness combining ROMS (RAG, OKF, MCP, Skills), Swarmojo (Aeon specialist reviews, workflow rehearsal, mSGL), PolyHarness (universal configuration & deterministic guardrails), and 10 specialized Buzburg engines (Symdex, Titans, ToolCall, Sieve, Horizon, Fastgate, Compact-KV, Rewind, PathCarry, LocalDocSearch).
+The blazing-fast, local-first AI agent meta-harness. Run sovereign multi-agent super-swarms on your own silicon with sub-microsecond Mojo SIMD speed (<50µs), 30+ sovereign engines, fleet herd immunity, self-healing Git rollbacks, and zero cloud lock-in.
 
 ## Essential Commands
 - **test**: `uv run --directory . --with pytest python -m pytest tests/test_engines.py tests/test_swarmmojo.py`

@@ -1,5 +1,7 @@
 # Swarmojo ⚡
 
+### *The blazing-fast, local-first AI agent meta-harness. Run sovereign multi-agent super-swarms on your own silicon with sub-microsecond Mojo SIMD speed (<50µs), fleet herd immunity, self-healing Git rollbacks, and zero cloud lock-in.*
+
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Runtime: Mojo + Python](https://img.shields.io/badge/Runtime-Mojo_SIMD_v25+_|_Python_3.11+-orange.svg)](app_mojo/)
 [![Architecture: Local--First Meta--Harness](https://img.shields.io/badge/Architecture-Sovereign_Meta--Harness-emerald.svg)](docs/meta_agent_comparison.md)

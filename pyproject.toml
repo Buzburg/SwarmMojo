@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "Swarmojo"
 version = "1.0.0"
-description = "The world's fastest local-first meta-harness for autonomous multi-agent swarms. Powered by 30+ sovereign engines, native Mojo SIMD acceleration (<50µs triage), fleet herd immunity, and zero cloud dependency."
+description = "The blazing-fast, local-first AI agent meta-harness. Run sovereign multi-agent super-swarms on your own silicon with sub-microsecond Mojo SIMD speed (<50µs), 30+ sovereign engines, fleet herd immunity, self-healing Git rollbacks, and zero cloud lock-in."
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [
