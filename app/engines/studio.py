@@ -200,11 +200,11 @@ class StoryboardDirector:
 
 
 # -------------------------------------------------------------------------
-# ComfyUI Execution Graph Generator & Local Bridge
+# Diffusion Execution Graph Generator & Local Bridge
 # -------------------------------------------------------------------------
 
-class ComfyUIBridge:
-    """Generates execution graphs and handles IPC with local ComfyUI API servers."""
+class DiffusionGraphBridge:
+    """Generates execution graphs and handles IPC with local visual generation pipelines."""
 
     def __init__(self, host: str = "http://127.0.0.1:8188"):
         self.host = host.rstrip("/")
@@ -307,6 +307,10 @@ class ComfyUIBridge:
             return {"online": False, "host": self.host, "error": str(e)}
 
 
+# Backward-compatible alias
+ComfyUIBridge = DiffusionGraphBridge
+
+
 # -------------------------------------------------------------------------
 # Studio Agent Engine Master Orchestrator
 # -------------------------------------------------------------------------
@@ -360,14 +364,14 @@ class StudioAgentEngine:
         board["saved_to"] = str(save_file)
         return board
 
-    def export_comfyui_workflow(
+    def export_diffusion_workflow(
         self,
         prompt: str,
         negative_prompt: str = "",
         aspect_ratio: str = "16:9",
         steps: int = 25,
     ) -> Dict[str, Any]:
-        """Exports a ComfyUI execution graph mapped to standard aspect ratio."""
+        """Exports a diffusion execution graph mapped to standard aspect ratio."""
         ratio_info = ASPECT_RATIOS.get(aspect_ratio, ASPECT_RATIOS["16:9"])
         w, h = ratio_info["width"], ratio_info["height"]
         # Scale to max 1024 on longest edge for optimal base model efficiency
@@ -378,14 +382,14 @@ class StudioAgentEngine:
             eff_h = 1024
             eff_w = int((1024 * w / h) // 16 * 16)
 
-        workflow = ComfyUIBridge.build_flux_t2i_workflow(
+        workflow = DiffusionGraphBridge.build_flux_t2i_workflow(
             prompt=prompt,
             negative_prompt=negative_prompt,
             width=eff_w,
             height=eff_h,
             steps=steps,
         )
-        out_file = self.studio_dir / "comfyui_workflow.json"
+        out_file = self.studio_dir / "diffusion_workflow.json"
         out_file.write_text(json.dumps(workflow, indent=2), encoding="utf-8")
         return {
             "status": "ready",
@@ -394,6 +398,9 @@ class StudioAgentEngine:
             "workflow_file": str(out_file),
             "workflow": workflow,
         }
+
+    # Backward-compatible alias
+    export_comfyui_workflow = export_diffusion_workflow
 
     def craft_banner_spec(
         self,
@@ -452,7 +459,7 @@ class DirectorShot:
         return asdict(self)
 
 
-class DirectorBoardEngine:
+class SceneDirectorEngine:
     """Agentic filmmaking shot board, casting catalog, and directorial sequencing."""
 
     def __init__(self, project_name: str = "Buzburg Cinema Production"):
@@ -499,6 +506,10 @@ class DirectorBoardEngine:
             "cast_count": len(self.asset_catalog),
             "shots": [s.to_dict() for s in self.shots],
         }
+
+
+# Backward-compatible alias
+DirectorBoardEngine = SceneDirectorEngine
 
 
 @dataclass
@@ -554,7 +565,7 @@ class VideoTimelineEngine:
         }
 
 
-class ReasonixVerdictEngine:
+class VisualVerdictEngine:
     """Reasoning-driven visual assessment and render cost detector."""
 
     def evaluate_render_quality(
@@ -585,3 +596,7 @@ class ReasonixVerdictEngine:
             "overall_verdict": overall_verdict,
             "acceptable": overall_verdict >= 0.85,
         }
+
+
+# Backward-compatible alias
+ReasonixVerdictEngine = VisualVerdictEngine

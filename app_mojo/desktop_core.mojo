@@ -1,5 +1,5 @@
 """
-screenhand_core.mojo
+desktop_core.mojo
 Native Mojo desktop coordinate clipping and collision kernel for Desktop Automation Bridge by Buzburg AI.
 Provides sub-nanosecond 2D boundary clamping, bounding box collision checks,
 and click trajectory point generation.
@@ -61,6 +61,6 @@ def point_in_rect(x: Int, y: Int, box: ScreenBox) -> Bool:
 
 
 def main():
-    print("screenhand_core.mojo initialized.")
+    print("desktop_core.mojo initialized.")
     var pt = clip_coordinate_to_bounds(2000, 500, 1920, 1080)
     print("Clipped point:", pt.x, pt.y, pt.is_within_bounds)

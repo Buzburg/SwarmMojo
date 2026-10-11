@@ -1262,7 +1262,7 @@ class CanvasLayer:
 
 
 @dataclass
-class LiquidGlassMaterial:
+class OpticalGlassMaterial:
     """Optical glassmorphism material specifications with dynamic refraction."""
     blur_px: int = 24
     transparency: float = 0.65
@@ -1272,7 +1272,7 @@ class LiquidGlassMaterial:
     border_glow: str = "1px solid rgba(255, 255, 255, 0.12)"
     shadow_profile: str = "0 8px 32px 0 rgba(0, 0, 0, 0.37)"
 
-    def to_css(self, class_name: str = "liquid-glass") -> str:
+    def to_css(self, class_name: str = "optical-glass") -> str:
         return f"""
 .{class_name} {{
   background: {self.surface_tint};
@@ -1285,7 +1285,11 @@ class LiquidGlassMaterial:
 """
 
 
-class PhotocraftCanvasEngine:
+# Backward-compatible alias
+LiquidGlassMaterial = OpticalGlassMaterial
+
+
+class VisualCanvasEngine:
     """Layered digital canvas composer for UI assets, app icons, and marketing layouts."""
 
     PRESETS = {
@@ -1346,10 +1350,14 @@ class PhotocraftCanvasEngine:
         self.layers.append(layer)
         return layer
 
-    def export_spec(self, title: str = "Photocraft Spec") -> Dict[str, Any]:
+    def export_spec(self, title: str = "Visual Canvas Spec") -> Dict[str, Any]:
         return {
             "title": title,
             "total_layers": len(self.layers),
             "layers": [l.to_dict() for l in sorted(self.layers, key=lambda l: l.z_index)],
         }
+
+
+# Backward-compatible alias
+PhotocraftCanvasEngine = VisualCanvasEngine
 

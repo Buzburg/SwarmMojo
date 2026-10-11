@@ -187,8 +187,8 @@ def register_meta_tools(server: FastMCP) -> None:
     @server.tool()
     def coding_inspect_binary(file_path: str) -> str:
         """Inspects binary magic headers, architecture, entry point, and structure."""
-        from app.engines.reverse_engineering import ReverseEngineeringEngine
-        engine = ReverseEngineeringEngine()
+        from app.engines.reverse_engineering import BinaryAnalysisEngine
+        engine = BinaryAnalysisEngine()
         info = engine.identify_format(file_path)
         return json.dumps(info.to_dict(), indent=2)
 
@@ -201,26 +201,36 @@ def register_meta_tools(server: FastMCP) -> None:
         return json.dumps(codemap, indent=2)
 
     @server.tool()
-    def meta_antibody_check(error_text: str) -> str:
+    def meta_immunity_check(error_text: str) -> str:
         """Scans error text against fleet herd immunity memory to retrieve instant remedies."""
-        from app.meta.antibody import AntibodyRegistry
-        registry = AntibodyRegistry()
+        from app.meta.herd_immunity import HerdImmunityRegistry
+        registry = HerdImmunityRegistry()
         matches = registry.check_immunity(error_text)
         return json.dumps([m.to_dict() for m in matches], indent=2)
 
     @server.tool()
-    def meta_once_run(command: str, cwd: str = ".", ttl_seconds: float = 60.0) -> str:
+    def meta_antibody_check(error_text: str) -> str:
+        """Legacy alias: Scans error text against fleet herd immunity memory."""
+        return meta_immunity_check(error_text)
+
+    @server.tool()
+    def meta_dedup_run(command: str, cwd: str = ".", ttl_seconds: float = 60.0) -> str:
         """Executes deduplicated shell command with memory-cached TTL deduplication."""
-        from app.meta.once_cache import OnceExecutionCache
-        cache = OnceExecutionCache(default_ttl_seconds=ttl_seconds)
+        from app.meta.dedup_cache import DeduplicatedExecutionCache
+        cache = DeduplicatedExecutionCache(default_ttl_seconds=ttl_seconds)
         res = cache.get_or_run(command, cwd=cwd, ttl_seconds=ttl_seconds)
         return json.dumps(res, indent=2)
 
     @server.tool()
-    def meta_screenhand_action(action_type: str, x: int = 0, y: int = 0, text: str = "", dry_run: bool = True) -> str:
+    def meta_once_run(command: str, cwd: str = ".", ttl_seconds: float = 60.0) -> str:
+        """Legacy alias: Executes deduplicated shell command."""
+        return meta_dedup_run(command, cwd=cwd, ttl_seconds=ttl_seconds)
+
+    @server.tool()
+    def meta_desktop_action(action_type: str, x: int = 0, y: int = 0, text: str = "", dry_run: bool = True) -> str:
         """Dispatches high-speed desktop automation action (click, move, type) with safety bounds."""
-        from app.meta.screenhand import ScreenhandDesktopBridge
-        bridge = ScreenhandDesktopBridge(dry_run=dry_run)
+        from app.meta.desktop_bridge import DesktopAutomationBridge
+        bridge = DesktopAutomationBridge(dry_run=dry_run)
         if action_type == "click":
             res = bridge.click(x, y)
         elif action_type == "type":
@@ -232,10 +242,20 @@ def register_meta_tools(server: FastMCP) -> None:
         return json.dumps(res, indent=2)
 
     @server.tool()
-    def meta_everywhere_dispatch(action_id: str, context_text: str = "") -> str:
+    def meta_screenhand_action(action_type: str, x: int = 0, y: int = 0, text: str = "", dry_run: bool = True) -> str:
+        """Legacy alias: Dispatches high-speed desktop automation action."""
+        return meta_desktop_action(action_type=action_type, x=x, y=y, text=text, dry_run=dry_run)
+
+    @server.tool()
+    def meta_dispatch_quick_action(action_id: str, context_text: str = "") -> str:
         """Dispatches omnipresent desktop action (explain_code, review_diff, humanize_prose, etc.)."""
-        from app.meta.everywhere import EverywhereDispatcher
-        dispatcher = EverywhereDispatcher()
+        from app.meta.omnipresent_dispatcher import OmnipresentDispatcher
+        dispatcher = OmnipresentDispatcher()
         res = dispatcher.dispatch_action(action_id, context_text=context_text or None)
         return json.dumps(res, indent=2)
+
+    @server.tool()
+    def meta_everywhere_dispatch(action_id: str, context_text: str = "") -> str:
+        """Legacy alias: Dispatches omnipresent desktop action."""
+        return meta_dispatch_quick_action(action_id=action_id, context_text=context_text)
 

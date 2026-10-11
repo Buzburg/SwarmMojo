@@ -228,22 +228,37 @@ def register_engine_tools(server: FastMCP) -> None:
         return json.dumps(board, indent=2)
 
     @server.tool()
-    def studio_export_comfyui_graph(
+    def studio_export_diffusion_graph(
         prompt: str,
         negative_prompt: str = "",
         aspect_ratio: str = "16:9",
         steps: int = 25,
     ) -> str:
-        """Exports a production-ready ComfyUI API execution graph for Flux Dev / SDXL."""
+        """Exports a production-ready diffusion execution graph for Flux Dev / SDXL."""
         from app.engines.studio import StudioAgentEngine
         studio = StudioAgentEngine()
-        graph = studio.export_comfyui_workflow(
+        graph = studio.export_diffusion_workflow(
             prompt=prompt,
             negative_prompt=negative_prompt,
             aspect_ratio=aspect_ratio,
             steps=steps,
         )
         return json.dumps(graph, indent=2)
+
+    @server.tool()
+    def studio_export_comfyui_graph(
+        prompt: str,
+        negative_prompt: str = "",
+        aspect_ratio: str = "16:9",
+        steps: int = 25,
+    ) -> str:
+        """Legacy alias: Exports a production-ready diffusion execution graph for Flux Dev / SDXL."""
+        return studio_export_diffusion_graph(
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            aspect_ratio=aspect_ratio,
+            steps=steps,
+        )
 
     @server.tool()
     def studio_craft_banner(platform: str, headline: str, subtext: str, style: str = "bold_typography_glassmorphism") -> str:

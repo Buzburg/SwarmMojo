@@ -1,5 +1,5 @@
 """
-once_core.mojo
+dedup_core.mojo
 Native Mojo execution deduplication and cache eviction kernel for SwarmMojo by Buzburg AI.
 Provides sub-microsecond command key hashing, TTL epoch validation,
 and in-memory entry eviction checks.
@@ -66,6 +66,6 @@ def is_cache_entry_expired(current_time: Float64, executed_at: Float64, ttl_seco
 
 
 def main():
-    print("once_core.mojo initialized.")
+    print("dedup_core.mojo initialized.")
     var k = hash_command_key("default", "/workspace", "git status")
     print("Command key hash:", k)

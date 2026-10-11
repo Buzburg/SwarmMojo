@@ -55,7 +55,7 @@ class DisassembledInstruction:
         return asdict(self)
 
 
-class ReverseEngineeringEngine:
+class BinaryAnalysisEngine:
     """Safe inspection and analysis tool for binaries, bytecode, and compiled objects."""
 
     def identify_format(self, file_path: str | Path) -> BinaryHeaderInfo:
@@ -141,3 +141,7 @@ class ReverseEngineeringEngine:
             ascii_part = "".join(chr(b) if 32 <= b <= 126 else "." for b in chunk)
             lines.append(f"{i:08x}:  {hex_part}  |{ascii_part}|")
         return "\n".join(lines)
+
+
+# Backward-compatible alias
+ReverseEngineeringEngine = BinaryAnalysisEngine

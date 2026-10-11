@@ -29,14 +29,36 @@ from .workflowproof import WorkflowStep, WorkflowProofEngine
 from .cortex import CortexEngine, ExecutionShield
 from .triad import TriadEngine, TriadMetrics
 from .mojo_memory import MojoMemoryEngine
-from .studio import StudioAgentEngine, StudioPromptCompiler, StoryboardDirector, ComfyUIBridge
-from .design import DesignAgentEngine, DesignTokens, UIComponentRegistry
+from .studio import (
+    StudioAgentEngine,
+    StudioPromptCompiler,
+    StoryboardDirector,
+    DiffusionGraphBridge,
+    ComfyUIBridge,
+    SceneDirectorEngine,
+    DirectorBoardEngine,
+    DirectorShot,
+    VideoTimelineEngine,
+    TimelineClip,
+    VisualVerdictEngine,
+    ReasonixVerdictEngine,
+)
+from .design import (
+    DesignAgentEngine,
+    DesignTokens,
+    UIComponentRegistry,
+    VisualCanvasEngine,
+    PhotocraftCanvasEngine,
+    CanvasLayer,
+    OpticalGlassMaterial,
+    LiquidGlassMaterial,
+)
 from .writer import WriterAgentEngine, ProseHumanizer, BookOutlinePlanner
 from .code_review import CodeReviewEngine, ReviewFinding, CodeReviewReport
-from .reverse_engineering import ReverseEngineeringEngine, BinaryHeaderInfo
+from .reverse_engineering import BinaryAnalysisEngine, ReverseEngineeringEngine, BinaryHeaderInfo
 from .code_ledger import CodeLedgerEngine, FileCodemap, LedgerTransaction
-from .design import PhotocraftCanvasEngine, CanvasLayer, LiquidGlassMaterial
-from .studio import DirectorBoardEngine, DirectorShot, VideoTimelineEngine, TimelineClip, ReasonixVerdictEngine
+from .fast_search import FastSearchEngine, SearchMatch
+from .git_guard import GitCheckpointGuard, GitCheckpoint
 
 __all__ = [
     "SymdexIndex",
@@ -68,17 +90,22 @@ __all__ = [
     "StudioAgentEngine",
     "StudioPromptCompiler",
     "StoryboardDirector",
+    "DiffusionGraphBridge",
     "ComfyUIBridge",
+    "SceneDirectorEngine",
     "DirectorBoardEngine",
     "DirectorShot",
     "VideoTimelineEngine",
     "TimelineClip",
+    "VisualVerdictEngine",
     "ReasonixVerdictEngine",
     "DesignAgentEngine",
     "DesignTokens",
     "UIComponentRegistry",
+    "VisualCanvasEngine",
     "PhotocraftCanvasEngine",
     "CanvasLayer",
+    "OpticalGlassMaterial",
     "LiquidGlassMaterial",
     "WriterAgentEngine",
     "ProseHumanizer",
@@ -86,11 +113,16 @@ __all__ = [
     "CodeReviewEngine",
     "ReviewFinding",
     "CodeReviewReport",
+    "BinaryAnalysisEngine",
     "ReverseEngineeringEngine",
     "BinaryHeaderInfo",
     "CodeLedgerEngine",
     "FileCodemap",
     "LedgerTransaction",
+    "FastSearchEngine",
+    "SearchMatch",
+    "GitCheckpointGuard",
+    "GitCheckpoint",
 ]
 
 
